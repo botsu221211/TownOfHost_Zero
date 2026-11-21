@@ -139,6 +139,7 @@ namespace TownOfHostY
                             "mod",
                             "toh",
                             "tohy",
+                            "tohz",
                             "モッド",
                             "もっど",
                             "勧誘",

@@ -8,9 +8,9 @@ namespace TownOfHostY.Modules;
 
 public static class OptionSaver
 {
-    private static readonly DirectoryInfo SaveDataDirectoryInfo = new("./TOHY_DATA/SaveData/");
+    private static readonly DirectoryInfo SaveDataDirectoryInfo = new("./TOHZ_DATA/SaveData/");
     private static readonly DirectoryInfo PresetsDirectoryInfo = new($"{SaveDataDirectoryInfo.FullName}/Presets/");
-    private static readonly FileInfo OptionSaverFileInfo = new($"{SaveDataDirectoryInfo.FullName}/Options_TOHY.json");
+    private static readonly FileInfo OptionSaverFileInfo = new($"{SaveDataDirectoryInfo.FullName}/Options_TOHZ.json");
     private static readonly LogHandler logger = Logger.Handler(nameof(OptionSaver));
 
     public static void Initialize()
