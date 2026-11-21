@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "TownOfHostY": {
+      "commandName": "Executable",
+      "executablePath": "%AmongUs%\\Among Us.exe",
+      }
+    }
+  }
+}
