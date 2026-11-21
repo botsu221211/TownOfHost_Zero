@@ -23,7 +23,7 @@ namespace TownOfHostY
             {
                 discordButton = CreateButton(
                     "DiscordButton",
-                    new(-0.8f, -2.7f, 1f),
+                    new(-1.6f, -2.7f, 1f),
                     new(86, 98, 246, byte.MaxValue),
                     new(173, 179, 244, byte.MaxValue),
                     () => Application.OpenURL(Main.DiscordInviteUrl),
@@ -37,7 +37,7 @@ namespace TownOfHostY
             {
                 wikiwikiButton = CreateButton(
                     "WikiwikiButton",
-                    new(0.8f, -2.7f, 1f),
+                    new(0f, -2.7f, 1f),
                     new(255, 142, 168, byte.MaxValue),
                     new(255, 226, 153, byte.MaxValue),
                     () => Application.OpenURL("https://wikiwiki.jp/amonguas/TOH-Zero"),
@@ -54,8 +54,7 @@ namespace TownOfHostY
                     new(209, 209, 209, byte.MaxValue),
                     () => Application.OpenURL("https://github.com/botsu221211/TownOfHost_Zero"),
                     "GitHub",
-                    new(1.85f, 0.5f),
-                    isActive: false); // リポジトリが非公開のため非表示
+                    new(1.85f, 0.5f));
             }
 
             //Updateボタンを生成

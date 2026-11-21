@@ -158,6 +158,8 @@ public class ModNews
 
         foreach (var news in aRange)
         {
+            // 以前に受信して端末に残っている古いMODニュース(TOH_Y時代のものなど)は表示しない
+            if (news.Id == "ModNews") continue;
             if (!JsonAndAllModNews.Any(x => x.Number == news.Number))
                 FinalAllNews.Add(news);
         }
