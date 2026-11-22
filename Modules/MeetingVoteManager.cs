@@ -176,8 +176,25 @@ public class MeetingVoteManager
             ExileControllerWrapUpPatch.AntiBlackout_LastExiled = exiled;
             AntiBlackout.SetIsDead();
 
-            meetingHud.RpcVotingComplete(states.ToArray(), null, true, false, 0);
-            if (isOverruled) MeetingHudPatch.SetJudgeOverrulePatch.ShowOverruleLocally(result.OverruleNonce);
+            if (exiled == null)
+            {
+                // 誰も追放されない時は、本当の結果(スキップ / 同数)をそのまま見せる
+                meetingHud.RpcVotingComplete(states.ToArray(), null, result.IsTie, false, 0);
+            }
+            else if (AntiBlackout.IsSafeToShowExiled())
+            {
+                // 追放者を見せても試合が終わったと判断されない時は、本当の追放者を見せる
+                Logger.Info($"追放者 {exiled.PlayerName} をそのまま表示します", "AntiBlackout");
+                meetingHud.RpcVotingComplete(states.ToArray(), exiled, false, isOverruled, result.OverruleNonce);
+            }
+            else
+            {
+                // 見せると暗転しうる時だけ、これまで通り同数投票として見せて後から追放する
+                Logger.Info($"追放者 {exiled.PlayerName} を見せると暗転しうるので同数投票として表示します", "AntiBlackout");
+                AntiBlackout.HideExiledRoleForSelf(exiled.Object);
+                meetingHud.RpcVotingComplete(states.ToArray(), null, true, false, 0);
+                if (isOverruled) MeetingHudPatch.SetJudgeOverrulePatch.ShowOverruleLocally(result.OverruleNonce);
+            }
         }
         else
         {

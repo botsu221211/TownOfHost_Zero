@@ -87,10 +87,9 @@ namespace TownOfHostY
 
             }
             //廃村
-            if (GetKeysDown(KeyCode.Return, KeyCode.L, KeyCode.LeftShift) && GameStates.IsInGame && Main.IsSetRoleFinished) 
+            if (GetKeysDown(KeyCode.Return, KeyCode.L, KeyCode.LeftShift))
             {
-                CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Draw);
-                GameManager.Instance.LogicFlow.CheckEndCriteria();
+                Modules.AutoAbort.EndAsDraw("Shift+Enter+L");
             }
             //ミーティングを強制終了
             if (GetKeysDown(KeyCode.Return, KeyCode.M, KeyCode.LeftShift) && GameStates.IsMeeting)

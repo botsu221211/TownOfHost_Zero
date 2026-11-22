@@ -155,6 +155,7 @@ namespace TownOfHostY
                             }
                         }
                         var state = PlayerState.GetByPlayerId(data.Character.PlayerId);
+                        bool wasAlive = !state.IsDead;
                         if (state.DeathReason == CustomDeathReason.etc) //死因が設定されていなかったら
                         {
                             state.DeathReason = CustomDeathReason.Disconnected;
@@ -162,6 +163,7 @@ namespace TownOfHostY
                         }
                         AntiBlackout.OnDisconnect(data.Character.Data);
                         PlayerGameOptionsSender.RemoveSender(data.Character);
+                        if (wasAlive) Modules.AutoAbort.OnAliveDisconnected();
                     }
                     Main.playerVersion.Remove(data.Character.PlayerId);
                     Logger.Info($"{data.PlayerName}(ClientID:{data.Id})が切断(理由:{reason}, ping:{AmongUsClient.Instance.Ping})", "Session");

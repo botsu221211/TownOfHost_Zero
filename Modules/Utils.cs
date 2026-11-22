@@ -616,7 +616,24 @@ public static class Utils
     }
 
     // Help Now
-    public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue)
+    /// <summary>
+    /// コマンドの陣営指定(I/M/C/N/U/A)。/n i ・ /n r c ・ /h n m のように使う。指定がなければ null
+    /// </summary>
+    public static TabGroup? ParseTeamFilter(string arg) => arg?.Trim().ToLower() switch
+    {
+        "i" or "imp" or "impostor" or "インポスター" or "いんぽすたー" => TabGroup.ImpostorRoles,
+        "m" or "mad" or "madmate" or "マッド" or "マッドメイト" or "まっど" => TabGroup.MadmateRoles,
+        "c" or "crew" or "crewmate" or "クルー" or "クルーメイト" or "くるー" => TabGroup.CrewmateRoles,
+        "n" or "neutral" or "ニュートラル" or "第三" or "第三陣営" => TabGroup.NeutralRoles,
+        "u" or "unit" or "コンビ" or "コンビネーション" => TabGroup.UnitRoles,
+        "a" or "addon" or "addons" or "属性" => TabGroup.Addons,
+        _ => null,
+    };
+    /// <summary>役職が陣営指定に合うか(指定なしなら常に true)</summary>
+    public static bool MatchesTeam(CustomRoles role, TabGroup? filter)
+        => filter == null || (Options.CustomRoleSpawnChances.TryGetValue(role, out var option) && option.Tab == filter);
+
+    public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue, TabGroup? filter = null)
     {
         string formatTag = "<size=65%><line-height=1.5pic>";
 
@@ -647,15 +664,15 @@ public static class Utils
             //if (Options.SabotageTimeControl.GetBool()) { SendMessage(GetString("SabotageTimeControlInfo"), PlayerId); }
 
             formatTag = "<size=70%><line-height=1.6pic>";
-            if (Options.RandomMapsMode.GetBool())
+            if (filter == null && Options.RandomMapsMode.GetBool())
             {
                 SendMessageAutoSplit($"{formatTag}{GetString("RandomMapsModeInfo")}", false, "", PlayerId, formatTag);
             }
-            if (Options.IsStandardHAS)
+            if (filter == null && Options.IsStandardHAS)
             {
                 SendMessageAutoSplit($"{formatTag}{GetString("StandardHASInfo")}", false, "", PlayerId, formatTag);
             }
-            if (Options.EnableGM.GetBool())
+            if (filter == null && Options.EnableGM.GetBool())
             {
                 SendMessageAutoSplit($"{formatTag}{GetRoleName(CustomRoles.GM)}{GetString("GMInfoLong")}", false, "", PlayerId, formatTag);
             }
@@ -665,6 +682,7 @@ public static class Utils
                 //if (Options.IsONMode && !role.IsONRole()) continue;
                 if (!role.IsEnable() || role.IsVanilla()) continue;
                 if (role is CustomRoles.NormalImpostor) continue;
+                if (!MatchesTeam(role, filter)) continue;
 
                 string infoLongText = "";
                 var roleName = Enum.GetName(typeof(CustomRoles), role);
@@ -705,7 +723,7 @@ public static class Utils
 
             foreach (var role in CustomRolesHelper.AllAddOnRoles.Where(role => role.IsOtherAddOn()))
             {
-                if (!role.IsEnable()) continue;
+                if (!role.IsEnable() || !MatchesTeam(role, filter)) continue;
                 var addonName = role.ToString();
                 var sb = new StringBuilder();
                 formatTag = "<size=70%><line-height=1.6pic>";
@@ -726,7 +744,7 @@ public static class Utils
 
             foreach (var role in CustomRolesHelper.AllAddOnRoles.Where(role => role.IsAddOn()))
             {
-                if (!role.IsEnable()) continue;
+                if (!role.IsEnable() || !MatchesTeam(role, filter)) continue;
                 var addonName = role.ToString();
                 var sb = new StringBuilder();
                 formatTag = "<size=70%><line-height=1.6pic>";
@@ -737,14 +755,14 @@ public static class Utils
                 SendMessageAutoSplit(sb.ToString(), false, "", PlayerId, formatTag);
             }
         }
-        if (Options.NoGameEnd.GetBool())
+        if (filter == null && Options.NoGameEnd.GetBool())
         {
             formatTag = "<size=70%><line-height=1.6pic>";
             SendMessageAutoSplit($"{formatTag}{GetString("NoGameEndInfo")}", false, "", PlayerId, formatTag);
         }
     }
     // Now
-    public static void ShowActiveSettings(byte PlayerId = byte.MaxValue)
+    public static void ShowActiveSettings(byte PlayerId = byte.MaxValue, TabGroup? filter = null)
     {
         bool roleAssignRandomMode = RoleAssignManager.OptionAssignMode.GetBool();
         string formatTag = $"<size={ActiveSettingsSize}>";
@@ -791,21 +809,24 @@ public static class Utils
             //}
             //else
             {
-                sb.AppendFormat("<size={0}>", ActiveSettingsSize);
-
-                formatTag = "<size=65%><line-height=1.5pic>";
-                sb.AppendFormat("<size={0}>【{1}: {2}】\n<line-height=1.5pic>", "65%", RoleAssignManager.OptionAssignMode.GetName(true), RoleAssignManager.OptionAssignMode.GetString());
-                if (roleAssignRandomMode)
+                if (filter == null)
                 {
-                    ShowChildrenSettings(RoleAssignManager.OptionAssignMode, ref sb);
+                    sb.AppendFormat("<size={0}>", ActiveSettingsSize);
+
+                    formatTag = "<size=65%><line-height=1.5pic>";
+                    sb.AppendFormat("<size={0}>【{1}: {2}】\n<line-height=1.5pic>", "65%", RoleAssignManager.OptionAssignMode.GetName(true), RoleAssignManager.OptionAssignMode.GetString());
+                    if (roleAssignRandomMode)
+                    {
+                        ShowChildrenSettings(RoleAssignManager.OptionAssignMode, ref sb);
+                    }
+                    sb.Append("\n</line-height></size>");
+                    SendMessageAutoSplitAndClearSB(PlayerId, sb, title, formatTag);
                 }
-                sb.Append("\n</line-height></size>");
-                SendMessageAutoSplitAndClearSB(PlayerId, sb, title, formatTag);
 
                 foreach (var role in Options.CustomRoleCounts.Keys)
                 {
                     if (!role.IsEnable() || role is CustomRoles.HASFox or CustomRoles.HASTroll
-                        || role.IsCCRole() /*|| role.Key.IsONRole()*/)
+                        || role.IsCCRole() /*|| role.Key.IsONRole()*/ || !MatchesTeam(role, filter))
                     {
                         continue;
                     }
@@ -838,7 +859,8 @@ public static class Utils
             }
 
             formatTag = "<size=65%><line-height=1.5pic>";
-            foreach (var opt in OptionItem.AllOptions.Where(x => x.GetBool() && x.Parent == null && x.Id >= 100000 && !x.IsHiddenOn(Options.CurrentGameMode)))
+            // 陣営を指定した時は、役職以外の設定は出さない
+            foreach (var opt in OptionItem.AllOptions.Where(x => filter == null && x.GetBool() && x.Parent == null && x.Id >= 100000 && !x.IsHiddenOn(Options.CurrentGameMode)))
             {
                 // 常時表示しないオプション
                 if (Options.NotShowOption(opt.Name)) continue;
@@ -909,7 +931,7 @@ public static class Utils
         ClipboardHelper.PutClipboardString(sb.ToString());
     }
     // Now Role
-    public static void ShowActiveRoles(byte PlayerId = byte.MaxValue)
+    public static void ShowActiveRoles(byte PlayerId = byte.MaxValue, TabGroup? filter = null)
     {
         if (Options.HideGameSettings.GetBool() && PlayerId != byte.MaxValue)
         {
@@ -922,7 +944,7 @@ public static class Utils
         var sb = new StringBuilder();
 
         //if (Options.IsONMode) sb.Append("\n").Append(GetString("ONInfoWarning")).Append("\n");
-        if (Options.EnableGM.GetBool())
+        if (filter == null && Options.EnableGM.GetBool())
         {
             sb.AppendFormat("{0}{1} ：{2}</size>\n</line-height>", formatTag, $"<color={GetRoleColorCode(CustomRoles.GM)}>{GetRoleName(CustomRoles.GM)}</color>", Options.EnableGM.GetString());
         }
@@ -951,7 +973,7 @@ public static class Utils
             sb.Append(formatTag);
             foreach (CustomRoles role in CustomRolesHelper.AllStandardRoles)
             {
-                if (!role.IsEnable()) continue;
+                if (!role.IsEnable() || !MatchesTeam(role, filter)) continue;
                 // バニラ役職(元)は反映させないので表示させない
                 if (role.IsVanilla()) continue;
 
@@ -976,7 +998,7 @@ public static class Utils
             sb.Append(formatTag);
             foreach (CustomRoles role in CustomRolesHelper.AllAddOnRoles)
             {
-                if (!role.IsEnable()) continue;
+                if (!role.IsEnable() || !MatchesTeam(role, filter)) continue;
 
                 // 陣営ごとのマーク
                 sb.Append("<color=#ee82ee>○</color>");
@@ -1103,7 +1125,10 @@ public static class Utils
         sb.Append($"\n/h modes {GetString("Command.h_modes")}");
         sb.Append($"\n/dump - {GetString("Command.dump")}");
         sb.Append($"\n/brackout - {GetString("Command.killflashall")}");
-        sb.Append($"\n/cmd c <色> <内容> - {GetString("Command.privatemessage")}");
+        sb.Append($"\n/c <色> <内容> - {GetString("Command.privatemessage")}");
+        sb.Append($"\n/end - 廃村にする(Shift+Enter+L と同じ)");
+        sb.Append($"\n/mf - 会議を即座に終了する(Shift+Enter+M と同じ)");
+        sb.Append($"\n\n陣営で絞り込み: /n ・ /n r ・ /h n の後ろに I M C N U A (例: /n r i)");
         sb.Append($"\n\n視界が暗転した参加者が発生した場合は、\nチャットコマンド[/brackout・/bo]か、左Control,K,Lを同時に押下してください");
 
         SendMessageAutoSplit(sb.ToString(), true);
@@ -1117,18 +1142,22 @@ public static class Utils
 
         sb.Append(formatTag);
         sb.Append(GetString("CommandList"));
-        sb.Append($"\n/cmd l - {GetString("Command.lastresult")}");
-        sb.Append($"\n/cmd kl - {GetString("Command.killlog")}");
-        sb.Append($"\n/cmd n - {GetString("Command.now")}");
-        sb.Append($"\n/cmd n r - {GetString("Command.n_roles")}");
-        sb.Append($"\n/cmd n v - {GetString("Command.n_vanilla")}");
-        sb.Append($"\n/cmd h n - {GetString("Command.h_now")}");
-        sb.Append($"\n/cmd h r {GetString("Command.h_roles")}");
-        sb.Append($"\n/cmd m - {GetString("Command.myrole")}");
-        sb.Append($"\n/cmd t <名前> - {GetString("Command.template")}");
-        sb.Append($"\n/cmd vo - {GetString("Command.voice")}");
-        sb.Append($"\n/cmd kf - {GetString("Command.killflash")}");
-        sb.Append($"\n/cmd c <色> <内容> - {GetString("Command.privatemessage")}");
+        sb.Append($"\n/l - {GetString("Command.lastresult")}");
+        sb.Append($"\n/kl - {GetString("Command.killlog")}");
+        sb.Append($"\n/n - {GetString("Command.now")}");
+        sb.Append($"\n/n r - {GetString("Command.n_roles")}");
+        sb.Append($"\n/n v - {GetString("Command.n_vanilla")}");
+        sb.Append($"\n/h n - {GetString("Command.h_now")}");
+        sb.Append($"\n/h r {GetString("Command.h_roles")}");
+        sb.Append($"\n/m - {GetString("Command.myrole")}");
+        sb.Append($"\n/t <名前> - {GetString("Command.template")}");
+        sb.Append($"\n/vo - {GetString("Command.voice")}");
+        sb.Append($"\n/kf - {GetString("Command.killflash")}");
+        sb.Append($"\n/c <色> <内容> - {GetString("Command.privatemessage")}");
+        sb.Append("\n\n<color=#ffd84d>陣営で絞り込み</color>: /n ・ /n r ・ /h n の後ろに");
+        sb.Append("\n I(インポスター) M(マッド) C(クルー) N(ニュートラル) U(コンビ) A(属性)");
+        sb.Append("\n(例) /n r i ・ /h n c");
+        sb.Append("\n\n先頭に /cmd を付けると、打った文が他の人に見えません");
 
         SendMessageAutoSplit(sb.ToString(), true, sendTo: playerId);
     }

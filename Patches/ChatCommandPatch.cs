@@ -45,6 +45,8 @@ namespace TownOfHostY
                 text = string.Join(" ", args);
             }
 
+            args = NormalizeArgs(args);
+
             var tag = !PlayerControl.LocalPlayer.Data.IsDead ? "SendChatHost" : "SendChatDeadHost";
             if (text.StartsWith("試合結果:") || text.StartsWith("キル履歴:")) tag = "SendSystemChat";
             VoiceReader.ReadHost(text, tag);
@@ -134,14 +136,14 @@ namespace TownOfHostY
                         {
                             case "r":
                             case "roles":
-                                Utils.ShowActiveRoles();
+                                Utils.ShowActiveRoles(byte.MaxValue, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
                                 break;
                             case "v":
                             case "vanilla":
                                 Utils.ShowVanillaSetting();
                                 break;
                             default:
-                                Utils.ShowActiveSettings();
+                                Utils.ShowActiveSettings(byte.MaxValue, Utils.ParseTeamFilter(subArgs));
                                 break;
                         }
                         break;
@@ -226,7 +228,7 @@ namespace TownOfHostY
 
                             case "n":
                             case "now":
-                                Utils.ShowActiveSettingsHelp();
+                                Utils.ShowActiveSettingsHelp(byte.MaxValue, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
                                 break;
 
                             default:
@@ -302,6 +304,23 @@ namespace TownOfHostY
                         {
                             Utils.SendMessageAutoSplit(VoiceReader.GetVoiceIdxMsg(), true, sendTo: 0);
                         }
+                        break;
+
+                    case "/mf":
+                        canceled = true;
+                        if (GameStates.IsMeeting && MeetingHud.Instance != null)
+                        {
+                            Logger.Info("/mf で会議を終了します", "ChatCommand");
+                            MeetingHud.Instance.RpcClose();
+                        }
+                        else HudManager.Instance.Chat.AddChat(PlayerControl.LocalPlayer, "/mf は会議中だけ使えます");
+                        break;
+
+                    case "/end":
+                    case "/廃村":
+                        canceled = true;
+                        if (!Modules.AutoAbort.EndAsDraw("/end"))
+                            HudManager.Instance.Chat.AddChat(PlayerControl.LocalPlayer, "廃村は試合中(役職の割り当て後)だけ使えます");
                         break;
 
                     case "/c":
@@ -728,11 +747,35 @@ namespace TownOfHostY
             }
             Utils.SendMessageAutoSplit(text, true, title, sendTo: to.PlayerId);
         }
+        /// <summary>色の別名(日本語・ひらがな・カタカナ)→ 英語名</summary>
+        private static readonly Dictionary<string, string> ColorAliases = new()
+        {
+            ["赤"] = "red", ["あか"] = "red", ["レッド"] = "red",
+            ["青"] = "blue", ["あお"] = "blue", ["ブルー"] = "blue",
+            ["緑"] = "green", ["みどり"] = "green", ["グリーン"] = "green",
+            ["ピンク"] = "pink", ["桃"] = "pink", ["もも"] = "pink",
+            ["オレンジ"] = "orange", ["橙"] = "orange", ["だいだい"] = "orange",
+            ["黄"] = "yellow", ["黄色"] = "yellow", ["き"] = "yellow", ["きいろ"] = "yellow", ["イエロー"] = "yellow",
+            ["黒"] = "black", ["くろ"] = "black", ["ブラック"] = "black",
+            ["白"] = "white", ["しろ"] = "white", ["ホワイト"] = "white",
+            ["紫"] = "purple", ["むらさき"] = "purple", ["パープル"] = "purple",
+            ["茶"] = "brown", ["茶色"] = "brown", ["ちゃいろ"] = "brown", ["ブラウン"] = "brown",
+            ["水"] = "cyan", ["水色"] = "cyan", ["みず"] = "cyan", ["みずいろ"] = "cyan", ["シアン"] = "cyan",
+            ["黄緑"] = "lime", ["きみどり"] = "lime", ["ライム"] = "lime",
+            ["マルーン"] = "maroon", ["えんじ"] = "maroon", ["臙脂"] = "maroon",
+            ["ローズ"] = "rose", ["薔薇"] = "rose", ["ばら"] = "rose",
+            ["バナナ"] = "banana",
+            ["灰"] = "gray", ["灰色"] = "gray", ["はいいろ"] = "gray", ["グレー"] = "gray", ["グレイ"] = "gray",
+            ["タン"] = "tan", ["肌"] = "tan", ["はだ"] = "tan",
+            ["コーラル"] = "coral", ["珊瑚"] = "coral", ["さんご"] = "coral",
+        };
+
         /// <summary>色名(日本語/英語どちらでも可)から、その色のプレイヤーを探す</summary>
         private static PlayerControl FindPlayerByColorName(string colorName)
         {
             if (string.IsNullOrWhiteSpace(colorName)) return null;
             var key = colorName.Trim().ToLower();
+            if (ColorAliases.TryGetValue(key, out var aliasEnglish)) key = aliasEnglish;
             foreach (var pc in Main.AllPlayerControls)
             {
                 if (pc?.Data == null) continue;
@@ -750,6 +793,30 @@ namespace TownOfHostY
             var color = colorId >= 0 && colorId < Palette.PlayerColors.Length ? Palette.PlayerColors[colorId] : (UnityEngine.Color32)UnityEngine.Color.white;
             return $"<color=#{UnityEngine.ColorUtility.ToHtmlStringRGB(color)}>{pc.Data.PlayerName}</color>";
         }
+        /// <summary>
+        /// 空白なしで打たれたコマンドを、空白ありの形に直す
+        /// /hr → /h r ・ /hrジャッカル → /h r ジャッカル ・ /nr → /n r ・ /nri → /n r i ・ /hn → /h n ・ /nv → /n v ・ /ni → /n i
+        /// </summary>
+        public static string[] NormalizeArgs(string[] args)
+        {
+            if (args == null || args.Length == 0 || string.IsNullOrEmpty(args[0])) return args;
+            var head = args[0];
+            var lower = head.ToLower();
+            string[] split = null;
+            foreach (var (prefix, cmd, sub) in new[] { ("/hr", "/h", "r"), ("/hn", "/h", "n"), ("/nr", "/n", "r"), ("/nv", "/n", "v") })
+            {
+                if (!lower.StartsWith(prefix)) continue;
+                var rest = head.Substring(prefix.Length);
+                split = rest.Length == 0 ? new[] { cmd, sub } : new[] { cmd, sub, rest };
+                break;
+            }
+            // /ni ・ /nc など(/n + 陣営の文字)。/now などの既存のコマンドは陣営の文字にならないのでそのまま
+            if (split == null && lower.StartsWith("/n") && lower.Length > 2 && Utils.ParseTeamFilter(head.Substring(2)) != null)
+                split = new[] { "/n", head.Substring(2) };
+            if (split == null) return args;
+            return split.Concat(args.Skip(1)).ToArray();
+        }
+
         /// <summary>コマンドに /cmd が付いていないとき、送った本人にだけ使い方を教える</summary>
         private static void SendCommandFailedMessage(PlayerControl player)
         {
@@ -785,21 +852,23 @@ namespace TownOfHostY
                 }
             }
 
-            string[] args = text.Split(' ');
+            string[] args = text.Trim().Split(' ');
             string subArgs = "";
 
+            // /cmd は有っても無くてもよい(付けると本編のサーバーがホストにしか届けないので他の人に見えない)
+            bool viaCmd = args.Length > 1 && args[0].Equals("/cmd", StringComparison.OrdinalIgnoreCase);
+            if (viaCmd)
+            {
+                args = args.Skip(1).ToArray();
+                if (args[0].StartsWith("/") is false) args[0] = $"/{args[0]}";
+            }
+            if (!args[0].StartsWith("/")) return;
+            args = NormalizeArgs(args);
             if (args.Length == 1 && args[0].ToLower() is "/h" or "/help")
             {
                 Utils.ShowPlayerHelp(player.PlayerId);
                 return;
             }
-            if (args[0] != "/cmd" || args.Length <= 1)
-            {
-                if (args[0].StartsWith("/") && args[0] != "/cmd") SendCommandFailedMessage(player);
-                return;
-            }
-            args = args.Skip(1).ToArray();
-            if (args[0].StartsWith("/") is false) args[0] = $"/{args[0]}";
 
             switch (args[0]?.ToLower())
             {
@@ -820,14 +889,14 @@ namespace TownOfHostY
                     {
                         case "r":
                         case "roles":
-                            Utils.ShowActiveRoles(player.PlayerId);
+                            Utils.ShowActiveRoles(player.PlayerId, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
                             break;
                         case "v":
                         case "vanilla":
                             Utils.ShowVanillaSetting(player.PlayerId);
                             break;
                         default:
-                            Utils.ShowActiveSettings(player.PlayerId);
+                            Utils.ShowActiveSettings(player.PlayerId, Utils.ParseTeamFilter(subArgs));
                             break;
                     }
                     break;
@@ -839,7 +908,7 @@ namespace TownOfHostY
                     {
                         case "n":
                         case "now":
-                            Utils.ShowActiveSettingsHelp(player.PlayerId);
+                            Utils.ShowActiveSettingsHelp(player.PlayerId, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
                             break;
 
                         case "r":

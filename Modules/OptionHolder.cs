@@ -717,7 +717,7 @@ public static class Options
             .SetGameMode(CustomGameMode.All);
 
         // 初手会議に役職名表示
-        ShowRoleInfoAtFirstMeeting = StringOptionItem.Create((int)offsetId.FeatMeeting + 200, "ShowRoleInfoAtFirstMeeting", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true)
+        ShowRoleInfoAtFirstMeeting = StringOptionItem.Create((int)offsetId.FeatMeeting + 205, "ShowRoleInfoAtFirstMeeting", new string[] { "ColoredOff", "ColoredOn" }, 1, TabGroup.ModMainSettings, true)
             .SetColor(Color.cyan);
 
         // ボタン回数同期
@@ -843,6 +843,8 @@ public static class Options
         //NoDuplicateHat = StringOptionItem.Create((int)offsetId.FeatOther + 410, "NoDuplicateHat", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true).SetParent(SkinControle).SetGameMode(CustomGameMode.All);
         //NoDuplicateSkin = StringOptionItem.Create((int)offsetId.FeatOther + 411, "NoDuplicateSkin", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true).SetParent(SkinControle).SetGameMode(CustomGameMode.All);
         VoiceReader.SetupCustomOption((int)Options.offsetId.FeatOther + 500);
+        // 生きていた人の切断で自動廃村
+        Modules.AutoAbort.SetupCustomOption((int)Options.offsetId.FeatOther + 600);
 
         TextOptionItem.Create((int)offsetId.GModeAdd, "Head.GameMode", TabGroup.ModMainSettings).SetColor(Color.yellow).SetGameMode(CustomGameMode.Standard);
         // シンクロカラーモード

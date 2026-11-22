@@ -42,13 +42,20 @@ public static class AntiBlackout
             return;
         }
         isDeadCache.Clear();
+        // 暗転を防ぐのに必要な数の幽霊だけを、一時的に生きている扱いにする。
+        // (全員を生きている扱いにすると、追放の演出が先に終わった人の画面に幽霊の体が見え、
+        //  幽霊本人の当たり判定も戻ってしまう)
+        int need = RequiredRevivals();
+        LastRevivedCount = 0;
         foreach (var info in GameData.Instance.AllPlayers)
         {
-            if (info == null) continue;
+            if (info == null || !info.IsDead || info.Disconnected) continue;
+            if (LastRevivedCount >= need) break;
             isDeadCache[info.PlayerId] = (info.IsDead, info.Disconnected);
             info.IsDead = false;
-            info.Disconnected = false;
+            LastRevivedCount++;
         }
+        logger.Info($"暗転対策で一時的に生きている扱いにした幽霊: {LastRevivedCount}人 (必要数 {need}, 追放者ID {lastExiledPlayerId}, 身代わり {LastDummyCount}人, 生存クルーの見え方 {AliveCrewInView()}人)");
         IsCached = true;
         if (doSend) SendGameData();
     }
@@ -74,6 +81,74 @@ public static class AntiBlackout
         };
     }
 
+    /// <summary>直前の SetRoleChange で、各クライアントに見せた身代わりのインポスターの数</summary>
+    public static int LastDummyCount { get; private set; }
+    private static int lastExiledPlayerId = -1;
+    /// <summary>
+    /// 追放を同数投票として伏せた時の追放者。追放者本人の画面では自分が生きているので、
+    /// 自分がインポスターだと「生存インポスター ≥ 生存クルー」になって暗転しうる。
+    /// 本人の画面でだけ自分をクルーに見せ、会議明けの役職の配り直しでも戻さない
+    /// </summary>
+    public static byte HiddenExiledPlayerId { get; private set; } = byte.MaxValue;
+    public static void HideExiledRoleForSelf(PlayerControl exiled)
+    {
+        HiddenExiledPlayerId = byte.MaxValue;
+        if (exiled == null || exiled.AmOwner) return;
+        int clientId = exiled.GetClientId();
+        if (clientId == -1) return;
+        HiddenExiledPlayerId = exiled.PlayerId;
+        lastHiddenExiledPlayerId = exiled.PlayerId;
+        exiled.RpcSetRoleDesync(RoleTypes.Crewmate, clientId, canOverrideRole: true);
+        logger.Info($"{exiled.Data?.PlayerName}: 追放を伏せたので、本人の画面でだけクルーに見せます");
+    }
+
+    private static byte lastHiddenExiledPlayerId = byte.MaxValue;
+    /// <summary>
+    /// 追放者が幽霊になった後に呼ぶ。本人の画面でクルーに見せていた役職を、本当の幽霊の役職に戻す
+    /// (インポスターなら幽霊でもサボタージュできるように)。勝敗の判定はホストの役職データで行うので、元々影響しない
+    /// </summary>
+    public static void RestoreHiddenExiledRole(PlayerControl exiled)
+    {
+        if (exiled == null || exiled.PlayerId != lastHiddenExiledPlayerId) return;
+        lastHiddenExiledPlayerId = byte.MaxValue;
+        int clientId = exiled.GetClientId();
+        if (clientId == -1) return;
+        var ghost = exiled.GetCustomRole().IsImpostor() ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost;
+        exiled.RpcSetRoleDesync(ghost, clientId, canOverrideRole: true);
+        logger.Info($"{exiled.Data?.PlayerName}: 本人の画面の役職を {ghost} に戻しました");
+    }
+
+    /// <summary>直前の SetIsDead で、一時的に生きている扱いにした幽霊の数</summary>
+    public static int LastRevivedCount { get; private set; }
+
+    /// <summary>追放後(追放者を除く)にクライアントから見える、生存しているクルーの数(幽霊は数えない)</summary>
+    private static int AliveCrewInView()
+    {
+        int alive = Main.AllAlivePlayerControls.Count(pc => pc.PlayerId != lastExiledPlayerId);
+        return alive - LastDummyCount;
+    }
+    /// <summary>
+    /// クライアントは追放の演出の締めで「生存インポスター ≥ 生存クルー」なら試合が終わったと判断して暗転する。
+    /// 身代わりのインポスターの数がクルーより少なくなるよう、足りない分だけ幽霊を生きているクルーに見せる
+    /// </summary>
+    private static int RequiredRevivals()
+    {
+        if (LastDummyCount <= 0) return 0;
+        int crew = AliveCrewInView();
+        return LastDummyCount >= crew ? LastDummyCount - crew + 1 : 0;
+    }
+
+    /// <summary>
+    /// 追放者を本当の名前で見せても、クライアントが追放の演出の締めで「試合が終わった」と判断しないか。
+    /// 会議の後は全員を生きている扱いにしているので、クライアントから見た生存者は(切断者以外の)全員から追放者を除いた数。
+    /// そのうち身代わりのインポスターが 1 人以上いて、クルーより少なければ試合は続くと判断される。
+    /// </summary>
+    public static bool IsSafeToShowExiled()
+    {
+        if (Options.IsCCMode) return false;
+        return LastDummyCount > 0 && LastDummyCount < AliveCrewInView() + LastRevivedCount;
+    }
+
     public static void SetRoleChange(PlayerControl killer = null)
     {
         if (CustomWinnerHolder.WinnerTeam != CustomWinner.Default) return;
@@ -89,6 +164,7 @@ public static class AntiBlackout
         }
 
         recognizeType = remaining;
+        LastDummyCount = list.Count;
 
         Logger.Info($"SetDummyImpostor type: {recognizeType}, count:{list.Count}", "AntiBlackout");
         var deadPlayers = Main.AllDeadPlayerControls.Where(x => !x.Data.Disconnected).ToList();
@@ -133,11 +209,14 @@ public static class AntiBlackout
             }
             Logger.Info($"SetDummyImpostor player: {pc?.name} ({count} rpc)", "AntiBlackout");
         }
+        // 追放者の ID は直後の人数計算(RequiredRevivals / IsSafeToShowExiled)でも使うので控えておく
+        lastExiledPlayerId = ExiledPlayerId;
         ExiledPlayerId = -1;
     }
     public static void RestoreIsDead(bool doSend = true, [CallerMemberName] string callerMethodName = "")
     {
         logger.Info($"RestoreIsDead is called from {callerMethodName}");
+        var ghosts = new List<NetworkedPlayerInfo>();
         foreach (var info in GameData.Instance.AllPlayers)
         {
             if (info == null) continue;
@@ -145,11 +224,46 @@ public static class AntiBlackout
             {
                 info.IsDead = val.isDead;
                 info.Disconnected = val.Disconnected;
+                if (val.isDead && !val.Disconnected) ghosts.Add(info);
             }
         }
         isDeadCache.Clear();
         IsCached = false;
+        HiddenExiledPlayerId = byte.MaxValue;
+        ResendGhostDeaths(ghosts);
         if (doSend) SendGameData();
+    }
+
+    /// <summary>
+    /// 会議の間だけ生きている扱いにしていた幽霊を、各クライアントの画面でも本当に死んだ状態に戻す。
+    /// IsDead を戻すだけだとクライアントは死亡処理(Die)をやり直さないため、
+    /// ・生きている人の画面に幽霊が見えたままになる
+    /// ・幽霊本人の当たり判定が戻ったままで壁を抜けられない
+    /// ことがある。Exiled(追放)のRPCは死体を残さずに死亡処理を行うので、それを送る。
+    /// </summary>
+    private static void ResendGhostDeaths(List<NetworkedPlayerInfo> ghosts)
+    {
+        foreach (var info in ghosts)
+        {
+            var pc = info.Object;
+            if (pc == null) continue;
+            try
+            {
+                if (pc.AmOwner)
+                {
+                    // ホスト自身が幽霊の時は、自分の画面の当たり判定だけ切る
+                    if (pc.Collider != null) pc.Collider.enabled = false;
+                    continue;
+                }
+                var writer = AmongUsClient.Instance.StartRpcImmediately(pc.NetId, (byte)RpcCalls.Exiled, Hazel.SendOption.Reliable, -1);
+                AmongUsClient.Instance.FinishRpcImmediately(writer);
+                logger.Info($"{info.PlayerName}: 幽霊の死亡処理を送り直しました");
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(ex, "AntiBlackout.ResendGhostDeaths");
+            }
+        }
     }
 
     public static void SendGameData([CallerMemberName] string callerMethodName = "")

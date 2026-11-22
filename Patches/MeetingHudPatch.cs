@@ -228,10 +228,6 @@ public static class MeetingHudPatch
                 }
             }
 
-            if (AntiBlackout.OverrideExiledPlayer && !Options.IsCCMode)
-            {
-                messageList.Add(GetString("Warning.OverrideExiledPlayer"));
-            }
             if (Options.IsCCMode)
             {
                 CatchCat.Infomation.ShowMeeting();
@@ -432,6 +428,8 @@ public static class MeetingHudPatch
 
                         // 霊界（死亡済み）プレイヤーにはSetRoleしない
                         if (PlayerState.GetByPlayerId(pc.PlayerId).IsDead) continue;
+                        // 追放を伏せた追放者は、本人の画面でクルーに見せたままにする(戻すと暗転する)
+                        if (pc.PlayerId == AntiBlackout.HiddenExiledPlayerId) continue;
 
                         var baseRole = roleInfo?.BaseRoleType?.Invoke() ?? RoleTypes.Crewmate;
                         if (roleInfo?.IsDesyncImpostor == true)

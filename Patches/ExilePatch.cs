@@ -138,6 +138,8 @@ namespace TownOfHostY
                         exiled.Object != null)
                     {
                         exiled.Object.RpcExileV3();
+                        // 追放を伏せた時に本人の画面でクルーに見せていた役職を、本当の幽霊に戻す
+                        AntiBlackout.RestoreHiddenExiledRole(exiled.Object);
                     }
                 }, 0.5f, "Restore IsDead Task");
 

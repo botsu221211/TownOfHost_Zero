@@ -1203,7 +1203,7 @@ Message.AddedPlayerToBanList	{0}をBANリストに追記しました。
 Message.AnnounceUsingOpenMODAttention	<size=150%><color=yellow>【参加には同意が必要です】</color></size>\n\nこの部屋はMOD TownOfHost_Zero v{0}を使用しています\n\n<color=red>【重要】</color>\nMODの使用にあたり、<color=red>全プレイヤーにMOD使用の同意を取る必要があります</color>\n各プレイヤーに /modok コマンドを使用してMOD使用の同意を取ってください\n各プレイヤーには同意コマンドを入力するよう案内が表示されます\n\n※コマンド未入力の場合はスタート時にキックされ<color=red>ゲームに参加できません</color>\n※再度同意コマンドの入力を促す場合は /modmsg コマンドを使用してください\n※詳細は TownOfHost_Zero のWIKIWIKIを参照ください
 Message.AnnounceUsingOpenMOD	<size=150%><color=yellow>【参加には同意が必要です】</color></size>\n\nこの部屋はMOD TownOfHost_Zero v{0}を使用しています\n\n<color=red>【重要】</color>\nこの部屋ではホストのみ導入するMODを使用しています\nMOD使用について同意する場合は下記コマンドを入力してください\n<color=red>　/modok</color>\n\n※コマンド未入力の場合はスタート時にキックされ<color=red>ゲームに参加できません</color>\n\nMODの詳細は TownOfHost_Zero のWIKIWIKIを参照ください\nゲーム中の不具合などはまずこのゲームのホストへ報告してください\n※この部屋での不具合等について<color=red>AmongUs公式への問合せはしない</color>でください
 Message.AnnounceUsingTOH	"この部屋はTownOfHost_Zero v{0}を使用しています。\n/cmd nで現在の設定、/cmd h nで現在の設定の説明が確認できます。\n不具合があった場合はホストへお知らせください。"
-Message.CommandGuide	<color={0}>{1}</color> v{2} の部屋へようこそ！\n\nコマンドは先頭に<color=yellow>/cmd</color>を付けて打ってください。\n付けると他の人には見えません。\n(例) /cmd n → 現在の設定を表示\n\n<color=yellow>/h</color> でコマンド一覧が見られます。\n(<color=yellow>/cmd h</color> なら他の人に見えません)
+Message.CommandGuide	<color={0}>{1}</color> v{2} の部屋へようこそ！\n\nコマンドは <color=yellow>/n</color> のようにそのまま打てます。\n<color=yellow>/h</color> でコマンド一覧が見られます。\n\n先頭に <color=yellow>/cmd</color> を付けると、打った文が他の人に見えません。\n(例) /cmd c 赤 こんにちは
 Message.isReport	死体発見により会議が開かれました。\n通報された死体：{0}
 Message.isButton	緊急ボタンにより会議が開かれました。
 Message.RevengeText	{0}が追放され、道連れが発生しました。\n{1}が死亡しています。
@@ -1633,7 +1633,12 @@ PrivateMessage.Title	{0}からの秘匿メッセージ
 PrivateMessage.Sent	{0}に秘匿メッセージを送りました
 PrivateMessage.OnlyMeeting	秘匿メッセージは会議中とロビー待機中のみ送れます
 PrivateMessage.DeadCannotSend	霊界からは秘匿メッセージを送れません
-PrivateMessage.Usage	使い方: /cmd c 色 内容\n(例) /cmd c 赤 こんにちは
+PrivateMessage.Usage	使い方: /c 色 内容\n(例) /c 赤 こんにちは\n※/cmd c と打つと、打った文が他の人に見えません
 PrivateMessage.NotFound	「{0}」色のプレイヤーが見つかりません
 PrivateMessage.CannotSendSelf	自分には秘匿メッセージを送れません
 PrivateMessage.TargetDead	{0}は霊界にいるため秘匿メッセージを送れません
+AutoAbortOnDisconnect	生存者の切断で自動廃村
+AutoAbortDisconnectCount	廃村になる切断人数
+AbandonGame	<color=#ff6b6b>廃村</color>
+AbandonGameConfirm	<color=#ffd84d>もう一度押すと廃村</color>
+AbandonGameUnavailable	試合中のホストのみ
