@@ -219,6 +219,9 @@ public static class MeetingHudPatch
                         $"{playerName}{ReportDeadBodyPatch.ReportTarget.ColorName.Color(ReportDeadBodyPatch.ReportTarget.Color)}"));
                 }
             }
+            // フライドポテトが捕食された通知
+            messageList.AddRange(Roles.Crewmate.FriedPotato.TakeMeetingNotices());
+
             if (Options.ShowRevengeTarget.GetBool())
             {
                 foreach (var Exiled_Target in RevengeTargetPlayer)

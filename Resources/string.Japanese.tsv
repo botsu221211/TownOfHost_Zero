@@ -63,6 +63,8 @@ CharismaStar	カリスマスター
 Telekinetic	テレキネス
 Administer	アドミニスター
 Mimic	ミミック
+HalfKiller	ハーフキラー
+Frenzy	フレンジー
 	
 CustomImpostorInfo	あんな能力も使えるようになりました
 EvilWatcherInfo	みんなの投票に目を光らせよう
@@ -95,6 +97,8 @@ CharismaStarInfo	オレんとこ来ないか？
 TelekineticInfo	念力で殺せ
 AdministerInfo	最終位置を監視し優位に付け
 MimicInfo	君にならないと生きていけない...
+HalfKillerInfo	このキルはいつか喉元に届く
+FrenzyInfo	周りなど気にしない
 	
 CustomImpostorInfoLong	ホストが設定した属性を持つインポスター。
 EvilWatcherInfoLong	船員全員が誰に投票したかの情報を得る。
@@ -124,6 +128,8 @@ CharismaStarInfoLong	自身から一番近いベントを集合地点として�
 TelekineticInfoLong	自身がキルする時、キルモーションなしで相手をキルする。
 AdministerInfoLong	会議が開かれる度、生存している船員全員が会議の始まる直前にどの部屋にいたかの情報を得る。\n通路にいる場合は「@通路」、部屋と部屋の間にいる場合などは「@追跡不可」との表示になる。
 MimicInfoLong	(インポスター陣営):\nシェイプしている間は自殺クールが1秒ごとに1ずつ上昇し(上限あり)、シェイプしていない間は1秒ごとに1ずつ減少する。\n自殺クールが0になると自殺してしまう。\n自殺クールは名前の横に表示され、会議をまたいで持ち越される。\n【死因：自殺】
+HalfKillerInfoLong	(インポスター陣営):\nキルクールが短い代わりに、同じ相手を2回キルしないと倒せない。\n1回目のキルでは相手は死なず、自分にだけ見える印(◆)が付く。\n印が付いているプレイヤーをキルすると、その相手は死亡する。
+FrenzyInfoLong	(インポスター陣営):\n視界が狭い代わりに、短いキルクールを持つインポスター。\nまた、味方のインポスターをキルすることもできる。
 	
 # マッド役職	
 	
@@ -136,6 +142,7 @@ MadNimrod	マッドニムロッド
 MadScientist	マッド科学者
 MadGuesser	マッドゲッサー
 MadConnecter	マッドコネクター
+MadUnknown	マッドアンノウン
 SKMadmate	サイドキックマッドメイト
 	
 MadmateInfo	インポスターの援助をしよう
@@ -148,6 +155,7 @@ MadNimrodInfo	誰か選んで道連れせよ
 MadScientistInfo	バイタルを見ながら援助しろ
 MadGuesserInfo	推測して撃ち抜こう
 MadConnecterInfo	インポスターと内通し合え
+MadUnknownInfo	さあ、正体不明の怪奇に怯えるがいい
 SKMadmateInfo	あなたはマッドに任命された
 	
 MadmateInfoLong	(インポスター陣営):\nクルーだがインポスターの味方をする。\nインポスターと互いに認識できない。\nベントが使え、タスクはない。
@@ -159,6 +167,7 @@ MadNimrodInfoLong	[インポスター陣営]:\nクルーだがインポスター
 MadScientistInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\nバイタルを持つ。
 MadGuesserInfoLong	(インポスター陣営):\n会議中に他のプレイヤーの役職を当てる事でそのプレイヤーを死亡(死因:射殺)させることができる。\nなお役職の推測をミスした場合、自身が死亡(死因:誤爆)する。
 MadConnecterInfoLong	[インポスター陣営]\nクルーだがインポスターの味方をする。\nはじめインポスターと互いに認識できないが、特殊タスクを完了させることでインポスターが誰か認識できる。認識後、インポスターにキルボタンを押すことでインポスター側はマッドコネクターを認識でき、お互いの位置が矢印で表示されるようになる。\nタスクは専用タスクで、表示される場所のベントに入ることで完了できる。(ただし、他視点でもベント開閉は確認できる。)\n設定により、タスク数に応じてインポスターの配役を確認できたり、死体への矢印が表示されるようになる。
+MadUnknownInfoLong	[インポスター陣営(マッドメイト)]\nキルボタンで、対象にインポスター陣営にしか見えない印(?)を付けられる(キルはしない)。\nファントムボタンで、印の付いた人の体の色をランダムに変え、名前を「？？？」にする。効果は自分が死亡するまで続く。\nファントムを使う前に会議に入ると、印はリセットされる。\nベントに入ると自分にも印を付けられる。\nカウントはクルー、勝利条件はインポスター陣営の勝利。
 SKMadmateInfoLong	(インポスター陣営):\n変身した際に一番近かった人がなれる役職。タスクはない。
 	
 # クルー役職	
@@ -182,6 +191,8 @@ Bakery	パン屋
 NBakery	(第三)覚醒パン屋
 Nekomata	猫又
 Express	エクスプレス
+FriedPotato	フライドポテト
+SpeedStar	スピードスター
 Chairman	チェアマン
 TaskManager	タスクマネージャー
 RainbowResize	<size=8><color=#ffff00>★</color></size><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><size=8><color=#ffff00>★</color></size>
@@ -217,6 +228,8 @@ NBakeryInfo	みんなに【毒入り】パンを届けよう
 TaskManagerInfo	タスクの数を見張ろう
 NekomataInfo	人外まで道連れしたい
 ExpressInfo	気持ちよく駆け回ろう
+FriedPotatoInfo	僕はフライドポテト!
+SpeedStarInfo	見ろ私のこの速さを
 ChairmanInfo	会議開閉を操ろう
 SillySheriffInfo	ごめん、ちょっと調子悪いみたい
 SympathizerInfo	ふたりで白をとり合おう
@@ -252,6 +265,8 @@ NBakeryInfoLong	[ニュートラル]\n覚醒して第三陣営になった。\n�
 TaskManagerInfoLong	(タスクマネージャー)[クルー陣営]\n全員の合計タスク完了数が分かる(役職名横()にて)。
 NekomataInfoLong	[クルー陣営]\n自身が吊られた際、ランダムな1人を道連れにする。
 ExpressInfoLong	[クルー陣営]\nただ足が速い。
+FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の名前が「フライドポテト」として届く。\nキルされると、次の会議で「フライドポテトが捕食された」と全員に通知される。
+SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
 ChairmanInfoLong	[クルー陣営]\n・ベントに入ると会議が開ける。サボタージュ中はベントに入っても会議を開けない。\n通常ボタン回数と同時に消費する。(通常ボタン回数1回の時、先にベントボタンを使うと、通常ボタンは使えなくなる。)\n・誰かに投票することでその会議を即中断できる(追放は起こらずスキップ扱い)。\nスキップ・自投票以外の普通の投票は出来ず、能力を発動してしまう。
 SillySheriffInfoLong	[クルー陣営]\n普通のシェリフとはちょっと違うバカなシェリフ。正しく陣営を認識できない時、人外に向かって自爆したりクルーをキルする時がある
 SympathizerInfoLong	[クルー陣営]\n共鳴者は必ず2人でしか設定できない。\n設定タスク数まで完了させると自身にしか見えない◎がつく。2人ともタスクが互いに設定数を超えた時、相手にも◎が付きもう1人の共鳴者が誰か分かる。
@@ -751,6 +766,9 @@ HunterKnowTargetIsImpostor	キルした時、敵陣営かどうか分かる
 HunterKnowTargetMadIsImpostor	マッドメイトはインポスター判定で表示する
 BakeryChangeChances	ニュートラルに変化する確率
 ExpressSpeed	スピード
+FriedPotatoHideNameInWhisper	秘匿のフライドポテト
+FriedPotatoNotifyEaten	通知
+FriedPotatoEatenNotice	{0}が捕食された
 TaskmanagerSeeNowtask	会議時以外でもタスク数が見える
 ChairmanIgnoreSkip	強制スキップを無効化する
 CandleLighterStartVision	初めの視界(一番広い視界)
@@ -1642,3 +1660,9 @@ AutoAbortDisconnectCount	廃村になる切断人数
 AbandonGame	<color=#ff6b6b>廃村</color>
 AbandonGameConfirm	<color=#ffd84d>もう一度押すと廃村</color>
 AbandonGameUnavailable	試合中のホストのみ
+MadUnknownPhantomCooldown	ファントムクール
+MadUnknownPhantomUses	ファントムの使用回数
+FrenzyVision	視界倍率
+SpeedStarInterval	速度変化秒数
+SpeedStarMinRate	速度変化最小倍率
+SpeedStarMaxRate	速度変化最大倍率

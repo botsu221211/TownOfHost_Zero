@@ -100,17 +100,21 @@ public static class Camouflage
 
             newOutfit = PlayerSkins[id];
         }
+        // 戻す色。マッドアンノウンに姿を変えられている人は、変えた後の色に戻す
+        int colorId = newOutfit.ColorId;
+        if ((!isCamouflage || ForceRevert) && Roles.Madmate.MadUnknown.TryGetDisguiseColor(target.PlayerId, out var disguiseColor))
+            colorId = disguiseColor;
         //if (newOutfit == null) return;
-        if (newOutfit.Compare(target.Data.DefaultOutfit)) return;
-        Logger.Info($"newOutfit={newOutfit.GetString()}", "RpcSetSkin");
+        if (target.Data.DefaultOutfit.ColorId == colorId && newOutfit.Compare(target.Data.DefaultOutfit)) return;
+        Logger.Info($"newOutfit={newOutfit.GetString()} color={colorId}", "RpcSetSkin");
 
         var sender = CustomRpcSender.Create(name: $"Camouflage.RpcSetSkin({target.Data.PlayerName})");
 
         // SetColor のみ送信する（SetHat/SetSkin/SetPet/SetVisor は送信すると落ちるため無効化）
-        target.SetColor(newOutfit.ColorId);
+        target.SetColor((byte)colorId);
         sender.AutoStartRpc(target.NetId, (byte)RpcCalls.SetColor)
             .Write(target.Data.NetId)
-            .Write(newOutfit.ColorId)
+            .Write((byte)colorId)
             .EndRpc();
 
         //target.SetHat(newOutfit.HatId, newOutfit.ColorId);

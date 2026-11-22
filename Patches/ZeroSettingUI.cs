@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using TownOfHostY.Modules;
+using TownOfHostY.Roles.Core;
 using TownOfHostY.Templates;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -133,7 +134,19 @@ public static class ZeroSettingUI
     private static GameObject presetPanel;
     private static TextMeshPro presetNameText;
     private static readonly List<SimpleButton> actionButtons = new();
-    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "役職をリセット" };
+    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "役職をリセット" };
+    private const int ResetActionIndex = 3;
+
+    /// <summary>TOH_Zero オリジナル役職(Zero闇鍋の対象)。新しく作ったら追加する</summary>
+    public static readonly HashSet<CustomRoles> ZeroOriginalRoles = new()
+    {
+        CustomRoles.Mimic,
+        CustomRoles.HalfKiller,
+        CustomRoles.Frenzy,
+        CustomRoles.MadUnknown,
+        CustomRoles.FriedPotato,
+        CustomRoles.SpeedStar,
+    };
     private static int pendingAction = -1;
     private static float pendingTime;
     private const float ConfirmSeconds = 4f;
@@ -170,9 +183,9 @@ public static class ZeroSettingUI
         for (int i = 0; i < actionLabels.Length; i++)
         {
             int actionIndex = i;
-            bool danger = i == 2;
+            bool danger = i == ResetActionIndex;
             var button = new SimpleButton(
-                parent, $"PresetAction{i}", new Vector3(0f, -0.35f - 0.7f * i, 0f),
+                parent, $"PresetAction{i}", new Vector3(0f, -0.25f - 0.62f * i, 0f),
                 danger ? DangerColor : ButtonColor, danger ? DangerHoverColor : ButtonHoverColor,
                 (Action)(() => OnActionClicked(actionIndex)), actionLabels[i]);
             button.Scale = new Vector2(3.6f, 0.55f);
@@ -181,9 +194,9 @@ public static class ZeroSettingUI
         }
 
         var note = TMPTemplate.Create("PresetNote",
-            "闇鍋：属性以外の全役職を 100% / 最大1 にする\n属性入り闇鍋：属性も含めて 100% / 最大1 にする\n役職をリセット：全役職・属性を 0% にする\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
-            Color.white, 1.4f, TextAlignmentOptions.Center, true, parent);
-        note.transform.localPosition = new Vector3(0f, -2.55f, 0f);
+            "闇鍋：属性以外の全役職を 100% / 最大1 にする\n属性入り闇鍋：属性も含めて 100% / 最大1 にする\nZero闇鍋：Zeroオリジナル役職だけを 100% / 最大1 にする(他は 0%)\n役職をリセット：全役職・属性を 0% にする\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
+            Color.white, 1.3f, TextAlignmentOptions.Center, true, parent);
+        note.transform.localPosition = new Vector3(0f, -2.75f, 0f);
 
         UpdatePresetPanel();
         presetPanel.SetActive(false);
@@ -223,7 +236,8 @@ public static class ZeroSettingUI
             {
                 case 0: SetAllRoles(includeRoles: true, includeAddons: false, on: true); break;
                 case 1: SetAllRoles(includeRoles: true, includeAddons: true, on: true); break;
-                case 2: SetAllRoles(includeRoles: true, includeAddons: true, on: false); break;
+                case 2: SetAllRoles(includeRoles: true, includeAddons: true, on: true, onlyRoles: ZeroOriginalRoles); break;
+                case ResetActionIndex: SetAllRoles(includeRoles: true, includeAddons: true, on: false); break;
             }
             UpdatePresetPanel();
             actionButtons[index].Label.text = $"{actionLabels[index]}　<color=#7dffa8>完了！</color>";
@@ -237,19 +251,22 @@ public static class ZeroSettingUI
     }
 
     /// <summary>役職(と属性)の出現率・最大数をまとめて設定する</summary>
-    private static void SetAllRoles(bool includeRoles, bool includeAddons, bool on)
+    /// <param name="onlyRoles">指定した時は、その役職だけを on にし、それ以外はすべて 0% にする(Zero闇鍋)</param>
+    private static void SetAllRoles(bool includeRoles, bool includeAddons, bool on, HashSet<CustomRoles> onlyRoles = null)
     {
         foreach (var (role, spawn) in Options.CustomRoleSpawnChances)
         {
             if (spawn == null || spawn.Tab == TabGroup.ModMainSettings) continue;
             bool isAddon = spawn.Tab == TabGroup.Addons;
             if (isAddon ? !includeAddons : !includeRoles) continue;
-            // オンにする時は、今のゲームモードで表示されていない役職は触らない
-            if (on && spawn.IsHiddenOn(Options.CurrentGameMode)) continue;
 
-            SetRawValue(spawn, spawn.Rule.GetNearestIndex(on ? 100 : 0));
+            bool enable = on && (onlyRoles == null || onlyRoles.Contains(role));
+            // オンにする時は、今のゲームモードで表示されていない役職は触らない
+            if (enable && spawn.IsHiddenOn(Options.CurrentGameMode)) continue;
+
+            SetRawValue(spawn, spawn.Rule.GetNearestIndex(enable ? 100 : 0));
             if (Options.CustomRoleCounts.TryGetValue(role, out var count) && count is IntegerOptionItem countItem && !count.IsFixValue)
-                SetRawValue(count, countItem.Rule.GetNearestIndex(on ? 1 : 0));
+                SetRawValue(count, countItem.Rule.GetNearestIndex(enable ? 1 : 0));
         }
         OptionSaver.Save();
         OptionItem.SyncAllOptions();

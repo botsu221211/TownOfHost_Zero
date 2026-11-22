@@ -59,8 +59,8 @@ public static class CustomRoleManager
         // 無効なキルをブロックする処理 必ず最初に実行する
         if (!CheckMurderPatch.CheckForInvalidMurdering(info, killerMyselfInvoke)) return false;
 
-        // インポスター同士のキル無効
-        if (attemptKiller.GetCustomRole().IsImpostor() && attemptTarget.GetCustomRole().IsImpostor()) return false;
+        // インポスター同士のキル無効(フレンジーは味方もキルできる)
+        if (attemptKiller.GetCustomRole().IsImpostor() && attemptTarget.GetCustomRole().IsImpostor() && !attemptKiller.Is(CustomRoles.Frenzy)) return false;
         // ゴッドファーザーのロックキル
         if (CustomRoles.Godfather.IsPresent() && GodfatherAndJanitor.JanitorTarget.Contains(attemptKiller.PlayerId)) return false;
         // ペンギンの拉致られ中キル
@@ -504,6 +504,8 @@ public enum CustomRoles
     Telekinetic,
     Administer,
     Mimic,
+    HalfKiller,
+    Frenzy,
 
     Godfather,
     Janitor,
@@ -517,6 +519,7 @@ public enum CustomRoles
     MadScientist,
     MadGuesser,
     MadConnecter,
+    MadUnknown,
 
     SKMadmate,
     //Crewmate(Vanilla)
@@ -555,6 +558,8 @@ public enum CustomRoles
     Nekomata,
     Chairman,
     Express,
+    FriedPotato,
+    SpeedStar,
     Sympathizer,
     Medic,
     CandleLighter,

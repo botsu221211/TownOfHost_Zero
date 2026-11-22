@@ -463,6 +463,9 @@ static class ExtendedPlayerControl
             string cachedName = (Main.AllPlayerNames != null && Main.AllPlayerNames.TryGetValue(player.PlayerId, out var n))
                 ? n
                 : player?.Data?.PlayerName;
+            // マッドアンノウンに姿を変えられた人は「？？？」
+            if (TownOfHostY.Roles.Madmate.MadUnknown.IsDisguised(player.PlayerId))
+                return "？？？";
             if (Options.GetNameChangeModes() == NameChange.Crew)
                 return isMeeting ? cachedName : GetString("CustomRoleTypes.Crewmate");
             return cachedName;

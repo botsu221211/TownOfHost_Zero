@@ -731,7 +731,9 @@ namespace TownOfHostY
             // 内容はログに残さない(秘匿のため)
             Logger.Info($"PrivateMessage {sender.PlayerId} -> {target.PlayerId}", "PrivateMessage");
 
-            var title = $"<color=#ff9ad5>{string.Format(GetString("PrivateMessage.Title"), ColoredPlayerName(sender))}</color>";
+            // フライドポテトは送り主の名前が「フライドポテト」になる
+            var senderName = Roles.Crewmate.FriedPotato.HidesNameInWhisper(sender) ? Roles.Crewmate.FriedPotato.WhisperName : ColoredPlayerName(sender);
+            var title = $"<color=#ff9ad5>{string.Format(GetString("PrivateMessage.Title"), senderName)}</color>";
             SendPrivateSystemMessage(target, body, title);
             SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.Sent"), ColoredPlayerName(target)) + "\n" + body);
         }
