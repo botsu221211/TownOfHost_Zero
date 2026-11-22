@@ -20,8 +20,8 @@ public static class AntiBlackout
     ///</summary>
     public static bool OverrideExiledPlayer
         => Options.NoGameEnd.GetBool()
-        || Jackal.RoleInfo.IsEnable || StrayWolf.RoleInfo.IsEnable
-        || Pirate.RoleInfo.IsEnable || JackOLantern.RoleInfo.IsEnable
+        || Jackal.RoleInfo.IsEnable
+        || Pirate.RoleInfo.IsEnable
         || Options.IsCCMode;
 
     public static bool IsCached { get; private set; } = false;
@@ -55,7 +55,6 @@ public static class AntiBlackout
     private enum RecognizeType
     {
         Impostor,
-        StrayWolf,
         Jackal,
         Pirate,
     }
@@ -68,8 +67,7 @@ public static class AntiBlackout
         Logger.Info($"RecognizeType {pc?.name}, {countType}, {customRole}({customRole.GetRoleInfo().CountType})", "AntiBlackout");
         return type switch
         {
-            RecognizeType.Impostor => countType == CountTypes.Impostor && customRole != CustomRoles.StrayWolf,
-            RecognizeType.StrayWolf => countType == CountTypes.Impostor && customRole == CustomRoles.StrayWolf,
+            RecognizeType.Impostor => countType == CountTypes.Impostor,
             RecognizeType.Jackal => countType == CountTypes.Jackal,
             RecognizeType.Pirate => countType == CountTypes.Pirate,
             _ => false,

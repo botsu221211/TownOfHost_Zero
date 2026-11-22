@@ -424,11 +424,6 @@ public static class Options
         //    Potentialist.SetupRoleOptions();
         //    Potentialist.RoleInfo.OptionCreator?.Invoke();
         //}
-        if (Main.IsHalloween)
-        {
-            JackOLantern.SetupRoleOptions();
-            JackOLantern.RoleInfo.OptionCreator?.Invoke();
-        }
 
         // 常設 新役職
         sortedRoleInfo.Where(role => role.RoleName.IsNewRole()).Do(info =>
@@ -474,7 +469,6 @@ public static class Options
         LastImpostor.SetupCustomOption();
 
         TextOptionItem.Create((int)offsetId.Text + 11, "Head.CrewmateAddOn", TabGroup.Addons).SetColor(Palette.CrewmateBlue);
-        CompreteCrew.SetupCustomOption();
         Workhorse.SetupCustomOption();
 
         TextOptionItem.Create((int)offsetId.Text + 12, "Head.NeutralAddOn", TabGroup.Addons).SetColor(Palette.Orange);
@@ -486,7 +480,6 @@ public static class Options
         AddWatch.SetupCustomOption();
         AddSeer.SetupCustomOption();
         Autopsy.SetupCustomOption();
-        VIP.SetupCustomOption();
         Revenger.SetupCustomOption();
         Sending.SetupCustomOption();
         TieBreaker.SetupCustomOption();

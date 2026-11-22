@@ -58,8 +58,7 @@ namespace TownOfHostY
                 "【今日のおすすめ役職】\nアドミニスター",
                 "【今日のおすすめ属性】\nリヴェラー",
                 "ランダムな文が\n表示されるって\nなんかいいよね",
-                "今日もシェリフ？\nたまにはハンターで使ってみない？",
-                "マッドシェリフなどで自爆する時に\n相手が斬るように見える設定があります",
+                "今日もシェリフ？\nたまにはバカシェリフで使ってみない？",
                 "属性を一つ足すだけで\n一気にゲームが変わります",
                 "ラストインポスターとか\nコンプリートクルーとかって\n使ってる？",
                 "パン屋はパン屋でも\nたまにご飯が好きになったりする",
@@ -143,8 +142,8 @@ namespace TownOfHostY
                 }
                 else if (Main.IsAprilFool)
                 {
-                    SpecialEventText.text = "★happy Halloween★<size=60%>\n本日限定：ジャック・オー・ランタン復刻登場！</size>";
-                    SpecialEventText.color = Utils.GetRoleColor(CustomRoles.JackOLantern);
+                    SpecialEventText.text = "★happy Halloween★";
+                    SpecialEventText.color = new UnityEngine.Color32(255, 140, 0, 255);
                 }
                 else if (Main.IsInitialRelease)
                 {
@@ -155,8 +154,7 @@ namespace TownOfHostY
                 {
                     SpecialEventText.text = "★happy Halloween★";
                     if (CultureInfo.CurrentCulture.Name == "ja-JP")
-                        SpecialEventText.text += "<size=60%>\n期間限定：ジャック・オー・ランタン登場！</size>";
-                    SpecialEventText.color = Utils.GetRoleColor(CustomRoles.JackOLantern);
+                    SpecialEventText.color = new UnityEngine.Color32(255, 140, 0, 255);
                 }
                 else if (Main.IsChristmas)
                 {

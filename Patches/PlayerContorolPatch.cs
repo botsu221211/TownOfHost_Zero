@@ -28,9 +28,7 @@ class CheckProtectPatch
         if (!AmongUsClient.Instance.AmHost) return false;
         Logger.Info("CheckProtect発生: " + __instance.GetNameWithRole() + "=>" + target.GetNameWithRole(), "CheckProtect");
         if (__instance.Is(CustomRoles.Sheriff)
-            || __instance.Is(CustomRoles.SillySheriff)
-            || __instance.Is(CustomRoles.Hunter)
-            || __instance.Is(CustomRoles.MadSheriff))
+            || __instance.Is(CustomRoles.SillySheriff))
         {
             if (__instance.Data.IsDead)
             {
@@ -654,8 +652,6 @@ class ReportDeadBodyPatch
 
         Utils.SyncAllSettings();
 
-        if (ShapeKiller.DummyReportDeadBody(__instance, target)) return false;
-
         if (!__instance.IsAlive())
         {
             //通報者が通報処理中に死亡した場合の強制会議実行
@@ -804,7 +800,6 @@ class PlayerControlCompleteTaskPatch
         }
         //属性クラスの扱いを決定するまで仮置き
         ret &= Workhorse.OnCompleteTask(pc);
-        CompreteCrew.OnCompleteTask(pc);
 
         if (Options.IsCCMode) CatchCat.CatPlayer.OnCompleteTask(pc, taskState);
 

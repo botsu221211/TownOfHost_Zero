@@ -124,8 +124,6 @@ namespace TownOfHostY
 
                 if (CustomRoles.Executioner.IsPresent())
                     Executioner.ChangeRoleByTarget(data.Character.PlayerId);
-                if (CustomRoles.Lawyer.IsPresent())
-                    Lawyer.ChangeRoleByTarget(data.Character);
 
                 VentEnterTask.TaskRemove(data.Character.PlayerId);
             }
@@ -200,6 +198,8 @@ namespace TownOfHostY
                         if (client.Character == null) return;
                         if (client.Character.PlayerId == PlayerControl.LocalPlayer.PlayerId) return;
                         if (AmongUsClient.Instance.IsGamePublic) Utils.SendMessageAutoSplit(string.Format(GetString("Message.AnnounceUsingTOH"), Main.PluginVersion), true, sendTo: client.Character.PlayerId);
+                        // コマンドの使い方の案内(入ってきた本人にだけ届く)
+                        Utils.SendMessageAutoSplit(string.Format(GetString("Message.CommandGuide"), Main.ModColor, Main.ModName, Main.PluginVersion), true, sendTo: client.Character.PlayerId);
                         TemplateManager.SendTemplate("welcome", client.Character.PlayerId, true);
                     }
                     catch { }

@@ -86,7 +86,6 @@ namespace TownOfHostY
                 if (pc == null) return false;
                 return ((pc.Is(CustomRoles.Sheriff) && (Sheriff.IsInfoPoor?.GetBool() ?? false))
                         || (pc.Is(CustomRoles.SillySheriff) && (SillySheriff.IsInfoPoor?.GetBool() ?? false))
-                        || (pc.Is(CustomRoles.Hunter) && (Hunter.IsInfoPoor?.GetBool() ?? false))
                         || pc.Is(CustomRoles.InfoPoor));
             }
             catch

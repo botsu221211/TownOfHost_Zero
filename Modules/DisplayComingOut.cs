@@ -96,9 +96,7 @@ class DisplayComingOut
             or CustomRoles.Tracker
             or CustomRoles.Noisemaker
             or CustomRoles.Judge
-            or CustomRoles.Potentialist
 
-            or CustomRoles.EvilHacker // 一旦封印
 
             or CustomRoles.GM
             or CustomRoles.GuardianAngel;

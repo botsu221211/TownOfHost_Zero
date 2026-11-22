@@ -60,7 +60,7 @@ public static class CustomRoleManager
         if (!CheckMurderPatch.CheckForInvalidMurdering(info, killerMyselfInvoke)) return false;
 
         // インポスター同士のキル無効
-        if (attemptKiller.GetCustomRole().IsImpostor() && attemptTarget.GetCustomRole().IsImpostor() && !attemptKiller.Is(CustomRoles.StrayWolf)) return false;
+        if (attemptKiller.GetCustomRole().IsImpostor() && attemptTarget.GetCustomRole().IsImpostor()) return false;
         // ゴッドファーザーのロックキル
         if (CustomRoles.Godfather.IsPresent() && GodfatherAndJanitor.JanitorTarget.Contains(attemptKiller.PlayerId)) return false;
         // ペンギンの拉致られ中キル
@@ -74,8 +74,6 @@ public static class CustomRoleManager
         {
             if (killer.IsKiller)
             {
-                // イビルディバイナーのみ占いのためここで先に処理
-                if (killerRole is EvilDiviner && !EvilDiviner.OnCheckMurder(info)) return false;
                 // ガーディング属性によるガード
                 if (Guarding.OnCheckMurder(info)) { }
                 // メディックの対象プレイヤー
@@ -314,7 +312,6 @@ public static class CustomRoleManager
             case CustomRoles.AddLight: AddLight.Add(playerId); break;
             case CustomRoles.AddSeer: AddSeer.Add(playerId); break;
             case CustomRoles.Autopsy: Autopsy.Add(playerId); break;
-            case CustomRoles.VIP: VIP.Add(playerId); break;
             case CustomRoles.Revenger: Revenger.Add(playerId); break;
             case CustomRoles.Management: Management.Add(playerId); break;
             case CustomRoles.Sending: Sending.Add(playerId); break;
@@ -497,49 +494,30 @@ public enum CustomRoles
     Stealth,
     NekoKabocha,
     Insider,
-    EvilNekomata,
-    AntiAdminer,
-    CursedWolf,
     Greedier,
-    Ambitioner,
-    Scavenger,
-    EvilDiviner,
     Telepathisters,
-    ShapeKiller,
-    StrayWolf,
-    EvilIgnition,
-    Escalationer,
-    EvilDyer,
     BestieWolf,
     EvilGuesser,
     SelfBomber,
-    GrudgeCharger,
     Charger,
-    Chaser,
     CharismaStar,
-    EvilHacker,
     Telekinetic,
     Administer,
+    Mimic,
 
     Godfather,
     Janitor,
-    Jack,
     //Madmate
     Madmate,
     MadGuardian,
     MadSnitch,
-    MadSheriff,
     MadDictator,
-    MadNatureCalls,
     MadBrackOuter,
     MadNimrod,
     MadScientist,
-    MadJester,
     MadGuesser,
     MadConnecter,
 
-    MadDilemma,
-    jO,
     SKMadmate,
     //Crewmate(Vanilla)
     Engineer,
@@ -574,29 +552,20 @@ public enum CustomRoles
     TaskManager,
     SillySheriff,
     GrudgeSheriff,
-    Hunter,
     Nekomata,
     Chairman,
     Express,
-    SeeingOff,
-    Rainbow,
     Sympathizer,
-    Blinder,
     Medic,
     CandleLighter,
     FortuneTeller,
     Psychic,
     Nimrod,
     Detector,
-    LoyalDoggy,
     Rabbit,
     VentManager,
     NiceGuesser,
-    Elder,
 
-    Counselor,
-    Lantern,
-    Potentialist,
     //Neutral
     Arsonist,
     Egoist,
@@ -609,13 +578,10 @@ public enum CustomRoles
     Jackal,
     JSidekick,
     JClient,
-    AntiComplete,
     Workaholic,
     DarkHide,
     LoveCutter,
     PlatonicLover,
-    Lawyer,
-    Pursuer,
     Totocalcio,
     Duelist,
     God,
@@ -625,12 +591,9 @@ public enum CustomRoles
     Pirate,
     Gang,
     ChainShifter,
-    Vendetta,
 
     GM,
-    CounselorAndMadDilemma,
     GodfatherAndJanitor,
-    JackOLantern,
     MaxMain,
     /************/
 
@@ -664,7 +627,6 @@ public enum CustomRoles
     // Addon
     StartAddon = 500,
     LastImpostor,
-    CompleteCrew,
     Lovers,
     Workhorse,
 
@@ -672,7 +634,6 @@ public enum CustomRoles
     AddLight,
     AddSeer,
     Autopsy,
-    VIP,
     Revenger,
     Management,
     Sending,

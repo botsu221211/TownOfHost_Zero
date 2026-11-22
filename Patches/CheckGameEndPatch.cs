@@ -64,7 +64,7 @@ namespace TownOfHostY
                         if (Egoist.CheckWin()) break;
 
                         Main.AllPlayerControls
-                            .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoleTypes.Madmate)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Archenemy) && !pc.Is(CustomRoles.MadJester))
+                            .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoleTypes.Madmate)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Archenemy))
                             .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                         break;
                 }
@@ -149,7 +149,7 @@ namespace TownOfHostY
                                 if (!Egoist.CheckWin())
                                 {
                                     Main.AllPlayerControls
-                                        .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoleTypes.Madmate)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Archenemy) && !pc.Is(CustomRoles.MadJester))
+                                        .Where(pc => (pc.Is(CustomRoleTypes.Impostor) || pc.Is(CustomRoleTypes.Madmate)) && !pc.Is(CustomRoles.Lovers) && !pc.Is(CustomRoles.Archenemy))
                                         .Do(pc => CustomWinnerHolder.WinnerIds.Add(pc.PlayerId));
                                 }
                                 break;
@@ -183,8 +183,6 @@ namespace TownOfHostY
                             CustomWinnerHolder.AdditionalWinnerRoles.Add(CustomRoles.Archenemy);
                         }
                     }
-                    //弁護士且つ追跡者
-                    Lawyer.EndGameCheck();
 
                     //確定敗北陣営
                     foreach (var pc in Main.AllPlayerControls)

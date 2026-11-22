@@ -101,7 +101,7 @@ static class CustomRolesHelper
 
         //return role is CustomRoles.Administer
         //    or CustomRoles.Charger
-        //    or CustomRoles.GrudgeCharger;
+        //;
 
         return false;
     }
@@ -110,50 +110,37 @@ static class CustomRolesHelper
     {
         return role is CustomRoles.Lovers
             or CustomRoles.Sympathizer
-            or CustomRoles.CounselorAndMadDilemma
-            or CustomRoles.GodfatherAndJanitor
-            or CustomRoles.JackOLantern;
+            or CustomRoles.GodfatherAndJanitor;
     }
     public static bool IsFixedCountRole(this CustomRoles role)
     {
         if (IsPairRole(role)) return true;
 
         return role is CustomRoles.Jackal
-            or CustomRoles.StrayWolf
             or CustomRoles.DarkHide
             or CustomRoles.Pirate
             or CustomRoles.ChainShifter
             or CustomRoles.PlatonicLover
-            or CustomRoles.FoxSpirit
-            or CustomRoles.Vendetta;
+            or CustomRoles.FoxSpirit;
     }
 
     public static bool IsDontShowOptionRole(this CustomRoles role)
     {
-        return role is CustomRoles.Counselor or CustomRoles.MadDilemma
-            or CustomRoles.Godfather or CustomRoles.Janitor
+        return role is CustomRoles.Godfather or CustomRoles.Janitor
             // 期間限定で
-            or CustomRoles.JackOLantern
-            or CustomRoles.Jack or CustomRoles.jO or CustomRoles.Lantern
             or CustomRoles.Gang
             or CustomRoles.SKMadmate
-          
-            or CustomRoles.EvilHacker //一旦封印
-            or CustomRoles.EvilDyer //封印
-            or CustomRoles.Vendetta //封印
-            or CustomRoles.Potentialist
+
             or CustomRoles.Impostor or CustomRoles.Crewmate;
     }
     public static bool IsDontSelectLoyaltyRole(this CustomRoles role)
     {
         return role is CustomRoles.CustomImpostor or CustomRoles.CustomCrewmate
             or CustomRoles.MadSnitch
-            or CustomRoles.MadDilemma
             or CustomRoles.MadConnecter
-            or CustomRoles.jO
 
             or CustomRoles.Jackal or CustomRoles.JClient or
-            CustomRoles.LastImpostor or CustomRoles.CompleteCrew;
+            CustomRoles.LastImpostor;
     }
 
     public static bool IsAddAddOn(this CustomRoles role)
@@ -169,7 +156,6 @@ static class CustomRolesHelper
             CustomRoles.AddLight or
             CustomRoles.AddSeer or
             CustomRoles.Autopsy or
-            CustomRoles.VIP or
             CustomRoles.Revenger or
             CustomRoles.Management or
             CustomRoles.Sending or
@@ -196,7 +182,6 @@ static class CustomRolesHelper
             role is
             CustomRoles.LastImpostor or
             CustomRoles.Workhorse or
-            CustomRoles.CompleteCrew or
             CustomRoles.Lovers;
     }
 
@@ -206,7 +191,6 @@ static class CustomRolesHelper
             role is
             CustomRoles.LastImpostor or
             CustomRoles.Workhorse or
-            CustomRoles.CompleteCrew or
             CustomRoles.Archenemy or
             CustomRoles.ChainShifterAddon or
             CustomRoles.Lovers;
@@ -218,10 +202,8 @@ static class CustomRolesHelper
             CustomRoles.Arsonist or
             CustomRoles.PlatonicLover or
             CustomRoles.Totocalcio or
-            CustomRoles.MadSheriff or
             CustomRoles.MadConnecter or
-            CustomRoles.Pirate or
-            CustomRoles.jO;
+            CustomRoles.Pirate;
     }
 
     //CC

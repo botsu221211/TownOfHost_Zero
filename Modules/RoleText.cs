@@ -87,9 +87,6 @@ public static class RoleText
                     case CustomRoles.LastImpostor:
                         str = "Last-";
                         break;
-                    case CustomRoles.CompleteCrew:
-                        str = "Complete-";
-                        break;
                 }
                 roleText.Append(Utils.ColorString(Utils.GetRoleColor(subRole), Translator.GetRoleString(str)));
                 count--;
@@ -230,7 +227,6 @@ public static class RoleText
                     case CustomRoles.AddLight: sb.Append(AddLight.SubRoleMark); break;
                     case CustomRoles.AddSeer: sb.Append(AddSeer.SubRoleMark); break;
                     case CustomRoles.Autopsy: sb.Append(Autopsy.SubRoleMark); break;
-                    case CustomRoles.VIP: sb.Append(VIP.SubRoleMark); break;
                     case CustomRoles.Revenger: sb.Append(Revenger.SubRoleMark); break;
                     case CustomRoles.Management: sb.Append(Management.SubRoleMark); break;
                     case CustomRoles.Sending: sb.Append(Sending.SubRoleMark); break;

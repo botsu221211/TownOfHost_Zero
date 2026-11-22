@@ -67,10 +67,12 @@ public static class GameOptionsMenuPatch
         var modTab = (TabGroup)(ModGameOptionsMenu.TabIndex - 3);
         ModGameOptionsMenu.SettingsMenus[modTab] = __instance;
 
+        // 役職タブ(表形式)は右端に ？・⚙ があるのでスクロールバーを少し右に
+        var scrollbarShift = RoleTableUI.IsTableTab(modTab) ? 0.5f : 1f;
         var scrollbarTrack = __instance.transform.FindChild("UI_ScrollbarTrack");
-        scrollbarTrack.localPosition -= new Vector3(1f, 0f, 0f);
+        scrollbarTrack.localPosition -= new Vector3(scrollbarShift, 0f, 0f);
         var scrollbar = __instance.transform.FindChild("UI_Scrollbar");
-        scrollbar.localPosition -= new Vector3(1f, 0f, 0f);
+        scrollbar.localPosition -= new Vector3(scrollbarShift, 0f, 0f);
 
         //float num = 0.713f;
         float num = 2.0f;
@@ -181,6 +183,13 @@ public static class GameOptionsMenuPatch
         foreach (var x in __instance.scrollBar.GetComponentsInChildren<UiElement>())
             __instance.ControllerSelectable.Add(x);
         __instance.scrollBar.SetYBoundsMax(-num - 1.65f);
+
+        // 役職タブは「役職名・出現確率・最大数」の表で表示する
+        if (RoleTableUI.IsTableTab(modTab))
+        {
+            RoleTableUI.Build(__instance, modTab);
+            RoleTableUI.Layout(__instance, modTab, true);
+        }
 
         return false;
     }
@@ -307,7 +316,7 @@ public static class GameOptionsMenuPatch
         }
     }
 
-    private static bool IsOptionEnabled(OptionItem option)
+    internal static bool IsOptionEnabled(OptionItem option)
     {
         if (option.IsHiddenOn(Options.CurrentGameMode)) return false;
 
@@ -336,6 +345,8 @@ public static class GameOptionsMenuPatch
     }
     private static void ReCreateSettings(GameOptionsMenu __instance, TabGroup modTab, bool updateNavigation)
     {
+        if (RoleTableUI.Layout(__instance, modTab, updateNavigation)) return;
+
         float num = 2.0f;
         for (int index = 0; index < OptionItem.AllOptions.Count; index++)
         {

@@ -180,8 +180,7 @@ class ChangeRoleSettings
                 {
                     if (Options.GetNameChangeModes() == NameChange.Color)
                     {
-                        if (pc.Is(CustomRoles.Rainbow)) pc.RpcSetName(GetString("RainbowColor"));
-                        else pc.RpcSetName(Palette.GetColorName(colorId));
+                        pc.RpcSetName(Palette.GetColorName(colorId));
                     }
                 }
                 PlayerState.Create(pc.PlayerId);
@@ -351,9 +350,6 @@ class SelectRolesPatch
                 IGameOptions currentGameOptions = GameOptionsManager.Instance.CurrentGameOptions;
                 int adjustedNumImpostors = GameOptionsManager.Instance.CurrentGameOptions.GetAdjustedNumImpostors(playerInfos.Count);
 
-                if (CustomRoles.jO.IsPresent())
-                    adjustedNumImpostors--;
-
 
                 int alreadyAssignedImpostors = Main.AllPlayerControls.Count(pc =>
                 {
@@ -493,7 +489,7 @@ class SelectRolesPatch
             AssignCustomSubRolesFromList(CustomRoles.Lovers, allPlayersbySub, 2);
         foreach (var role in new CustomRoles[] {
             CustomRoles.AddWatch, CustomRoles.Sunglasses, CustomRoles.AddLight,
-            CustomRoles.AddSeer, CustomRoles.Autopsy, CustomRoles.VIP,
+            CustomRoles.AddSeer, CustomRoles.Autopsy,
             CustomRoles.Clumsy, CustomRoles.Revenger, CustomRoles.Management,
             CustomRoles.InfoPoor, CustomRoles.Sending, CustomRoles.TieBreaker,
             CustomRoles.NonReport, CustomRoles.PlusVote, CustomRoles.Guarding,
@@ -540,8 +536,7 @@ class SelectRolesPatch
             {
                 if (seer == pc) continue;
                 if (pc.Is(CustomRoles.GM)
-                    || (pc.Is(CustomRoles.Workaholic) && Workaholic.Seen)
-                    || pc.Is(CustomRoles.Rainbow))
+                    || (pc.Is(CustomRoles.Workaholic) && Workaholic.Seen))
                     NameColorManager.Add(seer.PlayerId, pc.PlayerId, pc.GetRoleColorCode());
             }
         }

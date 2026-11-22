@@ -627,8 +627,7 @@ static class ExtendedPlayerControl
         return
             player.GetCustomRole() is
             CustomRoles.Sheriff or
-            CustomRoles.SillySheriff or
-            CustomRoles.Hunter;
+            CustomRoles.SillySheriff;
     }
     public static bool KnowDeathReason(this PlayerControl seer, PlayerControl seen)
     {
@@ -636,11 +635,6 @@ static class ExtendedPlayerControl
         if (seen.IsAlive())
         {
             return false;
-        }
-        if (EvilIgnition.CanBombTarget() &&
-            PlayerState.GetByPlayerId(seen.PlayerId).DeathReason == CustomDeathReason.IgnitionBombed)
-        {
-            return true;
         }
         // seerが死亡済で，霊界から死因が見える設定がON
         if (!seer.IsAlive() && Options.GhostCanSeeDeathReason.GetBool())

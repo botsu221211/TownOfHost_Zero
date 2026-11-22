@@ -304,6 +304,11 @@ namespace TownOfHostY
                         }
                         break;
 
+                    case "/c":
+                        canceled = true;
+                        SendPrivateMessage(PlayerControl.LocalPlayer, args);
+                        break;
+
                     case "/killFlash":
                     case "/kf":
                         canceled = true;
@@ -622,13 +627,11 @@ namespace TownOfHostY
                 roleCommands.Add(CustomRoles.LastImpostor, "ラストインポスター");
                 roleCommands.Add(CustomRoles.Lovers, "ラバーズ");
                 roleCommands.Add(CustomRoles.Workhorse, "ワークホース");
-                roleCommands.Add(CustomRoles.CompleteCrew, "コンプリートクルー");
                 roleCommands.Add(CustomRoles.AddWatch, "ウォッチング");
                 roleCommands.Add(CustomRoles.Sunglasses, "サングラス");
                 roleCommands.Add(CustomRoles.AddLight, "ライティング");
                 roleCommands.Add(CustomRoles.AddSeer, "シーイング");
                 roleCommands.Add(CustomRoles.Autopsy, "オートプシー");
-                roleCommands.Add(CustomRoles.VIP, "VIP");
                 roleCommands.Add(CustomRoles.Clumsy, "クラムシー");
                 roleCommands.Add(CustomRoles.Revenger, "リベンジャー");
                 roleCommands.Add(CustomRoles.Management, "マネジメント");
@@ -659,6 +662,93 @@ namespace TownOfHostY
 
                 roleCommands[role.RoleName] = role.ChatCommand;
             }
+        }
+        /// <summary>
+        /// 個人秘匿メッセージ: 会議中・ロビー待機中に「/cmd c 色 内容」で指定した色のプレイヤーにだけ文章を届ける
+        /// args[0] は "/c"、args[1] が色、args[2..] が本文
+        /// </summary>
+        private static void SendPrivateMessage(PlayerControl sender, string[] args)
+        {
+            if (!AmongUsClient.Instance.AmHost || sender == null) return;
+
+            if (!GameStates.IsMeeting && !GameStates.IsLobby)
+            {
+                SendPrivateSystemMessage(sender, GetString("PrivateMessage.OnlyMeeting"));
+                return;
+            }
+            // 霊界の人は送れない・霊界の人には送れない(ロビーでは全員生存扱い)
+            if (!sender.IsAlive())
+            {
+                SendPrivateSystemMessage(sender, GetString("PrivateMessage.DeadCannotSend"));
+                return;
+            }
+            if (args.Length < 3 || string.IsNullOrWhiteSpace(string.Join(" ", args.Skip(2))))
+            {
+                SendPrivateSystemMessage(sender, GetString("PrivateMessage.Usage"));
+                return;
+            }
+
+            var colorArg = args[1];
+            var target = FindPlayerByColorName(colorArg);
+            if (target == null)
+            {
+                SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.NotFound"), colorArg));
+                return;
+            }
+            if (target.PlayerId == sender.PlayerId)
+            {
+                SendPrivateSystemMessage(sender, GetString("PrivateMessage.CannotSendSelf"));
+                return;
+            }
+            if (!target.IsAlive())
+            {
+                SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.TargetDead"), ColoredPlayerName(target)));
+                return;
+            }
+
+            // リッチテキストタグで表示を偽装されないよう < > を無効化
+            var body = string.Join(" ", args.Skip(2)).Replace("<", "＜").Replace(">", "＞");
+
+            // 内容はログに残さない(秘匿のため)
+            Logger.Info($"PrivateMessage {sender.PlayerId} -> {target.PlayerId}", "PrivateMessage");
+
+            var title = $"<color=#ff9ad5>{string.Format(GetString("PrivateMessage.Title"), ColoredPlayerName(sender))}</color>";
+            SendPrivateSystemMessage(target, body, title);
+            SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.Sent"), ColoredPlayerName(target)) + "\n" + body);
+        }
+        /// <summary>指定したプレイヤーだけに届くシステムメッセージ(ホスト本人宛ての場合は自分のチャット欄に表示)</summary>
+        private static void SendPrivateSystemMessage(PlayerControl to, string text, string title = "")
+        {
+            if (to == null) return;
+            if (to.AmOwner)
+            {
+                var titleText = title == "" ? $"<color=#aaaaff>{GetString("DefaultSystemMessageTitle")}</color>" : title;
+                HudManager.Instance?.Chat?.AddChat(to, $"<align=left>{titleText}\n{text}</align>");
+                return;
+            }
+            Utils.SendMessageAutoSplit(text, true, title, sendTo: to.PlayerId);
+        }
+        /// <summary>色名(日本語/英語どちらでも可)から、その色のプレイヤーを探す</summary>
+        private static PlayerControl FindPlayerByColorName(string colorName)
+        {
+            if (string.IsNullOrWhiteSpace(colorName)) return null;
+            var key = colorName.Trim().ToLower();
+            foreach (var pc in Main.AllPlayerControls)
+            {
+                if (pc?.Data == null) continue;
+                var colorId = pc.Data.DefaultOutfit.ColorId;
+                if (colorId < 0 || colorId >= Palette.ColorNames.Length) continue;
+                var localized = Palette.GetColorName(colorId)?.Trim().ToLower();
+                var english = Palette.ColorNames[colorId].ToString().Replace("Color", "").ToLower();
+                if (key == localized || key == english) return pc;
+            }
+            return null;
+        }
+        private static string ColoredPlayerName(PlayerControl pc)
+        {
+            var colorId = pc.Data.DefaultOutfit.ColorId;
+            var color = colorId >= 0 && colorId < Palette.PlayerColors.Length ? Palette.PlayerColors[colorId] : (UnityEngine.Color32)UnityEngine.Color.white;
+            return $"<color=#{UnityEngine.ColorUtility.ToHtmlStringRGB(color)}>{pc.Data.PlayerName}</color>";
         }
         /// <summary>コマンドに /cmd が付いていないとき、送った本人にだけ使い方を教える</summary>
         private static void SendCommandFailedMessage(PlayerControl player)
@@ -698,6 +788,11 @@ namespace TownOfHostY
             string[] args = text.Split(' ');
             string subArgs = "";
 
+            if (args.Length == 1 && args[0].ToLower() is "/h" or "/help")
+            {
+                Utils.ShowPlayerHelp(player.PlayerId);
+                return;
+            }
             if (args[0] != "/cmd" || args.Length <= 1)
             {
                 if (args[0].StartsWith("/") && args[0] != "/cmd") SendCommandFailedMessage(player);
@@ -752,6 +847,10 @@ namespace TownOfHostY
                             subArgs = args.Length < 3 ? "" : args[2];
                             GetRolesInfo(subArgs, player.PlayerId);
                             break;
+
+                        default:
+                            Utils.ShowPlayerHelp(player.PlayerId);
+                            break;
                     }
                     break;
 
@@ -787,6 +886,10 @@ namespace TownOfHostY
                     }
                     else
                         Utils.SendMessageAutoSplit(VoiceReader.GetVoiceIdxMsg(), true, sendTo: player.PlayerId);
+                    break;
+
+                case "/c":
+                    SendPrivateMessage(player, args);
                     break;
 
                 case "/killFlash":

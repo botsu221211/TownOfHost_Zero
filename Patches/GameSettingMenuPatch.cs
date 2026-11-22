@@ -81,15 +81,16 @@ public class GameSettingMenuPatch
         var gameSettingTextObject = Object.Instantiate(infoBox.gameObject, __instance.transform);
         gameSettingTextObject.gameObject.SetActive(true);
         gameSettingTextObject.name = "GameSettingText";
-        gameSettingTextObject.transform.localPosition = new Vector3(-0.45f, 0.88f, -1f);
-        gameSettingTextObject.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+        // 左メニューと重ならないよう、ロゴの右側に置く
+        gameSettingTextObject.transform.localPosition = new Vector3(-1.4f, -2.75f, -1f);
+        gameSettingTextObject.transform.localScale = new Vector3(0.9f, 0.9f, 1f);
 
         gameSettingTextObject.transform.FindChild("InfoImage").gameObject.SetActive(false);
         gameSettingTextObject.transform.FindChild("Cube").gameObject.SetActive(false);
 
         var gameSettingTextTMP = gameSettingTextObject.GetComponentInChildren<TextMeshPro>();
         gameSettingTextTMP.DestroyTranslator();
-        gameSettingTextTMP.text = Translator.GetString("GameSettingHelpText");
+        gameSettingTextTMP.text = "・オプション名クリック：詳細説明を表示\n・左Shift＋±クリック：5倍幅で変更";
         gameSettingTextTMP.alignment = TextAlignmentOptions.BottomLeft;
 
         /******** パネル ********/
@@ -105,12 +106,14 @@ public class GameSettingMenuPatch
         gameSettingsLabel.localPosition = new Vector3(-4.03f, 2f, -3f);
 
         infoBox.localScale = new Vector3(0.8f, 0.8f, 1f);
-        infoBox.localPosition = new Vector3(5.74f, -2.42f, -1f);
+        infoBox.localPosition = new Vector3(6.14f, -2.42f, -1f);
         infoBox.FindChild("Cube").gameObject.SetActive(false);
+        // 説明欄の左下の「？」のクルーは出さない
+        infoBox.FindChild("InfoImage")?.gameObject.SetActive(false);
 
         var infoBoxText = infoBox.FindChild("InfoText");
         infoBoxText.localPosition = new Vector3(-2.945f, 3.2145f, -2f);
-        infoBoxText.GetComponent<RectTransform>().sizeDelta = new(3.5f, 5f);
+        infoBoxText.GetComponent<RectTransform>().sizeDelta = new(3.1f, 5f);
 
         var mainArea = __instance.transform.FindChild("MainArea");
         mainArea.localScale = new Vector3(0.95f, 0.95f, 1f);
@@ -119,6 +122,10 @@ public class GameSettingMenuPatch
         var closeButton = __instance.transform.FindChild("CloseButton");
         closeButton.localScale = new Vector3(0.5f, 0.5f, 1f);
         closeButton.localPosition = new Vector3(5.05f, 2.05f, -13f);
+
+        // TOH_Zero の見た目(色・ロゴ)とプリセット画面
+        ZeroSettingUI.ApplyPanelStyle(__instance);
+        ZeroSettingUI.CreatePresetPanel(__instance);
 
         /******** ボタン作成 ********/
 
@@ -137,23 +144,8 @@ public class GameSettingMenuPatch
             label.DestroyTranslator();
             // ボタンテキストの名前変更
             label.text = "";
-            // ボタンテキストの色変更
-            button.activeTextColor = button.inactiveTextColor = Color.black;
-            // ボタンテキストの選択中の色変更
-            button.selectedTextColor = Color.blue;
-
-            var activeButton = Utils.LoadSprite($"TownOfHost_Zero.Resources.Tab_Active_{tab}.png", 100f);
-            // 各種スプライトをオリジナルのものに変更
-            button.inactiveSprites.GetComponent<SpriteRenderer>().sprite = Utils.LoadSprite($"TownOfHost_Zero.Resources.Tab_Small_{tab}.png", 100f);
-            button.activeSprites.GetComponent<SpriteRenderer>().sprite = activeButton;
-            button.selectedSprites.GetComponent<SpriteRenderer>().sprite = activeButton;
-
-            // Y座標オフセット
-            Vector3 offset = new(0.0f, 0.45f * ((int)tab + 1), 0.0f);
-            // ボタンの座標設定
-            button.transform.localPosition = buttonPosition - offset;
-            // ボタンのサイズ設定
-            button.transform.localScale = buttonSize;
+            // 見た目(画像・位置・大きさ)を TOH_Zero のデザインにする
+            ZeroSettingUI.StyleTabButton(button, tab.ToString(), ZeroSettingUI.GetTabDisplayIndex(tab));
 
             // ボタンがクリックされた時の設定
             var buttonComponent = button.GetComponent<PassiveButton>();
@@ -255,8 +247,10 @@ public class GameSettingMenuPatch
     private static void SetDefaultButton(GameSettingMenu __instance)
     {
         /******** デフォルトボタン設定 ********/
-        // プリセット設定 非表示
-        __instance.GamePresetsButton.gameObject.SetActive(false);
+        /**** プリセットボタン(MODのプリセット画面を開く) ****/
+        var presetButton = __instance.GamePresetsButton;
+        presetButton.gameObject.SetActive(true);
+        ZeroSettingUI.StyleTabButton(presetButton, "Preset", ZeroSettingUI.PresetTabIndex);
 
         /**** ゲーム設定ボタンを変更 ****/
         var gameSettingButton = __instance.GameSettingsButton;
@@ -273,15 +267,7 @@ public class GameSettingMenuPatch
         // ボタンテキストの選択中の色変更
         gameSettingButton.selectedTextColor = Color.blue;
 
-        var vanillaActiveButton = Utils.LoadSprite($"TownOfHost_Zero.Resources.Tab_Active_VanillaGameSettings.png", 100f);
-        // 各種スプライトをオリジナルのものに変更
-        gameSettingButton.inactiveSprites.GetComponent<SpriteRenderer>().sprite = Utils.LoadSprite($"TownOfHost_Zero.Resources.Tab_Small_VanillaGameSettings.png", 100f);
-        gameSettingButton.activeSprites.GetComponent<SpriteRenderer>().sprite = vanillaActiveButton;
-        gameSettingButton.selectedSprites.GetComponent<SpriteRenderer>().sprite = vanillaActiveButton;
-        // ボタンの座標設定
-        gameSettingButton.transform.localPosition = buttonPosition;
-        // ボタンのサイズ設定
-        gameSettingButton.transform.localScale = buttonSize;
+        ZeroSettingUI.StyleTabButton(gameSettingButton, "VanillaGameSettings", ZeroSettingUI.GameSettingsTabIndex);
         /**** ゲーム設定ボタンを変更 ここまで ****/
 
         // バニラ役職設定 非表示
@@ -290,16 +276,19 @@ public class GameSettingMenuPatch
 
         __instance.DefaultButtonSelected = gameSettingButton;
         __instance.ControllerSelectable = new();
+        __instance.ControllerSelectable.Add(presetButton);
         __instance.ControllerSelectable.Add(gameSettingButton);
     }
 
     [HarmonyPatch(nameof(GameSettingMenu.ChangeTab)), HarmonyPrefix]
     public static bool ChangeTabPrefix(GameSettingMenu __instance, ref int tabNum, [HarmonyArgument(1)] bool previewOnly)
     {
+        if (tabNum == 0 && previewOnly) return false;
         ModGameOptionsMenu.TabIndex = tabNum;
 
         GameOptionsMenu settingsTab;
         PassiveButton button;
+        if (!previewOnly) ZeroSettingUI.SetPresetPanelActive(tabNum == 0);
 
         if ((previewOnly && Controller.currentTouchType == Controller.TouchType.Joystick) || !previewOnly)
         {
@@ -326,16 +315,42 @@ public class GameSettingMenuPatch
             var whatIsThis = __instance.transform.FindChild("What Is This?");
             var mainArea = __instance.transform.FindChild("MainArea");
 
+            var infoText = whatIsThis.FindChild("InfoText")?.GetComponent<RectTransform>();
             if (tabNum < 3)
             {
                 whatIsThis.gameObject.SetActive(false);
                 mainArea.localPosition = new Vector3(0.6f, -0.817f, -1f);
             }
+            else if (RoleTableUI.IsTableTab((TabGroup)(tabNum - 3)))
+            {
+                // 役職タブ(表形式): 表の右の空きに説明欄(？を押すと役職の詳細が出る)
+                whatIsThis.gameObject.SetActive(true);
+                whatIsThis.localPosition = new Vector3(6.46f, -2.42f, -1f);
+                if (infoText != null) infoText.sizeDelta = new(1.93f, 5f);
+                mainArea.localPosition = new Vector3(0.6f, -0.817f, -1f);
+            }
             else
             {
                 whatIsThis.gameObject.SetActive(true);
-                mainArea.localPosition = new Vector3(-0.26f, -0.817f, -1f);
+                whatIsThis.localPosition = new Vector3(6.14f, -2.42f, -1f);
+                if (infoText != null) infoText.sizeDelta = new(3.1f, 5f);
+                mainArea.localPosition = new Vector3(0.32f, -0.817f, -1f);
             }
+        }
+        if (tabNum == 0)
+        {
+            // バニラのプリセット画面の代わりに TOH_Zero のプリセット画面を出す
+            __instance.PresetsTab.gameObject.SetActive(false);
+            __instance.GameSettingsTab.gameObject.SetActive(false);
+            __instance.RoleSettingsTab.gameObject.SetActive(false);
+            __instance.GameSettingsButton.SelectButton(false);
+            __instance.RoleSettingsButton.SelectButton(false);
+            __instance.GamePresetsButton.SelectButton(true);
+            __instance.MenuDescriptionText.DestroyTranslator();
+            __instance.MenuDescriptionText.text = "プリセットの切り替えと、役職の一括設定を行います。";
+            __instance.ToggleLeftSideDarkener(true);
+            __instance.ToggleRightSideDarkener(false);
+            return false;
         }
         if (tabNum < 3)
         {
@@ -418,6 +433,8 @@ public class GameSettingMenuPatch
             UnityEngine.Object.Destroy(tab);
         ModSettingsButtons = new();
         ModSettingsTabs = new();
+        RoleTableUI.Clear();
+        ZeroSettingUI.Clear();
     }
 }
 

@@ -30,7 +30,7 @@ class SetUpRoleTextPatch
         {
             CustomRoles role = PlayerControl.LocalPlayer.GetCustomRole();
 
-            if (!role.IsVanilla() && role != CustomRoles.Potentialist)
+            if (!role.IsVanilla() && true)
             {
                 __instance.YouAreText.color = Utils.GetRoleColor(role);
                 __instance.RoleText.text = Utils.GetRoleName(role);
@@ -130,7 +130,7 @@ class BeginCrewmatePatch
 {
     public static void Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay)
     {
-        if (PlayerControl.LocalPlayer.Is(CustomRoleTypes.Neutral) || PlayerControl.LocalPlayer.Is(CustomRoles.StrayWolf)
+        if (PlayerControl.LocalPlayer.Is(CustomRoleTypes.Neutral)
             || PlayerControl.LocalPlayer.GetCustomRole().IsCCLeaderRoles())
         {
             var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
@@ -193,9 +193,7 @@ class BeginCrewmatePatch
                     __instance.BackgroundBar.material.color = Utils.GetRoleColor(CustomRoles.FoxSpirit);
                     break;
 
-                case CustomRoles.MadSheriff:
                 case CustomRoles.MadConnecter:
-                case CustomRoles.jO:
                     __instance.ImpostorText.gameObject.SetActive(true);
                     __instance.ImpostorText.text = numImpostors == 1
                         ? DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.NumImpostorsS)
@@ -234,15 +232,7 @@ class BeginCrewmatePatch
 
         switch (role)
         {
-            case CustomRoles.StrayWolf:
-                __instance.TeamTitle.text = GetString("Impostor");
-                __instance.TeamTitle.color = Palette.ImpostorRed;
-                __instance.ImpostorText.gameObject.SetActive(false);
-                __instance.BackgroundBar.material.color = Palette.ImpostorRed;
-                break;
-
             case CustomRoles.Sheriff:
-            case CustomRoles.Hunter:
             case CustomRoles.SillySheriff:
                 __instance.BackgroundBar.material.color = Palette.CrewmateBlue;
                 __instance.ImpostorText.gameObject.SetActive(true);
@@ -351,9 +341,7 @@ class BeginImpostorPatch
     public static bool Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
     {
         if (PlayerControl.LocalPlayer.Is(CustomRoles.Sheriff)
-            || PlayerControl.LocalPlayer.Is(CustomRoles.Hunter)
-            || PlayerControl.LocalPlayer.Is(CustomRoles.SillySheriff)
-            || PlayerControl.LocalPlayer.Is(CustomRoles.jO))
+            || PlayerControl.LocalPlayer.Is(CustomRoles.SillySheriff))
         {
             yourTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
             yourTeam.Add(PlayerControl.LocalPlayer);
@@ -367,7 +355,7 @@ class BeginImpostorPatch
         }
 
         var localRole = PlayerControl.LocalPlayer.GetCustomRole();
-        if (localRole.GetCustomRoleTypes() == CustomRoleTypes.Impostor || localRole == CustomRoles.StrayWolf)
+        if (localRole.GetCustomRoleTypes() == CustomRoleTypes.Impostor)
         {
             BeginCrewmatePatch.Prefix(__instance, ref yourTeam);
             if (localRole.GetCustomRoleTypes() == CustomRoleTypes.Impostor)
@@ -388,7 +376,7 @@ class BeginImpostorPatch
     public static void Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
     {
         var role = PlayerControl.LocalPlayer.GetCustomRole();
-        if (role.GetCustomRoleTypes() != CustomRoleTypes.Impostor && role != CustomRoles.StrayWolf)
+        if (role.GetCustomRoleTypes() != CustomRoleTypes.Impostor)
         {
             BeginCrewmatePatch.Postfix(__instance, ref yourTeam);
         }

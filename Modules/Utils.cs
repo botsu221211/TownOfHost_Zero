@@ -202,7 +202,6 @@ public static class Utils
         // ターゲット(属性)
         foreach (var subRole in PlayerState.GetByPlayerId(target.PlayerId).SubRoles)
         {
-            if (subRole == CustomRoles.VIP) return true;
         }
         // ターゲット(役職)
         if (target == BestieWolf.EnableKillFlash) return true;
@@ -382,10 +381,6 @@ public static class Utils
             {
                 return false;
             }
-            if (LoyalDoggy.IgnoreTask(p))
-            {
-                return false;
-            }
             var role = States.GetNowMainRole();
             var roleClass = CustomRoleManager.GetByPlayerId(p.PlayerId);
             if (roleClass != null)
@@ -510,12 +505,6 @@ public static class Utils
         var sb = new StringBuilder();
         var myRole = player.GetCustomRole();
         var roleInfoLong = player.GetRoleInfo(true);
-        if (myRole == CustomRoles.Potentialist)
-        {
-            myRole = CustomRoles.Crewmate;
-            roleInfoLong = GetString("PotentialistInfo");
-        }
-
         var roleName = myRole.ToString();
         if (myRole == CustomRoles.Bakery && Bakery.IsNeutral(player))
         {
@@ -1114,9 +1103,34 @@ public static class Utils
         sb.Append($"\n/h modes {GetString("Command.h_modes")}");
         sb.Append($"\n/dump - {GetString("Command.dump")}");
         sb.Append($"\n/brackout - {GetString("Command.killflashall")}");
+        sb.Append($"\n/cmd c <色> <内容> - {GetString("Command.privatemessage")}");
         sb.Append($"\n\n視界が暗転した参加者が発生した場合は、\nチャットコマンド[/brackout・/bo]か、左Control,K,Lを同時に押下してください");
 
         SendMessageAutoSplit(sb.ToString(), true);
+    }
+
+    /// <summary>ホスト以外の参加者向けのコマンド一覧(本人にだけ送る)</summary>
+    public static void ShowPlayerHelp(byte playerId)
+    {
+        string formatTag = $"<size=70%><line-height=1.6pic>";
+        StringBuilder sb = new();
+
+        sb.Append(formatTag);
+        sb.Append(GetString("CommandList"));
+        sb.Append($"\n/cmd l - {GetString("Command.lastresult")}");
+        sb.Append($"\n/cmd kl - {GetString("Command.killlog")}");
+        sb.Append($"\n/cmd n - {GetString("Command.now")}");
+        sb.Append($"\n/cmd n r - {GetString("Command.n_roles")}");
+        sb.Append($"\n/cmd n v - {GetString("Command.n_vanilla")}");
+        sb.Append($"\n/cmd h n - {GetString("Command.h_now")}");
+        sb.Append($"\n/cmd h r {GetString("Command.h_roles")}");
+        sb.Append($"\n/cmd m - {GetString("Command.myrole")}");
+        sb.Append($"\n/cmd t <名前> - {GetString("Command.template")}");
+        sb.Append($"\n/cmd vo - {GetString("Command.voice")}");
+        sb.Append($"\n/cmd kf - {GetString("Command.killflash")}");
+        sb.Append($"\n/cmd c <色> <内容> - {GetString("Command.privatemessage")}");
+
+        SendMessageAutoSplit(sb.ToString(), true, sendTo: playerId);
     }
 
     private static void SendMessageAutoSplitAndClearSB(byte PlayerId, StringBuilder sb, string title = "", string formatTag = "")
@@ -1330,9 +1344,6 @@ public static class Utils
             {
                 if (Options.GetNameChangeModes() == NameChange.Color)
                 {
-                    if (PlayerControl.LocalPlayer.Is(CustomRoles.Rainbow))
-                        name = GetString("RainbowColor");
-                    else
                         name = Palette.GetColorName(Camouflage.PlayerSkins[PlayerControl.LocalPlayer.PlayerId].ColorId);
                 }
             }
@@ -1493,7 +1504,6 @@ public static class Utils
 
             StringBuilder SelfName = new();
             if (!(Options.IsSyncColorMode && isForMeeting && seer.IsAlive())
-                || seer.Is(CustomRoles.Rainbow)
                 || seer.Is(CustomRoles.Workaholic))
             {
                 SelfName.Append(SelfRoleName).Append("\r\n");
@@ -1506,7 +1516,7 @@ public static class Utils
             seer.GetRoleClass()?.OverrideShowMainRoleText(ref SelfNameColor, ref t);//colorのみ
 
             bool selfNameOriginal = true;
-            if (seer.Is(CustomRoles.SeeingOff) || seer.Is(CustomRoles.Sending) || seer.Is(CustomRoles.MadDilemma))
+            if (seer.Is(CustomRoles.Sending))
             {
                 string str = Sending.RealNameChange();
                 if (str != string.Empty)
@@ -1517,7 +1527,6 @@ public static class Utils
             }
             if (Options.IsSyncColorMode && isForMeeting && seer.IsAlive() &&
                 !seer.Is(CustomRoleTypes.Impostor) &&
-                !seer.Is(CustomRoles.Rainbow) &&
                 !seer.Is(CustomRoles.Workaholic))
             {
                 SelfName.Append($"{ColorString(Color.white, SeerRealName)}{SelfDeathReason}{SelfMark}");
@@ -1563,22 +1572,17 @@ public static class Utils
                 || seer.IsNeutralKiller() //seerがキル出来るニュートラル
                 || (IsActive(SystemTypes.Electrical) && CustomRoles.Mare.IsEnable())    //メアーが入っていない時は通さない
                 || (IsActive(SystemTypes.Comms) && Options.CommsCamouflage.GetBool())   //カモフラオプションがない時は通さない
-                || EvilDyer.IsColorCamouflage    //カモフラがない時は通さない
                 || NoCache
                 || ForceLoop
                 || Options.IsCCMode
                 || Options.GetNameChangeModes() == NameChange.Crew
                 || (CustomRoles.Workaholic.IsEnable() && Workaholic.Seen)
-                || CustomRoles.Rainbow.IsEnable()
                 || (seer.Is(CustomRoles.FortuneTeller) && ((FortuneTeller)seer.GetRoleClass()).HasForecastResult())
                 || seer.Is(CustomRoles.Sympathizer)
                 || seer.Is(CustomRoles.Medic)
                 || seer.Is(CustomRoles.GrudgeSheriff)
-                || seer.Is(CustomRoles.AntiComplete)
                 || seer.Is(CustomRoles.Totocalcio)
                 || seer.Is(CustomRoles.Immoralist)
-                || seer.Is(CustomRoles.LoyalDoggy)
-                || seer.Is(CustomRoles.jO)
                 || VentEnterTask.HaveTask(seer)
 
                 || Duelist.CheckNotify(seer)
@@ -1631,8 +1635,6 @@ public static class Utils
 
                     if (IsActive(SystemTypes.Comms) && Options.CommsCamouflage.GetBool() && !isForMeeting && !Options.IsSyncColorMode)
                         TargetPlayerName = $"<size=0%>{TargetPlayerName}</size>";
-                    if (EvilDyer.IsColorCamouflage && !isForMeeting)
-                        TargetPlayerName = $"<size=0%>{TargetPlayerName}</size>";
 
                     //全てのテキストを合成します。
                     string TargetName = $"{TargetRoleText}{TargetPlayerName}{TargetDeathReason}{TargetMark}{TargetSuffix}";
@@ -1668,7 +1670,6 @@ public static class Utils
         foreach (var roleClass in CustomRoleManager.AllActiveRoles.Values)
             roleClass.AfterMeetingTasks();
 
-        Counselor.AfterMeetingTask();
         ChainShifterAddon.AfterMeetingTasks();
         VentEnterTask.AfterMeetingTasks();
 

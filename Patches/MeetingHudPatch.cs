@@ -489,7 +489,7 @@ public static class MeetingHudPatch
         if (!((player.Is(CustomRoles.SKMadmate) && Options.MadmateRevengeCrewmate.GetBool())
             || (player.Is(CustomRoles.NekoKabocha) && NekoKabocha.revengeOnExile)
             || (player.Is(CustomRoles.SchrodingerCat) && SchrodingerCat.RevengeOnExile)
-            || player.Is(CustomRoles.EvilNekomata) || player.Is(CustomRoles.Nekomata)
+            || player.Is(CustomRoles.Nekomata)
             || player.Is(CustomRoles.Immoralist) || player.Is(CustomRoles.Revenger))) return;
 
         var target = PickRevengeTarget(player, deathReason);

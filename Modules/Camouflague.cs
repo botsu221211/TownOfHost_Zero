@@ -62,8 +62,7 @@ public static class Camouflage
         {
             foreach (var pc in Main.AllPlayerControls)
             {
-                if (!pc.Is(Roles.Core.CustomRoles.Rainbow))
-                    RpcSetSkin(IsCamouflage, pc, CamouflageOutfit);
+                RpcSetSkin(IsCamouflage, pc, CamouflageOutfit);
 
                 // バニラのペットバグの対応
                 if (!IsCamouflage && !pc.IsAlive()) pc.RpcSetPet("");
@@ -73,7 +72,7 @@ public static class Camouflage
     }
     public static void RpcSetSkin(bool isCamouflage, PlayerControl target, NetworkedPlayerInfo.PlayerOutfit camouflageOutfit = null, bool ForceRevert = false, bool RevertToDefault = false)
     {
-        if (!(Options.CommsCamouflage.GetBool() || Roles.Core.CustomRoles.EvilDyer.IsEnable()) || Options.IsSyncColorMode) return;
+        if (!Options.CommsCamouflage.GetBool() || Options.IsSyncColorMode) return;
         if (target == null) return;
 
         var id = target.PlayerId;

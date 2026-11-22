@@ -54,28 +54,15 @@ Stealth	ステルス
 NekoKabocha	ネコカボチャ
 Penguin	ペンギン
 Insider	インサイダー
-EvilNekomata	イビル猫又
-AntiAdminer	アンチアドミナー
-CursedWolf	呪狼
 Greedier	グリーディア
-Ambitioner	アンビショナー
-Scavenger	スカベンジャー
-EvilDiviner	イビルディバイナー
-ShapeKiller	シェイプキラー
-StrayWolf	はぐれ狼
-EvilIgnition	イビルイグニッション
-Escalationer	エスカレーショナー
-EvilDyer	イビル真っ赤
 BestieWolf	ベスティーウルフ
 EvilGuesser	イビルゲッサー
 SelfBomber	自爆魔
-GrudgeCharger	グラージチャージャー
 Charger	チャージャー
-Chaser	チェイサー
 CharismaStar	カリスマスター
-EvilHacker	イビルハッカー
 Telekinetic	テレキネス
 Administer	アドミニスター
+Mimic	ミミック
 	
 CustomImpostorInfo	あんな能力も使えるようになりました
 EvilWatcherInfo	みんなの投票に目を光らせよう
@@ -98,29 +85,16 @@ StealthInfo	闇の世界で暗躍せよ
 NekoKabochaInfo	死なばもろとも
 PenguinInfo	ぺちぺち！
 InsiderInfo	知は力なり
-EvilNekomataInfo	誰かを道連れにしよう
-AntiAdminerInfo	アドミンなんて無くなればいい
-CursedWolfInfo	私を斬るなんて愚かだ
 GreedierInfo	さらにもう一回キルしよう
-AmbitionerInfo	やめられないとまらない
-ScavengerInfo	クルーを食べつくそう
-EvilDivinerInfo	役職を知って騙ろう
-ShapeKillerInfo	プレイヤーを偽装しよう
-StrayWolfInfo	仲間、、おるかな、、
-EvilIgnitionInfo	寄り添うものならば、私が着火します
-EscalationerInfo	キルする度に焦っていく
-EvilDyerInfo	皆を赤色に染めてやるんだ
 BestieWolfInfo	うちはサポートにまわります
 AfterBestieWolfInfo	仲間おらんなった、、なんで、、
 EvilGuesserInfo	推測して撃ち抜こう
 SelfBomberInfo	みんな死んじゃえ
-GrudgeChargerInfo	恨みが溜まり襲い掛かる
 ChargerInfo	力を一気に解放する、、今だ！
-ChaserInfo	地の果てまで追いかける…
 CharismaStarInfo	オレんとこ来ないか？
-EvilHackerInfo	アドミンを駆使しクルーをキルせよ
 TelekineticInfo	念力で殺せ
 AdministerInfo	最終位置を監視し優位に付け
+MimicInfo	君にならないと生きていけない...
 	
 CustomImpostorInfoLong	ホストが設定した属性を持つインポスター。
 EvilWatcherInfoLong	船員全員が誰に投票したかの情報を得る。
@@ -141,40 +115,25 @@ StealthInfoLong	自身がキルする時、少しの間同じ部屋にいる他�
 NekoKabochaInfoLong	自身が誰かにキルされた時、自身をキルした相手をキルし返す。
 PenguinInfoLong	キルボタン一回で相手を拘束して連れまわすことが出来る。\nもう一度キルボタンを押すか一定時間経過でキルする。\nキルボタン2回で直接キル可能。
 InsiderInfoLong	自身がキルした時、キルした相手の役職が何か情報を得る。
-EvilNekomataInfoLong	自身が追放された時、ランダムな1人を道連れにする。 \n道連れの対象に他のインポスターは含まれない。
-AntiAdminerInfoLong	アドミン・カメラ・バイタル等、各種機器の前に人がいるかの情報を得る。機器を使用しているかは判別できない。 \nファングルの望遠鏡は検知できない。
-CursedWolfInfoLong	自身がキルされそうになった時、キルをガードし、はね返して呪殺する。
 GreedierInfoLong	1ターンの間、自身がキルした回数によってキルクールが変わる。奇数回、偶数回、会議終了後のキルクールがそれぞれ設定により異なる。
-AmbitionerInfoLong	1ターンの間、自身がキルした回数によってキルクールが変わる。キルするごとに設定した減少率ぶん、キルクールが短くなる。
-ScavengerInfoLong	自身がキルする時、死体をレポートができない状態にする。
-EvilDivinerInfoLong	キルボタンのダブルクリックシステムを使用する。\n[シングルクリック]：相手の役職を占う。役職は自身のみに公開され、相手の名前の上に表示される。キル不可。キルクールはリセットされる。\n[ダブルクリック]：相手をキルする。\n占い可能回数が0の時、ダブルクリックシステムは無効になり、通常通り相手をキルする。
-ShapeKillerInfoLong	自身が変身した状態で死体を通報すると、変身した対象の通報として会議が開かれる。
-StrayWolfInfoLong	他のインポスター(仲間)が分からない。仲間からも自身がインポスター・はぐれ狼であることが分からない。\n\n【仲間斬り合い設定】 \n・常時：仲間がキル対象・仲間から自身がキル対象でも、キルが発生する。仲間と内通できない。\n・内通後：仲間がキル対象・仲間から自身がキル対象なら、キルを一度ガードし互いに内通する。ただしその後も斬り合える。\n・なし：仲間がキル対象・仲間から自身がキル対象なら、キルをガードし互いに内通する。その後、仲間は互いにキルできない。
-EvilIgnitionInfoLong	キルボタンのダブルクリックシステムを使用する。\n[シングルクリック]：相手をキルし、着火する。相手の近くに誰かがいるなら、さらにその一番近い1人は爆死する。\n[ダブルクリック]：相手をキルする。\n着火可能回数が0の時、ダブルクリックシステムは無効になり、通常通り相手をキルする。
-EscalationerInfoLong	自身が誰かをキルすると、船員全員の移動速度が速くなる。さらに、キルする度に自身のキルクールが短くなる。
 BestieWolfInfoLong	他のインポスター(仲間)が生存しているなら、自身がキルする度に仲間へバフ属性を付与する。ただし、付与は最大5つまで。\n自身が最後のインポスターなら、キルする相手の近くに誰かがいる時、さらに一番近い1人を同時にキルする。ただし、同時キルが起こると船員全員にフラッシュで通知される。
 EvilGuesserInfoLong	会議の間、他の船員の役職を推測し、的中すると相手を射殺する。推測を外したなら自爆する。
 SelfBomberInfoLong	自身の周囲にいる船員を巻き込んで自爆することができる。\n自爆により生存者が誰もいなくなったなら、相討ちとならずインポスター勝利となる。
-GrudgeChargerInfoLong	自身で選んだターゲットに近づくと自動でその相手をキルする。同じターンで2人目以降のターゲット選択は、クールダウン無しで選んでキルできる。\nターゲットは次のターンになるか、キルをするまで変更できない。\nキル可能回数はゲージをチャージして溜めなければならない。\n\n[キルボタン]：ゲージをチャージする。キル不可。\n[変身ボタン]：対象選択でターゲットを選ぶ。変身不可。
-ChaserInfoLong	近くに移動したいターゲットを選ぶと、その相手に一番近いベントへワープし飛び出す。ワープと同時にそのベントは開閉する。\n\n[変身ボタン]：対象選択でターゲットを選ぶ。変身不可。
 ChargerInfoLong	キル可能回数をゲージチャージで溜めてキルをする。同じターンで2人目以降のキルは、クールダウン無しでキルできる。\nターゲットは次のターンになるか、キルをするまで変更できない。\n\n[キルボタン]：ゲージをチャージする。キル不可。\n[消えるボタン]：相手をキルする。透明化不可。
 CharismaStarInfoLong	自身から一番近いベントを集合地点として、船員をワープさせることができる。集合メンバーは複数人設定できる。 \n集合をかけた時に昇降機やはしごを使用しているメンバーは、集合を無視する。\n(全員を一度に集合できる)がオンの時、全員を集合対象にしたいなら、誰もメンバーに選んでいない状態で集合をかける。\n\n[消えるボタン]：集合をかける。透明化不可。\nキルボタンのダブルクリックシステムを使用する。\n[シングルクリック]：相手を集合メンバーにする。キル不可。\n[ダブルクリック]：相手をキルする。\n集合可能回数が0の時、ダブルクリックシステムは無効になり、通常通り相手をキルする。
-EvilHackerInfoLong	[インポスター陣営]\nアドミンが見れるインポスター。消えるボタンでアドミン前へワープし、手動でアドミンボタンを押すことで見ることが出来る。アドミン前へワープした時、アドミン前に立っている姿は他の人から見えないが、元の位置からも姿は消える。なお、約3秒後に元の位置へ戻る。戻った先でもアドミンを見続けることが出来るが、見ている最中は動けない。
 TelekineticInfoLong	自身がキルする時、キルモーションなしで相手をキルする。
 AdministerInfoLong	会議が開かれる度、生存している船員全員が会議の始まる直前にどの部屋にいたかの情報を得る。\n通路にいる場合は「@通路」、部屋と部屋の間にいる場合などは「@追跡不可」との表示になる。
+MimicInfoLong	(インポスター陣営):\nシェイプしている間は自殺クールが1秒ごとに1ずつ上昇し(上限あり)、シェイプしていない間は1秒ごとに1ずつ減少する。\n自殺クールが0になると自殺してしまう。\n自殺クールは名前の横に表示され、会議をまたいで持ち越される。\n【死因：自殺】
 	
 # マッド役職	
 	
 Madmate	マッドメイト
 MadGuardian	マッドガーディアン
 MadSnitch	マッドスニッチ
-MadSheriff	マッドシェリフ
 MadDictator	マッドディクテーター
-MadNatureCalls	マッドネイチャコール
 MadBrackOuter	マッドブラックアウター
 MadNimrod	マッドニムロッド
 MadScientist	マッド科学者
-MadJester	マッドジェスター
 MadGuesser	マッドゲッサー
 MadConnecter	マッドコネクター
 SKMadmate	サイドキックマッドメイト
@@ -183,13 +142,10 @@ MadmateInfo	インポスターの援助をしよう
 BeforeMadmateInfo	タスクを済ませろ
 MadGuardianInfo	タスクを済ませ、キルを防げ
 MadSnitchInfo	タスクを済ませ、インポスターと内通せよ
-MadSheriffInfo	自爆により混乱させろ
 MadDictatorInfo	独裁者となり道連れせよ
-MadNatureCallsInfo	ベントでトイレのドアが開く
 MadBrackOuterInfo	ベント開閉で停電を起こせ
 MadNimrodInfo	誰か選んで道連れせよ
 MadScientistInfo	バイタルを見ながら援助しろ
-MadJesterInfo	追放されて勝利せよ
 MadGuesserInfo	推測して撃ち抜こう
 MadConnecterInfo	インポスターと内通し合え
 SKMadmateInfo	あなたはマッドに任命された
@@ -197,13 +153,10 @@ SKMadmateInfo	あなたはマッドに任命された
 MadmateInfoLong	(インポスター陣営):\nクルーだがインポスターの味方をする。\nインポスターと互いに認識できない。\nベントが使え、タスクはない。
 MadGuardianInfoLong	(インポスター陣営):\nクルーだがインポスターの味方をする。\nインポスターと互いに認識できない。\nタスクを全て完了させるとｼｰﾙﾄﾞが付与される。
 MadSnitchInfoLong	(インポスター陣営):\nクルーだがインポスターの味方をする。\nインポスターと互いに認識できないが、タスクを全て完了させるとマッドスニッチからインポスターを認識できるようになる。
-MadSheriffInfoLong	[インポスター陣営]\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\n相手がどの陣営に関わらず、誰をキルしようとしても必ず自爆する。
 MadDictatorInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\n会議中に誰かに投票をすると、会議を強制終了させて投票先を吊る事ができる。投票したタイミングで自身も死ぬ。
-MadNatureCallsInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。ベントが使え、タスクはない。\nエアシップの時のみ効果を発動する。ベントに入る度ラウンジトイレのドアが4つ同時に開く。
 MadBrackOuterInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。ベントが使え、タスクはない。\nベントに入ることで停電を起こすことが出来る（ベントクールダウンを長めに設定するべし）。自身が起こした停電中にもう一回ベントに入ると停電は解除される。インポスターが起こしたサボには重ねることが可能（コミュサボ中はそもそもベント入れないが）。
 MadNimrodInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\n自身が追放された時、再びニムロッド投票用の会議が開かれる。ここでは追放されたらニムロッド以外は議論するべからず。1人を投票で選択して道連れ処刑することができる。
 MadScientistInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\nバイタルを持つ。
-MadJesterInfoLong	[インポスター陣営]:\nクルーだがインポスターの味方をする。インポスターと互いに認識できない。タスクはない。\n自身が追放されると、その時点でインポスター陣営の勝利になる。
 MadGuesserInfoLong	(インポスター陣営):\n会議中に他のプレイヤーの役職を当てる事でそのプレイヤーを死亡(死因:射殺)させることができる。\nなお役職の推測をミスした場合、自身が死亡(死因:誤爆)する。
 MadConnecterInfoLong	[インポスター陣営]\nクルーだがインポスターの味方をする。\nはじめインポスターと互いに認識できないが、特殊タスクを完了させることでインポスターが誰か認識できる。認識後、インポスターにキルボタンを押すことでインポスター側はマッドコネクターを認識でき、お互いの位置が矢印で表示されるようになる。\nタスクは専用タスクで、表示される場所のベントに入ることで完了できる。(ただし、他視点でもベント開閉は確認できる。)\n設定により、タスク数に応じてインポスターの配役を確認できたり、死体への矢印が表示されるようになる。
 SKMadmateInfoLong	(インポスター陣営):\n変身した際に一番近かった人がなれる役職。タスクはない。
@@ -229,15 +182,11 @@ Bakery	パン屋
 NBakery	(第三)覚醒パン屋
 Nekomata	猫又
 Express	エクスプレス
-SeeingOff	見送り人
-Hunter	ハンター
 Chairman	チェアマン
 TaskManager	タスクマネージャー
-Rainbow	<color=#ffff00>★</color><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><color=#ffff00>★</color>
 RainbowResize	<size=8><color=#ffff00>★</color></size><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><size=8><color=#ffff00>★</color></size>
 SillySheriff	バカシェリフ
 Sympathizer	共鳴者
-Blinder	ブラインダー
 Medic	メディック
 GrudgeSheriff	グラージシェリフ
 CandleLighter	キャンドルライター
@@ -245,11 +194,9 @@ FortuneTeller	占い師
 Psychic	霊媒師
 Nimrod	ニムロッド
 Detector	ディテクター
-LoyalDoggy	ロイヤルドギー
 Rabbit	ラビット
 VentManager	ベントマネージャー
 NiceGuesser	ナイスゲッサー
-Elder	長老
 	
 CustomCrewmateInfo	あんな能力も使えるようになりました
 NiceWatcherInfo	みんなの投票に目を光らせよう
@@ -267,16 +214,12 @@ SeerInfo	他人の死んだ瞬間がわかる
 TimeManagerInfo	タスクをして会議時間を延ばそう
 BakeryInfo	みんなにパンを届けよう
 NBakeryInfo	みんなに【毒入り】パンを届けよう
-HunterInfo	怪しい人を斬ろう
 TaskManagerInfo	タスクの数を見張ろう
-RainbowInfo	<color=#ff0000>あ</color><color=#ffa500>な</color><color=#ffff00>た</color><color=#00ff00>は</color><color=#00ffff>ま</color><color=#0000ff>ぶ</color><color=#800080>し</color><color=#ff0000>い</color><color=#ffa500>存</color><color=#ffff00>在</color>
 NekomataInfo	人外まで道連れしたい
 ExpressInfo	気持ちよく駆け回ろう
-SeeingOffInfo	あなたの最期を見送ってあげる
 ChairmanInfo	会議開閉を操ろう
 SillySheriffInfo	ごめん、ちょっと調子悪いみたい
 SympathizerInfo	ふたりで白をとり合おう
-BlinderInfo	私をキルしてもいいんだよ?
 MedicInfo	あなただけは斬られてほしくないんだ
 GrudgeSheriffInfo	私には恨まれないようにしてくれ
 CandleLighterInfo	ろうが無くなるまでには、、
@@ -284,11 +227,9 @@ FortuneTellerInfo	役職を占おう
 PsychicInfo	貴方の能力を使いたかった
 NimrodInfo	あなたと共に霊界へ向かおう
 DetectorInfo	死体は私が見つけます
-LoyalDoggyInfo	調子はどうですか？ご主人様！
 RabbitInfo	耳がいいので探知できるんだ
 VentManagerInfo	ベント、ベント、ベント！
 NiceGuesserInfo	推測して撃ち抜こう
-ElderInfo	まだ若者には負けんわい
 NormalDetectiveInfo	情報収集。殺人事件解決。
 NormalJudgeInfo	会議で裁きを下そう。
 	
@@ -308,16 +249,12 @@ SeerInfoLong	(クルー陣営):\nプレイヤーが死亡するごとに、シ�
 TimeManagerInfoLong	(クルー陣営):\nタスクを終わらせるごとに会議時間が延びる。死亡すると会議時間は元に戻る。
 BakeryInfoLong	[クルー陣営]\n生存中、会議はじめにパン屋についてのコメントが流れる。レアコメントあり。\n低確率(設定)で試合途中、第三陣営に変化する。
 NBakeryInfoLong	[ニュートラル]\n覚醒して第三陣営になった。\n人殺しに目覚め、食べると死亡するパンを開発した。覚醒パン屋が生存中、会議を挟む毎にランダムなプレイヤーに毒入りパンを提供する。そのプレイヤーはパン屋をそのターンに追放しない限り、会議終了時に死亡する。\n覚醒パン屋はパン配布で人数を減らしていき、インポスターorクルーの人数での勝利条件が満たされた時、生存していると単独勝利する。
-HunterInfoLong	[クルー陣営]\n誰に向かってでもキルできる。()内回数キル可能。あくまでクルー陣営なのでタイミングは考えよう。タスクはもっていない。\n「キルした時敵陣営かどうかわかる」設定がオンの時、インポスターをキルした時、自身の名前に◎が付く。第三陣営をキルした時、自身の名前に▽が付く。
 TaskManagerInfoLong	(タスクマネージャー)[クルー陣営]\n全員の合計タスク完了数が分かる(役職名横()にて)。
-RainbowInfoLong	[クルー陣営]\n自分の役職名がカラフル。また、自分の体の色が1秒ごとに変わる。自分の全員から自分がにじいろスターだということが分かる。
 NekomataInfoLong	[クルー陣営]\n自身が吊られた際、ランダムな1人を道連れにする。
 ExpressInfoLong	[クルー陣営]\nただ足が速い。
-SeeingOffInfoLong	[クルー陣営]\n追放した人がインポスターかそうでないかがわかる。
 ChairmanInfoLong	[クルー陣営]\n・ベントに入ると会議が開ける。サボタージュ中はベントに入っても会議を開けない。\n通常ボタン回数と同時に消費する。(通常ボタン回数1回の時、先にベントボタンを使うと、通常ボタンは使えなくなる。)\n・誰かに投票することでその会議を即中断できる(追放は起こらずスキップ扱い)。\nスキップ・自投票以外の普通の投票は出来ず、能力を発動してしまう。
 SillySheriffInfoLong	[クルー陣営]\n普通のシェリフとはちょっと違うバカなシェリフ。正しく陣営を認識できない時、人外に向かって自爆したりクルーをキルする時がある
 SympathizerInfoLong	[クルー陣営]\n共鳴者は必ず2人でしか設定できない。\n設定タスク数まで完了させると自身にしか見えない◎がつく。2人ともタスクが互いに設定数を超えた時、相手にも◎が付きもう1人の共鳴者が誰か分かる。
-BlinderInfoLong	[クルー陣営]\n独立した視野を持つクルー。\nキルしてきた人の視野をブラインダー自身の視野と同じにさせる。キルした人は元設定に関わらず停電の影響を受けるようになる。
 MedicInfoLong	[クルー陣営]\n自身以外の誰か1人に1回、キルを防ぐシールドを付与することが出来る。タスクターン中、ベントに出入りすることで付与するプレイヤーを指定できる。\nシールドが張られた側はシールド付与、キルガード共に確認できない。メディック側はシールドを付与するとそのプレイヤーにマークが付き、シールドがキルにより?がされるとそのマークは消える。
 GrudgeSheriffInfoLong	[クルー陣営]\nベントでキルしたいプレイヤーを選択する。その人に近づいた時、クルー陣営でなければキルすることができる。\nその人がクルー等グラージシェリフがキルできない役職であった場合、近づいた時に自殺する。
 CandleLighterInfoLong	[クルー陣営]\n視界がろうそくのようにだんだんと小さく狭くなっていく。しかし他人と違いろうそくで周りを灯している為、停電の影響は受けない。\nタスクを全て完了させると新たに一本ろうそくが供給され、一番明るい状態に点け直すことができる。
@@ -325,11 +262,9 @@ FortuneTellerInfoLong	(クルーメイト陣営):\n占うことで、他のプ�
 PsychicInfoLong	[クルー陣営]\n死亡した人をベントで選択して役職を確認することができる。
 NimrodInfoLong	[クルー陣営]\n自身が追放された時、再びニムロッド投票用の会議が開かれる。ここでは追放されたらニムロッド以外は議論するべからず。1人を投票で選択して道連れ処刑することができる。
 DetectorInfoLong	[クルー陣営]\n設定タスク量を完了すると、死体が生まれた際にキルフラッシュが見えると共に死体の場所への矢印が表示されるようになる。
-LoyalDoggyInfoLong	[クルー陣営]\n一番初めの会議で1人好きな人に投票して、ご主人として指名する。(票は表示されない)\nその人の場所を嗅覚により探知できる。ご主人がキルされた時、ご主人への矢印はなくなる。設定により、ご主人の死亡後はタスクが無くなる。
 RabbitInfoLong	[クルー陣営]\n設定タスク完了すると、タスクを1つ完了させる毎にその時のランダムな1インポスターがどの方向にいるかが矢印で5秒間表示される。\nタスク全完了後もカウントされないタスクが発生し、完了するごとに能力を使用できる。
 VentManagerInfoLong	[クルー陣営]\nベントを掃除しよう。ただそれだけ。
 NiceGuesserInfoLong	(クルー陣営):\n会議中に他のプレイヤーの役職を当てる事でそのプレイヤーを死亡(死因:射殺)させることができる。\nなお役職の推測をミスした場合、自身が死亡(死因:誤爆)する。
-ElderInfoLong	[クルー陣営]\nタスクを完了するまで一度だけキルを防ぐことができる。タスクが全て完了する前に自身が死亡すると、クルー陣営全員の役職が通常クルーメイトに変更される。\n自身のタスクを全て完了してからキルされると、キルした人に反撃し道連れに出来る。\n設定により、老衰により寿命で唐突に死亡する。
 	
 # ニュートラル役職	
 	
@@ -348,13 +283,10 @@ Egoist	エゴイスト
 Jackal	ジャッカル
 JClient	クライアント
 JSidekick	サイドキック
-AntiComplete	アンチコンプリート
 Workaholic	ワーカホリック
 DarkHide	ダークハイド
 LoveCutter	ラブカッター
 PlatonicLover	純愛者
-Lawyer	弁護士
-Pursuer	追跡者
 Totocalcio	トトカルチョ
 Duelist	決闘者
 God	神
@@ -364,7 +296,6 @@ Ogre	鬼
 Pirate	海賊
 Gang	一味
 ChainShifter	チェインシフター
-Vendetta	ヴェンデッタ
 	
 ArsonistInfo	燃やせ
 JesterInfo	追放されよう
@@ -383,13 +314,10 @@ EgoistInfo	インポスター勝利を独占しよう
 JackalInfo	すべてを殺せ
 JClientInfo	タスクを済ませ、ジャッカルの援助をしよう
 JSidekickInfo	ジャッカルの相棒
-AntiCompleteInfo	仕事出来るやつが嫌いだ
 WorkaholicInfo	仕事してないと生きてられない
 DarkHideInfo	キルして停電を起こそう
 LoveCutterInfo	誰か私をキルしてほしいの
 PlatonicLoverInfo	出会った恋人と共に勝ち抜くのだ
-LawyerInfo	依頼人の為に私、動きます
-PursuerInfo	依頼人いなくなっちゃった
 TotocalcioInfo	私の勝利は貴方に任せる
 DuelistInfo	貴方は因縁の相手、いざ勝負！
 GodInfo	あなたは神だ
@@ -399,7 +327,6 @@ OgreInfo	金棒を持たせたな？
 PirateInfo	海賊団船長とはこの私だ
 GangInfo	一味として船長を勝たせるんだ
 ChainShifterInfo	あなたは負けよっ！
-VendettaInfo	あいつに怨念があんねん
 	
 ArsonistInfoLong	(ニュートラル):\nキルボタンを使おうとすると、ターゲットに油を塗れる。\nすべてのクルーに油を塗ったら船を燃やして勝利する。
 JesterInfoLong	(ニュートラル):\n会議で追放された時に単独勝利できる。\n追放されず試合が終了orキルされると敗北。
@@ -412,13 +339,10 @@ EgoistInfoLong	(ニュートラル):\n味方がすべて死んだ状態でイン
 JackalInfoLong	(ジャッカル陣営):\nジャッカルはすべてのプレイヤーを殺すことができる。\nインポスターが残っておらず、生き残っているジャッカルの人数がクルーと同じかそれ以上でジャッカルが勝利する。\nサイドキックが作れる設定がONの時、シングルクリックでサイドキック作成、ダブルクリックで通常キルとなる。サイドキック作成後は通常のキルボタンの制御に戻る。
 JClientInfoLong	(ジャッカル陣営):\nクルーだがジャッカルの味方をする。\nジャッカルと互いに認識できないが、タスクを全て完了させるとジャッカルを認識できるようになる。
 JSidekickInfoLong	(ジャッカル陣営):\nジャッカルの相棒として行動する。\nジャッカルが死ぬと、ジャッカルに代わってキルができるようになる。
-AntiCompleteInfoLong	[ニュートラル]\n会議中、全体で1回のみ好きな人を投票で選択出来る。その人がタスクを既に完了させていたら単独勝利。タスクがない人、タスクが終わってない人を選ぶと死亡し敗北。\nアンチコンプが誰か選択した時、会議は強制終了する。
 WorkaholicInfoLong	[ニュートラル]\nタスクを完了させた時、単独勝利。タスク量はとても多い。死亡しても関係なく、タスクが終わると勝利。霊界からでも終わらそう。ベント可。
 DarkHideInfoLong	[ニュートラル]\n誰でも切れる。ベント不可。キルを起こす度に停電が起こる。(既に停電の場合はそのまま)。\n・自身生存時にインポスター陣営が勝利した時\n・自身生存時にインポスター(設定:+斬れる第三陣営)を1人以上斬ってクルー陣営が勝利(タスク勝利除く)した時\n上書きして単独勝利となる。
 LoveCutterInfoLong	[ニュートラル]\nラブカッターがキルされた時、キルをガードしてカウントする。設定回数誰かにキルされたら単独勝利。
 PlatonicLoverInfoLong	[ニュートラル]\n誰かに向かってキルボタンを押すことで、その人とラバーズになることが出来る。(設定時、ラバーズと同時に入れることは出来ない。)
-LawyerInfoLong	[ニュートラル]\n弁護士は、依頼人となるインポスターorキル可能な第3陣営を擁護する。\n依頼人が死亡すると弁護士は役職が変更されて「追跡者(自身が生存していれば追加勝利 + 設定回数キルを防ぐ)」 になる。弁護士、追跡者共にタスクはもたない。\n\n弁護士の勝利条件は以下の2通り。\n依頼人が生存時に勝利した時、\n1) 弁護士が死亡していたら、その優勝チームと共に勝利。\n2) 弁護士が生存していたら、優勝チームの勝利を横取り(弁護士の単独勝利)。
-PursuerInfoLong	[ニュートラル]\n依頼人が死亡したので弁護士は追跡者になった。\n自身がゲーム終了時に生存していれば追加で勝利となる。また、設定回数分キルを防ぐことが可能。
 TotocalcioInfoLong	[ニュートラル]\nキルボタンを使用して、誰かに「賭ける」ことが可能。賭けた対象プレイヤーが勝利すると、無条件で自身も追加で勝利できる。\n「賭ける」先は設定により途中で変更することも可能。ただし生存人数が減るごとに「賭ける」クールタイムが長くなる。
 DuelistInfoLong	[ニュートラル]\n初手会議に投票した相手を自身の宿敵にする。初手会議の投票時、決闘者の投票先は全視点見えない。初手会議で宿敵を決定しないと自殺する。\n宿敵決定後、宿敵目線でも決闘者が誰か表示され、決闘者・宿敵の勝利条件は「勝利判定時に自身が生存、且つ宿敵(決闘者)が死亡で追加勝利」となる。
 GodInfoLong	(ニュートラル):\n全員の役職がわかります。\n最後まで生き残っていると、勝利を奪い取ります。\n神はすべてのサボタージュが直せません。
@@ -428,45 +352,23 @@ OgreInfoLong	[ニュートラル]:\nゲーム決着時に、インポスター�
 PirateInfoLong	[ニュートラル]\nはじめに誰かキルする。そのキルされた人は死亡するが、海賊の一味となり勝利条件が「海賊の勝利」に変化する。\n一味はタスクを持ち、一味のタスク完了度により海賊の能力が拡大する。\nインポスターの全滅かつ、海賊の数がクルーと同数または上回ると単独で勝利する。\n[一味のタスクによる海賊の能力]\n25%完了：ベント使用可能\n50%完了：キル可能\n75%完了：バフ属性の付与\n100%完了：インポスターが誰か分かる
 GangInfoLong	[ニュートラル]\n海賊の勝利を目指そう。一味のタスク完了度により海賊の能力が拡大する。\n[タスク]\n25%完了：ベント使用可能\n50%完了：キル可能\n75%完了：バフ属性の付与\n100%完了：インポスターが誰か分かる
 ChainShifterInfoLong	[ニュートラル]\nチェインシフターでゲームを終了すると負けになる役職。\nチェインシフターは他のクルーの近くにしばらくいることで相手に移すことができる。\nチェインシフターを移した後に変化した役職で勝利できる。
-VendettaInfoLong	[ニュートラル]\n自身が生存していてかつ自身で選択した対象が死亡した状態でいずれかの陣営が勝利した時、追加勝利できる。\n初ターン以外で任意のプレイヤーをキルできる。ただし、キルはターン中に1回のみ。\n対象は初手会議に相手に投票して指定する。初手会議の投票時、ヴェンデッタの投票先は全視点で見えない。初手会議で対象を決定しないと自殺する。\n設定により、自身が対象をキルしていないと勝利できないようにできる。
 	
 # ユニット役職	
 	
 Telepathisters	テレパシスターズ
-CounselorAndMadDilemma	<color=#ffc0cb>カウンセラー</color>＆<color=#ff1919>マッドジレンマ</color>
-Counselor	カウンセラー
-MadDilemma	マッドジレンマ
 GodfatherAndJanitor	<color=#ff1919>ゴッドファーザー</color>＆<color=#ff1919>ジャニター</color>
 Godfather	ゴッドファーザー
 Janitor	ジャニター
-JackOLantern	ジャック・オー・ランタン
-Jack	ジャック
-jO	オー(マッド)
-Lantern	ランタン
 	
 TelepathistersInfo	以心伝心でキルしよう
-CounselorAndMadDilemmaInfo	改心させろ/インポスターを援助しろ
-CounselorInfo	そろそろ改心しませんか？
-MadDilemmaInfo	私はインポスターを助けるんだ、、！
 GodfatherAndJanitorInfo	連携して証拠を隠蔽しろ
 GodfatherInfo	連携して証拠を隠蔽させろ
 JanitorInfo	連携して証拠を隠蔽しろ
-JackOLanternInfo	ハッピー・ハロウィン！
-JackInfo	役職を奪い、復活させるな
-jOInfo	役職を検知し、ジャックに送信せよ
-LanternInfo	死者から役職を受け取れ
 	
 TelepathistersInfoLong	"複数人(2,3人)で設定する。\n他のテレパシスターズの位置が矢印8方向で分かる。テレパシスターズのベントに入れる回数は全員で共有され、設定数までしか使用できない。"
-CounselorAndMadDilemmaInfoLong	[ユニット]\n\nカウンセラー[クルー陣営]\nカウンセラーが生存している且つ、一定タスク完了した時からカウンセリングを行うことが可能。\n会議時にカウンセラーの投票した先がマッドジレンマの時、マッドジレンマをクルー陣営にさせることができる。\n\nマッドジレンマ[インポスター陣営]\nユニット役職用のただのマッドメイト。属性のカスタマイズ可能。\nカウンセラーによりカウンセリングを受けるとクルーメイトになる。クルーになっても属性はそのまま使用出来る。
-CounselorInfoLong	[クルー陣営]\nユニット役職の片割れ。カウンセラーが生存している且つ、一定タスク完了した時からカウンセリングを行うことが可能。\n会議時にカウンセラーの投票した先がマッドジレンマの時、マッドジレンマをクルー陣営にさせることができる。
-MadDilemmaInfoLong	[インポスター陣営]\nユニット役職の片割れ。ただのマッドメイト。属性のカスタマイズ可能。\nカウンセラーによりカウンセリングを受けるとクルーメイトになる。クルーになっても属性はそのまま使用出来る。
 GodfatherAndJanitorInfoLong	[インポスター陣営]\n二人で協力することで死体なしでキルが出来るインポスターユニット。ゴッドファーザーの能力は基本通常インポスターと変わらないが、ジャニターは通常キルが出来ない掃除専門役職。\nゴッドファーザーがジャニターの近くで誰かをキルしようとすると、その対象プレイヤーはジャニターへのターゲットとなり足止めされる。ターゲットに向かってジャニターがキルボタンを押すと、対象者は死体なしで死亡する。なお、ジャニターが死体を消せなかった場合、ターゲットは会議開始の直前で死亡する。\nゴッドファーザー死亡後、ジャニターのキル能力が解放されるか設定可能。オフの場合、ゴッドファーザー死亡時にジャニターは後追い自殺する。
 GodfatherInfoLong	[インポスター陣営]\nジャニターに対象を掃除してもらうことができるインポスター。\n基本は通常インポスターと同様の能力。自身がジャニターの近くで誰かをキルしようとすると、その対象プレイヤーはジャニターへのターゲットとなり足止めされる。さらにその対象をジャニターがキルすることで死体なしでキルすることができる。
 JanitorInfoLong	[インポスター陣営]\n死体を作らず証拠隠滅できるインポスター。通常キルは出来ない掃除専門役職。\nゴッドファーザーがジャニターの近くで誰かをキルしようとすると、その対象プレイヤーはジャニターへのターゲットとなり足止めされる。ターゲットに向かってジャニターがキルボタンを押すと、対象者は死体なしで死亡する。\nゴッドファーザー死亡後、キル能力が解放されるか設定可能。オフの場合、ゴッドファーザー死亡時にジャニターは後追い自殺する。
-JackOLanternInfoLong	[ユニット]\nハロウィン限定の3人に割り当てられる役職。\n\nジャック[インポスター陣営]\nダブルクリックを使い分ける。シングルクリックで能力キルを起こし、キルすると同時に対象がクルー陣営なら役職を素のクルーにする(回数制限有り)。ダブルクリックでは通常キル。\nオーから他人の役職情報を受け取った時、リアクターフラッシュによる通知が来る。\n\nオー(マッド)[インポスター陣営]\nクルーだがインポスターの味方をする。オーはジャックを含めたインポスターと内通している状態で開始する。インポスターにキルされることがない。\nキルボタンを使用すると、対象の役職を知ることが出来る(キル無し、無制限)。シェイプボタンで既に役職を知っている中から対象を選択すると、ジャックに対象の人の役職を知らせることが出来る(変身無し、回数制限有り)。\n\nランタン[クルー陣営]\n自身の停電視界が緩和される。また、オーへのランタン役職透けが起こらない。タスク全完了時、死亡しているクルー陣営からランダムな役職を受け取ることが出来る。その後ランタンの能力は失う。
-JackInfoLong	[インポスター陣営]\nダブルクリックを使い分ける。シングルクリックで能力キルを起こし、キルすると同時に対象がクルー陣営なら役職を素のクルーにする(回数制限有り)。ダブルクリックでは通常キル。\nオーから他人の役職情報を受け取った時、リアクターフラッシュによる通知が来る。
-jOInfoLong	[インポスター陣営]\nクルーだがインポスターの味方をする。オーはジャックを含めたインポスターと内通している状態で開始する。インポスターにキルされることがない。\nキルボタンを使用すると、対象の役職を知ることが出来る(キル無し、無制限)。シェイプボタンで既に役職を知っている中から対象を選択すると、ジャックに対象の人の役職を知らせることが出来る(変身無し、回数制限有り)。
-LanternInfoLong	[クルー陣営]\n自身の停電視界が緩和される。また、オーへのランタン役職透けが起こらない。タスク全完了時、死亡しているクルー陣営からランダムな役職を受け取ることが出来る。その後ランタンの能力は失う。
 	
 # その他役職	
 	
@@ -477,11 +379,8 @@ GMInfo	霊界から見守ろう
 GMInfoLong	(なし):\nGM(ゲームマスター)はオブザーバー役職である。\nGMはゲーム自体には何の影響も与えず、すべてのプレイヤーは誰がGMであるかがわかる。必ずホストに割り当てられ、始めから幽霊状態になっている。
 	
 Head.LimitedTimeRole	期間限定役職 12/19～12/25
-Potentialist	ポテンシャリスト
 PotentialistName	ポテンシャリスト</color>…初めはクルー。\n  設定タスク完了でランダムな能力を持つ。
 PotentialistHedderInfo	初めはクルー。設定タスク完了でランダムな能力を持つ。
-PotentialistInfo	タスクを行う
-PotentialistInfoLong	[クルー陣営]\n初めはクルーとして表示されるためポテンシャリストの自覚はありませんが、設定タスク数完了させると能力が開花して新たなクルー役職を手に入れられます。\n設定により、マッド系役職やニュートラル役職にも変化します。
 poTask	能力開花するタスク数
 poMad	マッド系役職に変化する可能性がある
 poNeutral	ニュートラル役職に変化する可能性がある
@@ -490,14 +389,12 @@ poNeutral	ニュートラル役職に変化する可能性がある
 	
 Lovers	ラバーズ
 LastImpostor	ラストインポスター
-CompleteCrew	コンプリートクルー
 Workhorse	ワークホース
 AddWatch	ウォッチング
 AddLight	ライティング
 Sunglasses	サングラス
 AddSeer	シーイング
 Autopsy	オートプシー
-VIP	VIP
 Clumsy	クラムシー
 Revenger	リベンジャー
 Management	マネジメント
@@ -533,14 +430,12 @@ RefusingInfo1	追放されそうになった時、一度追放を拒む
 RevealerInfo1	追放された時自身の役職を公開する
 LoversInfo	恋人と生きて幸せを掴もう
 LastImpostorInfo	残ったのはあなただけ
-CompleteCrewInfo	これで私は完璧な存在に、、
 WorkhorseInfo	タスクはまだ終わらない
 AddWatchInfo	みんなの投票に目を光らせよう
 AddLightInfo	すべてを照らそう
 SunglassesInfo	まぶしいのは嫌いなんだ
 AddSeerInfo	他人の死んだ瞬間を感知しよう
 AutopsyInfo	斯くして奴は死んだ
-VIPInfo	私を必死に守りなさい
 ClumsyInfo	ごめんなさい、私不器用なの
 RevengerInfo	私を追放するなんて考えられない
 ManagementInfo	タスクの数を見張ろう
@@ -557,14 +452,12 @@ RevealerInfo	これだけは伝えて私は去る
 	
 LastImpostorInfoLong	(属性):\n最後のインポスターに付与される属性。\nキルクールが設定した時間まで短くなったり、設定された属性が付与される。
 LoversInfoLong	(ニュートラル):\n全プレイヤーの中からランダムで2人に他の役職と重複して配役されるニュートラル。\n恋人が2人とも生き残っている状態で試合終了すれば勝利。\n恋人の片方が死んだときにもう片方も死ぬ。クルーのタスクが完了すると敗北。
-CompleteCrewInfoLong	[属性]:\nタスクを全て完了させた人に、早い順に設定人数分まで付与される。\n設定された属性を持つようになる。
 WorkhorseInfoLong	(属性):\n最初に生きてタスクを終えたクルーに付与される属性。\n追加タスクが割り当てられる。\nクルーメイト以外にも割り当てる設定でもタスクが無い、タスク完了で能力が発動する役職には付与されない。
 AddWatchInfoLong	(属性):\n全員の投票先を見ることができる。
 AddLightInfoLong	[属性]:\n設定倍率分、視界が広くなる。設定で停電での視界の狭さを無効化できる。
 SunglassesInfoLong	[属性]:\n設定倍率分、視界が狭くなる。
 AddSeerInfoLong	[属性]:\nプレイヤーが死亡するごとに、キルフラッシュを見ることができる。
 AutopsyInfoLong	[属性]:\n会議時に、死亡したプレイヤーの死因を確認することが出来る。
-VIPInfoLong	[属性]:\n自身がキルされた時、全員にキルフラッシュが起こる。
 ClumsyInfoLong	[属性]:\n停電と通信妨害を直すことが出来ない。
 RevengerInfoLong	[属性]:\n自身が追放された際、ランダムな1人を道連れにする。
 ManagementInfoLong	[属性]:\n全員の合計タスク完了数が分かる(役職名横()にて)。
@@ -785,6 +678,10 @@ CharismaStarNotGatherPlayerKill	集合出来ないプレイヤーは自爆する
 CharismaStarCanAllPlayerGather	全員を一度に集合できる
 EvilHackerAdminCooldown	アドミンワープのクールダウン
 TelekineticChangeDeathReason	死因が念殺になる
+MimicInitialSuicideCooldown	初期自殺クール
+MimicMaxSuicideCooldown	自殺クールの上限
+MimicShapeshiftCooldown	シェイプクール
+MimicShapeshiftDuration	シェイプできる秒数
 	
 # オプション:マッド設定	
 	
@@ -1270,6 +1167,14 @@ Command.h_modes	<モード名> - モードの説明を表示
 Command.dump	デスクトップにログを出力
 Command.h_args	使用可能な引数 (略称)
 Command.killflashall	キルフラッシュを全員に表示
+Command.privatemessage	会議中・ロビーで、指定した色の人にだけ見えるメッセージを送る
+Command.killlog	キル履歴を表示
+Command.n_roles	有効な役職を表示
+Command.n_vanilla	バニラの設定を表示
+Command.myrole	自分の役職の説明を表示
+Command.template	テンプレートを表示
+Command.voice	読み上げの声を確認・変更
+Command.killflash	死亡後のキルフラッシュ表示を切り替え
 CantUse.lastresult	試合中に/lastresultを使用することはできません。
 CantUse.killlog	試合中に/killlogを使用することはできません。
 	
@@ -1297,7 +1202,8 @@ Message.KickedByNoFriendCode	{0}はフレンドコードが存在しないため
 Message.AddedPlayerToBanList	{0}をBANリストに追記しました。
 Message.AnnounceUsingOpenMODAttention	<size=150%><color=yellow>【参加には同意が必要です】</color></size>\n\nこの部屋はMOD TownOfHost_Zero v{0}を使用しています\n\n<color=red>【重要】</color>\nMODの使用にあたり、<color=red>全プレイヤーにMOD使用の同意を取る必要があります</color>\n各プレイヤーに /modok コマンドを使用してMOD使用の同意を取ってください\n各プレイヤーには同意コマンドを入力するよう案内が表示されます\n\n※コマンド未入力の場合はスタート時にキックされ<color=red>ゲームに参加できません</color>\n※再度同意コマンドの入力を促す場合は /modmsg コマンドを使用してください\n※詳細は TownOfHost_Zero のWIKIWIKIを参照ください
 Message.AnnounceUsingOpenMOD	<size=150%><color=yellow>【参加には同意が必要です】</color></size>\n\nこの部屋はMOD TownOfHost_Zero v{0}を使用しています\n\n<color=red>【重要】</color>\nこの部屋ではホストのみ導入するMODを使用しています\nMOD使用について同意する場合は下記コマンドを入力してください\n<color=red>　/modok</color>\n\n※コマンド未入力の場合はスタート時にキックされ<color=red>ゲームに参加できません</color>\n\nMODの詳細は TownOfHost_Zero のWIKIWIKIを参照ください\nゲーム中の不具合などはまずこのゲームのホストへ報告してください\n※この部屋での不具合等について<color=red>AmongUs公式への問合せはしない</color>でください
-Message.AnnounceUsingTOH	"この部屋はTownOfHost_Zero v{0}を使用しています。\n/nで現在の設定、/h nで現在の設定の説明が確認できます。\n不具合があった場合はホストへお知らせください。,"
+Message.AnnounceUsingTOH	"この部屋はTownOfHost_Zero v{0}を使用しています。\n/cmd nで現在の設定、/cmd h nで現在の設定の説明が確認できます。\n不具合があった場合はホストへお知らせください。"
+Message.CommandGuide	<color={0}>{1}</color> v{2} の部屋へようこそ！\n\nコマンドは先頭に<color=yellow>/cmd</color>を付けて打ってください。\n付けると他の人には見えません。\n(例) /cmd n → 現在の設定を表示\n\n<color=yellow>/h</color> でコマンド一覧が見られます。\n(<color=yellow>/cmd h</color> なら他の人に見えません)
 Message.isReport	死体発見により会議が開かれました。\n通報された死体：{0}
 Message.isButton	緊急ボタンにより会議が開かれました。
 Message.RevengeText	{0}が追放され、道連れが発生しました。\n{1}が死亡しています。
@@ -1518,6 +1424,7 @@ Deadbody	死体
 PenguinKillButtonText	拉致
 PenguinTimerText	残り時間
 SelfBomberExplosionButtonText	爆破
+MimicShapeshiftButtonText	擬態
 GrudgeChargerCharge	チャージ
 GrudgeChargerSelectTarget	キル対象選択
 ChargerKill	キル
@@ -1722,3 +1629,11 @@ ThreeCornered	三つ巴
 Twin	ツイン
 SCM_NothingMeetingNameColor	会議時、自身への名前の色を消す(インポスターを除く)
 SCM_RestoredDeadPlayer	死亡したプレイヤーは姿を戻す
+PrivateMessage.Title	{0}からの秘匿メッセージ
+PrivateMessage.Sent	{0}に秘匿メッセージを送りました
+PrivateMessage.OnlyMeeting	秘匿メッセージは会議中とロビー待機中のみ送れます
+PrivateMessage.DeadCannotSend	霊界からは秘匿メッセージを送れません
+PrivateMessage.Usage	使い方: /cmd c 色 内容\n(例) /cmd c 赤 こんにちは
+PrivateMessage.NotFound	「{0}」色のプレイヤーが見つかりません
+PrivateMessage.CannotSendSelf	自分には秘匿メッセージを送れません
+PrivateMessage.TargetDead	{0}は霊界にいるため秘匿メッセージを送れません

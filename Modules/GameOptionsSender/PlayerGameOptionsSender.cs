@@ -155,7 +155,6 @@ namespace TownOfHostY.Modules
                     case CustomRoles.Sunglasses: Sunglasses.ApplyGameOptions(opt); break;
                 }
             }
-            Blinder.ApplyGameOptionsByOther(player.PlayerId, opt);
 
             if (Main.AllPlayerKillCooldown.TryGetValue(player.PlayerId, out var killCooldown))
             {

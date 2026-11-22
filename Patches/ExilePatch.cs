@@ -71,8 +71,7 @@ namespace TownOfHostY
                         exiled.Object?.ResetPlayerCam(1f);
 
                     exiled.IsDead = true;
-                    if (role != CustomRoles.AntiComplete || PlayerState.GetByPlayerId(exiled.PlayerId).DeathReason == CustomDeathReason.etc)
-                        PlayerState.GetByPlayerId(exiled.PlayerId).DeathReason = CustomDeathReason.Vote;
+                    PlayerState.GetByPlayerId(exiled.PlayerId).DeathReason = CustomDeathReason.Vote;
 
                     foreach (var roleClass in CustomRoleManager.AllActiveRoles.Values)
                     {
@@ -163,10 +162,8 @@ namespace TownOfHostY
                         if (requireResetCam)
                             player?.ResetPlayerCam(1f);
                         Executioner.ChangeRoleByTarget(playerId);
-                        Lawyer.ChangeRoleByTarget(player);
                         if (roleClass is Jackal jackal)
                             Jackal.CheckPromoted();
-                        Elder.DeadByRevenge(playerId);
                     });
                     Main.AfterMeetingDeathPlayers.Clear();
                 }, 0.6f, "AfterMeetingDeathPlayers Task");
