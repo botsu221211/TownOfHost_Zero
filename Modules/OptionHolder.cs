@@ -845,6 +845,8 @@ public static class Options
         VoiceReader.SetupCustomOption((int)Options.offsetId.FeatOther + 500);
         // 生きていた人の切断で自動廃村
         Modules.AutoAbort.SetupCustomOption((int)Options.offsetId.FeatOther + 600);
+        // 指定闇鍋で1人が入れられる役職の数
+        Modules.DesignatedMix.SetupCustomOption((int)Options.offsetId.FeatOther + 620);
 
         TextOptionItem.Create((int)offsetId.GModeAdd, "Head.GameMode", TabGroup.ModMainSettings).SetColor(Color.yellow).SetGameMode(CustomGameMode.Standard);
         // シンクロカラーモード

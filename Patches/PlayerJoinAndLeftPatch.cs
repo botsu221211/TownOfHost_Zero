@@ -166,6 +166,8 @@ namespace TownOfHostY
                         if (wasAlive) Modules.AutoAbort.OnAliveDisconnected();
                     }
                     Main.playerVersion.Remove(data.Character.PlayerId);
+                    // 指定闇鍋: 抜けた人が入れた役職をオフにする
+                    Modules.DesignatedMix.OnPlayerLeft(data.FriendCode, data.PlayerName);
                     Logger.Info($"{data.PlayerName}(ClientID:{data.Id})が切断(理由:{reason}, ping:{AmongUsClient.Instance.Ping})", "Session");
                 }
             }
@@ -202,6 +204,8 @@ namespace TownOfHostY
                         if (AmongUsClient.Instance.IsGamePublic) Utils.SendMessageAutoSplit(string.Format(GetString("Message.AnnounceUsingTOH"), Main.PluginVersion), true, sendTo: client.Character.PlayerId);
                         // コマンドの使い方の案内(入ってきた本人にだけ届く)
                         Utils.SendMessageAutoSplit(string.Format(GetString("Message.CommandGuide"), Main.ModColor, Main.ModName, Main.PluginVersion), true, sendTo: client.Character.PlayerId);
+                        // 指定闇鍋の最中なら使い方も知らせる
+                        Modules.DesignatedMix.SendGuideTo(client.Character);
                         TemplateManager.SendTemplate("welcome", client.Character.PlayerId, true);
                     }
                     catch { }

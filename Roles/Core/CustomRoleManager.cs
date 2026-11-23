@@ -584,6 +584,7 @@ public enum CustomRoles
     JSidekick,
     JClient,
     Workaholic,
+    Infectioner,
     DarkHide,
     LoveCutter,
     PlatonicLover,

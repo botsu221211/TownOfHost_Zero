@@ -326,6 +326,7 @@ public enum CustomWinner
     DarkHide = CustomRoles.DarkHide,
     NBakery = CustomRoles.Bakery,
     Workaholic = CustomRoles.Workaholic,
+    Infectioner = CustomRoles.Infectioner,
     LoveCutter = CustomRoles.LoveCutter,
     God = CustomRoles.God,
     FoxSpirit = CustomRoles.FoxSpirit,

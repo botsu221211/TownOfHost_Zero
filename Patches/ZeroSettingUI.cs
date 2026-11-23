@@ -134,8 +134,13 @@ public static class ZeroSettingUI
     private static GameObject presetPanel;
     private static TextMeshPro presetNameText;
     private static readonly List<SimpleButton> actionButtons = new();
-    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "役職をリセット" };
+    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "役職をリセット", "指定闇鍋" };
     private const int ResetActionIndex = 3;
+    private const int DesignatedMixIndex = 4;
+    /// <summary>ボタンの文字。指定闇鍋はオン/オフの状態も出す</summary>
+    private static string LabelFor(int index) => index == DesignatedMixIndex
+        ? $"指定闇鍋：{(DesignatedMix.Active ? "<color=#7dffa8>オン</color>" : "オフ")}"
+        : actionLabels[index];
 
     /// <summary>TOH_Zero オリジナル役職(Zero闇鍋の対象)。新しく作ったら追加する</summary>
     public static readonly HashSet<CustomRoles> ZeroOriginalRoles = new()
@@ -146,6 +151,7 @@ public static class ZeroSettingUI
         CustomRoles.MadUnknown,
         CustomRoles.FriedPotato,
         CustomRoles.SpeedStar,
+        CustomRoles.Infectioner,
     };
     private static int pendingAction = -1;
     private static float pendingTime;
@@ -185,18 +191,18 @@ public static class ZeroSettingUI
             int actionIndex = i;
             bool danger = i == ResetActionIndex;
             var button = new SimpleButton(
-                parent, $"PresetAction{i}", new Vector3(0f, -0.25f - 0.62f * i, 0f),
+                parent, $"PresetAction{i}", new Vector3(0f, -0.2f - 0.53f * i, 0f),
                 danger ? DangerColor : ButtonColor, danger ? DangerHoverColor : ButtonHoverColor,
-                (Action)(() => OnActionClicked(actionIndex)), actionLabels[i]);
-            button.Scale = new Vector2(3.6f, 0.55f);
+                (Action)(() => OnActionClicked(actionIndex)), LabelFor(i));
+            button.Scale = new Vector2(3.6f, 0.47f);
             button.FontSize = 2.4f;
             actionButtons.Add(button);
         }
 
         var note = TMPTemplate.Create("PresetNote",
-            "闇鍋：属性以外の全役職を 100% / 最大1 にする\n属性入り闇鍋：属性も含めて 100% / 最大1 にする\nZero闇鍋：Zeroオリジナル役職だけを 100% / 最大1 にする(他は 0%)\n役職をリセット：全役職・属性を 0% にする\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
-            Color.white, 1.3f, TextAlignmentOptions.Center, true, parent);
-        note.transform.localPosition = new Vector3(0f, -2.75f, 0f);
+            "闇鍋／属性入り闇鍋／Zero闇鍋：対象の役職を 100%・最大1 に　役職をリセット：全部 0% に\n指定闇鍋：全部リセットして、全員が「/add 役職名」で好きな役職を入れられる\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
+            Color.white, 1.2f, TextAlignmentOptions.Center, true, parent);
+        note.transform.localPosition = new Vector3(0f, -2.85f, 0f);
 
         UpdatePresetPanel();
         presetPanel.SetActive(false);
@@ -215,7 +221,7 @@ public static class ZeroSettingUI
             presetNameText.text = preset.GetString();
         pendingAction = -1;
         for (int i = 0; i < actionButtons.Count; i++)
-            if (!SimpleButton.IsNullOrDestroyed(actionButtons[i])) actionButtons[i].Label.text = actionLabels[i];
+            if (!SimpleButton.IsNullOrDestroyed(actionButtons[i])) actionButtons[i].Label.text = LabelFor(i);
     }
 
     private static void ChangePreset(int delta)
@@ -238,9 +244,14 @@ public static class ZeroSettingUI
                 case 1: SetAllRoles(includeRoles: true, includeAddons: true, on: true); break;
                 case 2: SetAllRoles(includeRoles: true, includeAddons: true, on: true, onlyRoles: ZeroOriginalRoles); break;
                 case ResetActionIndex: SetAllRoles(includeRoles: true, includeAddons: true, on: false); break;
+                case DesignatedMixIndex:
+                    if (DesignatedMix.Active) DesignatedMix.TurnOff();
+                    else DesignatedMix.TurnOn();
+                    break;
             }
             UpdatePresetPanel();
-            actionButtons[index].Label.text = $"{actionLabels[index]}　<color=#7dffa8>完了！</color>";
+            if (index != DesignatedMixIndex)
+                actionButtons[index].Label.text = $"{actionLabels[index]}　<color=#7dffa8>完了！</color>";
             return;
         }
 
@@ -251,6 +262,21 @@ public static class ZeroSettingUI
     }
 
     /// <summary>役職(と属性)の出現率・最大数をまとめて設定する</summary>
+    /// <summary>全役職・属性を 0% にする(指定闇鍋の開始時)</summary>
+    public static void ResetAllRoles() => SetAllRoles(includeRoles: true, includeAddons: true, on: false);
+
+    /// <summary>1つの役職を 100% / 最大1 にする(on=false なら 0%)。指定闇鍋の /add 用</summary>
+    public static void SetRole(CustomRoles role, bool on)
+    {
+        if (!Options.CustomRoleSpawnChances.TryGetValue(role, out var spawn)) return;
+        SetRawValue(spawn, spawn.Rule.GetNearestIndex(on ? 100 : 0));
+        if (Options.CustomRoleCounts.TryGetValue(role, out var count) && count is IntegerOptionItem countItem && !count.IsFixValue)
+            SetRawValue(count, countItem.Rule.GetNearestIndex(on ? 1 : 0));
+        OptionSaver.Save();
+        OptionItem.SyncAllOptions();
+        GameOptionsMenuPatch.RefreshChildSettings();
+    }
+
     /// <param name="onlyRoles">指定した時は、その役職だけを on にし、それ以外はすべて 0% にする(Zero闇鍋)</param>
     private static void SetAllRoles(bool includeRoles, bool includeAddons, bool on, HashSet<CustomRoles> onlyRoles = null)
     {

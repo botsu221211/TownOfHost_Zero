@@ -193,6 +193,7 @@ Nekomata	猫又
 Express	エクスプレス
 FriedPotato	フライドポテト
 SpeedStar	スピードスター
+Infectioner	インフェクショナー
 Chairman	チェアマン
 TaskManager	タスクマネージャー
 RainbowResize	<size=8><color=#ffff00>★</color></size><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><size=8><color=#ffff00>★</color></size>
@@ -230,6 +231,7 @@ NekomataInfo	人外まで道連れしたい
 ExpressInfo	気持ちよく駆け回ろう
 FriedPotatoInfo	僕はフライドポテト!
 SpeedStarInfo	見ろ私のこの速さを
+InfectionerInfo	感染はもう始まっている。
 ChairmanInfo	会議開閉を操ろう
 SillySheriffInfo	ごめん、ちょっと調子悪いみたい
 SympathizerInfo	ふたりで白をとり合おう
@@ -267,6 +269,7 @@ NekomataInfoLong	[クルー陣営]\n自身が吊られた際、ランダムな1�
 ExpressInfoLong	[クルー陣営]\nただ足が速い。
 FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の名前が「フライドポテト」として届く。\nキルされると、次の会議で「フライドポテトが捕食された」と全員に通知される。
 SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
+InfectionerInfoLong	[ニュートラル]\n会議で自分が投票した相手を感染させる(設定回数まで)。\nまた、感染している人が投票した相手にも感染が広がる。\n感染状況の可視化がオンのとき、感染者には自分にしか見えないマーク(◆)がつく。\n自分が生存していて、自分以外の生存者が全員感染状態になった時点で単独勝利。\nほかの勝利と同時になったときは勝利優先度の高い方が勝つ。
 ChairmanInfoLong	[クルー陣営]\n・ベントに入ると会議が開ける。サボタージュ中はベントに入っても会議を開けない。\n通常ボタン回数と同時に消費する。(通常ボタン回数1回の時、先にベントボタンを使うと、通常ボタンは使えなくなる。)\n・誰かに投票することでその会議を即中断できる(追放は起こらずスキップ扱い)。\nスキップ・自投票以外の普通の投票は出来ず、能力を発動してしまう。
 SillySheriffInfoLong	[クルー陣営]\n普通のシェリフとはちょっと違うバカなシェリフ。正しく陣営を認識できない時、人外に向かって自爆したりクルーをキルする時がある
 SympathizerInfoLong	[クルー陣営]\n共鳴者は必ず2人でしか設定できない。\n設定タスク数まで完了させると自身にしか見えない◎がつく。2人ともタスクが互いに設定数を超えた時、相手にも◎が付きもう1人の共鳴者が誰か分かる。
@@ -1666,3 +1669,11 @@ FrenzyVision	視界倍率
 SpeedStarInterval	速度変化秒数
 SpeedStarMinRate	速度変化最小倍率
 SpeedStarMaxRate	速度変化最大倍率
+InfectionerInfectCount	自身から感染させられる回数
+InfectionerWinPriority	勝利優先度
+InfectionerVisualize	感染状況の可視化
+InfectionerAdditionalWin	追加勝利にする
+ForceMeeting	<color=#ffb347>強制会議</color>
+ForceMeetingConfirm	<color=#ffd84d>もう一度押すと会議</color>
+ForceMeetingUnavailable	タスク中のホストのみ
+DesignatedMixLimit	指定闇鍋で1人が入れられる役職の数

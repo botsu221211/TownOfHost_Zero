@@ -70,6 +70,8 @@ namespace TownOfHostY
                 }
                 if (originalWinnerTeam is not CustomWinner.Draw and not CustomWinner.None)
                 {
+                    // インフェクショナー: ほかの勝利と同時に感染が完了していれば、勝利優先度で置き換える
+                    if (Infectioner.CheckWinOnGameEnd(originalWinnerTeam)) baseWinnerOverridden = true;
                     if (FoxSpirit.CheckWin() && !reason.Equals(GameOverReason.ImpostorsBySabotage))
                     {
                         CustomWinnerHolder.ResetAndSetWinner(CustomWinner.FoxSpirit);

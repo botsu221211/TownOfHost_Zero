@@ -148,6 +148,13 @@ namespace TownOfHostY
                         }
                         break;
 
+                    case "/add":
+                    case "/追加":
+                        canceled = true;
+                        // 指定闇鍋で好きな役職を入れる
+                        Modules.DesignatedMix.TryPick(PlayerControl.LocalPlayer, string.Join(" ", args.Skip(1)));
+                        break;
+
                     case "/w":
                         canceled = true;
                         if (!GameStates.IsInGame) break;
@@ -592,6 +599,21 @@ namespace TownOfHostY
             role = CustomRoles.NotAssigned;
             return false;
         }
+        /// <summary>役職名(日本語のコマンド名・英語名・表示名)から役職を探す。見つからなければ null</summary>
+        public static CustomRoles? FindRoleByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return null;
+            InitRoleCommands();
+            foreach (var r in roleCommands)
+            {
+                if ((int)r.Key < 0) continue; // 区切り
+                if (String.Compare(name, r.Key.ToString(), true) == 0 || String.Compare(name, r.Value, true) == 0
+                    || String.Compare(name, Utils.GetRoleName(r.Key), true) == 0)
+                    return r.Key;
+            }
+            return null;
+        }
+
         public static void GetRolesInfo(string role, byte PlayerId = byte.MaxValue)
         {
             InitRoleCommands();
@@ -961,6 +983,11 @@ namespace TownOfHostY
 
                 case "/c":
                     SendPrivateMessage(player, args);
+                    break;
+
+                case "/add":
+                case "/追加":
+                    Modules.DesignatedMix.TryPick(player, string.Join(" ", args.Skip(1)));
                     break;
 
                 case "/killFlash":

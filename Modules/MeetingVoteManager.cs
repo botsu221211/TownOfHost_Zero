@@ -164,6 +164,9 @@ public class MeetingVoteManager
             }
         }
 
+        // インフェクショナー: この会議の投票で感染を広げる
+        Roles.Neutral.Infectioner.OnMeetingEnd(AllVotes);
+
         if (exiled != null) AntiBlackout.ExiledPlayerId = exiled.PlayerId;
         Logger.Info($"ExiledPlayerIdSet exiled: {exiled?.name}", "AntiBlackout");
         // SetIsDead は MeetingHud.OnDestroy (会議終了ログの直後) で呼ばれるため、

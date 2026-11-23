@@ -12,6 +12,8 @@ namespace TownOfHostY
         private static ClientActionItem OpenLogFolder;
         private static ClientActionItem IsMuteLobbyBGM;
         private static ClientActionItem AbandonGame;
+        private static ClientActionItem ForceMeeting;
+        private static float forceMeetingPressedAt = float.NegativeInfinity;
         private static float abandonPressedAt = float.NegativeInfinity;
         private const float AbandonConfirmSeconds = 4f;
 
@@ -47,10 +49,50 @@ namespace TownOfHostY
             if (AbandonGame?.ToggleButton != null)
                 AbandonGame.ToggleButton.Text.text = Translator.GetString("AbandonGame");
 
+            if (ForceMeeting == null || ForceMeeting.ToggleButton == null)
+            {
+                ForceMeeting = ClientActionItem.Create("ForceMeeting", OnForceMeetingClicked, __instance);
+            }
+            forceMeetingPressedAt = float.NegativeInfinity;
+            if (ForceMeeting?.ToggleButton != null)
+                ForceMeeting.ToggleButton.Text.text = Translator.GetString("ForceMeeting");
+
             if (ModUnloaderScreen.Popup == null)
             {
                 ModUnloaderScreen.Init(__instance);
             }
+        }
+
+        /// <summary>強制会議ボタン: タスク中のホストだけ。誤操作防止に、4秒以内にもう一度押したら会議を開く</summary>
+        private static void OnForceMeetingClicked()
+        {
+            var label = ForceMeeting?.ToggleButton?.Text;
+            if (!AmongUsClient.Instance.AmHost || !GameStates.IsInTask || ExileController.Instance != null || MeetingHud.Instance != null)
+            {
+                if (label != null) label.text = Translator.GetString("ForceMeetingUnavailable");
+                return;
+            }
+            if (UnityEngine.Time.realtimeSinceStartup - forceMeetingPressedAt > AbandonConfirmSeconds)
+            {
+                forceMeetingPressedAt = UnityEngine.Time.realtimeSinceStartup;
+                if (label != null) label.text = Translator.GetString("ForceMeetingConfirm");
+                return;
+            }
+            forceMeetingPressedAt = float.NegativeInfinity;
+            if (label != null) label.text = Translator.GetString("ForceMeeting");
+
+            // 本編は死んだ人の通報を受け付けないので、ホストが死んでいれば生きている誰かを通報者にする。
+            // 通報者と死体が同じ人だと、MOD は強制会議として扱う(ボタンの回数・クールなどの制限を通さない)
+            var reporter = PlayerControl.LocalPlayer.IsAlive()
+                ? PlayerControl.LocalPlayer
+                : System.Linq.Enumerable.FirstOrDefault(Main.AllAlivePlayerControls);
+            if (reporter == null) return;
+            Logger.Info($"設定画面の強制会議ボタン (通報者: {reporter.GetNameWithRole()})", "ForceMeeting");
+            reporter.ReportDeadBody(reporter.Data);
+
+            // 設定画面を閉じる
+            if (ClientActionItem.CustomBackground != null) ClientActionItem.CustomBackground.gameObject.SetActive(false);
+            UnityEngine.Object.FindObjectOfType<OptionsMenuBehaviour>()?.Close();
         }
 
         /// <summary>廃村ボタン: 試合中のホストだけ。誤操作防止に、4秒以内にもう一度押したら廃村</summary>
