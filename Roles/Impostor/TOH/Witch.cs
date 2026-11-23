@@ -224,18 +224,8 @@ namespace TownOfHostY.Roles.Impostor
             text = default;
             return false;
         }
-        public override bool OnEnterVent(PlayerPhysics physics, int ventId)
-        {
-            if (NowSwitchTrigger is SwitchTrigger.TriggerVent)
-            {                
-                if (LastVentSwitchFrame == Time.frameCount && LastVentSwitchId == ventId)
-                    return true;
-
-                LastVentSwitchFrame = Time.frameCount;
-                LastVentSwitchId = ventId;
-                SwitchSpellMode(false);
-            }
-            return true;
-        }
+        // 「ベントで切り替え」の設定の時は、ペットを撫でてモードを切り替える(元はベント)
+        public override bool UsePetAbility => NowSwitchTrigger is SwitchTrigger.TriggerVent;
+        public override void OnPet() => SwitchSpellMode(false);
     }
 }

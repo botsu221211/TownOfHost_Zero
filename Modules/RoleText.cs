@@ -20,7 +20,9 @@ public static class RoleText
         //デフォルト値
         bool enabled = seer == seen
             || seen.Is(CustomRoles.GM)
-            || (Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherRoles.GetBool());
+            || (Modules.GMSettings.IsGM(seer)
+                ? Modules.GMSettings.CanSeeRoles.GetBool()
+                : Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherRoles.GetBool());
         //オーバーライドによる表示ではサブロールは見えないようにする/上記場合のみ表示
         var roleText = GetRoleNameText(seen.PlayerId, showSubRole: enabled);
 
@@ -49,11 +51,13 @@ public static class RoleText
         {
             enabled = seer == seen // 自分自身はtrue
                 || seen.Is(CustomRoles.GM) // GMはtrue
-                || (Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherRoles.GetBool()); // 幽霊で役職見れるとき
+                || (Modules.GMSettings.IsGM(seer)
+                    ? Modules.GMSettings.CanSeeRoles.GetBool() // GMは設定で決める
+                    : Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherRoles.GetBool()); // 幽霊で役職見れるとき
         }
 
         // 幽霊が陣営のみ見れる設定ならtrue
-        enabled |= Main.VisibleTasksCount && !seer.IsAlive()
+        enabled |= Main.VisibleTasksCount && !seer.IsAlive() && !Modules.GMSettings.IsGM(seer)
             && Options.GhostCantSeeOtherRoles.GetBool() && Options.GhostCanSeeOtherTeams.GetBool();
 
         return enabled ? Utils.GetTeamMark(seen.GetCustomRole(), 90) : "";

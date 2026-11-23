@@ -376,11 +376,13 @@ public static class Options
     public static bool IsLoaded = false;
     public static int GetRoleCount(CustomRoles role)
     {
+        if (Modules.JokeRoles.IsDisabled(role)) return 0;
         return GetRoleChance(role) == 0 ? 0 : CustomRoleCounts.TryGetValue(role, out var option) ? option.GetInt() : 0;
     }
 
     public static int GetRoleChance(CustomRoles role)
     {
+        if (Modules.JokeRoles.IsDisabled(role)) return 0;
         return CustomRoleSpawnChances.TryGetValue(role, out var option) ? option.GetInt() : 0;
     }
     public static void Load()
@@ -417,6 +419,8 @@ public static class Options
             .SetColor(new Color32(255, 91, 112, 255))
             .SetHeader(true, Translator.GetString("GM"))
             .SetGameMode(CustomGameMode.All);
+        // GM の詳細設定(ゲームマスターがオンの時だけ表示)
+        Modules.GMSettings.SetupCustomOption(EnableGM);
 
         // SpecialEvent
         //if (Main.IsChristmas)
@@ -847,6 +851,8 @@ public static class Options
         Modules.AutoAbort.SetupCustomOption((int)Options.offsetId.FeatOther + 600);
         // 指定闇鍋で1人が入れられる役職の数
         Modules.DesignatedMix.SetupCustomOption((int)Options.offsetId.FeatOther + 620);
+        // ネタ役の表示/非表示(プリセット画面のボタンで切り替える)
+        Modules.JokeRoles.SetupCustomOption((int)Options.offsetId.FeatOther + 630);
 
         TextOptionItem.Create((int)offsetId.GModeAdd, "Head.GameMode", TabGroup.ModMainSettings).SetColor(Color.yellow).SetGameMode(CustomGameMode.Standard);
         // シンクロカラーモード
@@ -882,6 +888,10 @@ public static class Options
             .SetGameMode(CustomGameMode.All);
         AddonShow = StringOptionItem.Create((int)offsetId.System + 700, "AddonShowMode", addonShowModes, 0, TabGroup.ModMainSettings, true);
         ChangeIntro = StringOptionItem.Create((int)offsetId.System + 800, "ChangeIntro", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true);
+
+        // 自動機能(自動スタート・自動で部屋に戻る)
+        Modules.AutoLobby.SetupCustomOption((int)offsetId.System + 900);
+        PetAbility.SetupCustomOption((int)offsetId.System + 950);
 
         TextOptionItem.Create((int)offsetId.Participation, "Head.Participation", TabGroup.ModMainSettings).SetColor(Palette.Purple).SetGameMode(CustomGameMode.All);
         ApplyDenyNameList = StringOptionItem.Create((int)offsetId.Participation + 100, "ApplyDenyNameList", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true)
@@ -925,7 +935,9 @@ public static class Options
                         or "CheaterAutoBan"
                         or "CheatLobbyKill"
                         or "ChangeIntro"
-                        or "AddonShowMode";
+                        or "AddonShowMode"
+                        or "AutoStart"
+                        or "AutoReturnLobby";
     }
     public static void SetupRoleOptions(SimpleRoleInfo info) =>
     SetupRoleOptions(info.ConfigId, info.Tab, info.RoleName, info.AssignInfo.AssignCountRule);
@@ -955,6 +967,7 @@ public static class Options
             .SetFixValue(role.IsFixedCountRole())
             .SetGameMode(customGameMode);
 
+        spawnOption.IsJoke = Modules.JokeRoles.IsJoke(role);
         CustomRoleSpawnChances.Add(role, spawnOption);
         CustomRoleCounts.Add(role, countOption);
     }

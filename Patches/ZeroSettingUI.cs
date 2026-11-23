@@ -134,13 +134,25 @@ public static class ZeroSettingUI
     private static GameObject presetPanel;
     private static TextMeshPro presetNameText;
     private static readonly List<SimpleButton> actionButtons = new();
-    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "役職をリセット", "指定闇鍋" };
-    private const int ResetActionIndex = 3;
+    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "ネタ役闇鍋", "指定闇鍋", "ネタ役", "役職をリセット" };
+    private const int ChaosIndex = 0;
+    private const int ChaosAddonIndex = 1;
+    private const int ZeroChaosIndex = 2;
+    private const int JokeChaosIndex = 3;
     private const int DesignatedMixIndex = 4;
-    /// <summary>ボタンの文字。指定闇鍋はオン/オフの状態も出す</summary>
-    private static string LabelFor(int index) => index == DesignatedMixIndex
-        ? $"指定闇鍋：{(DesignatedMix.Active ? "<color=#7dffa8>オン</color>" : "オフ")}"
-        : actionLabels[index];
+    private const int JokeToggleIndex = 5;
+    private const int ResetActionIndex = 6;
+    /// <summary>ボタンの位置(2列。リセットだけ下の段の真ん中)</summary>
+    private static Vector3 ActionPosition(int index) => index == ResetActionIndex
+        ? new Vector3(0f, -0.2f - 0.53f * 3, 0f)
+        : new Vector3(index % 2 == 0 ? -1.65f : 1.65f, -0.2f - 0.53f * (index / 2), 0f);
+    /// <summary>ボタンの文字。指定闇鍋・ネタ役はオン/オフの状態も出す</summary>
+    private static string LabelFor(int index) => index switch
+    {
+        DesignatedMixIndex => $"指定闇鍋：{(DesignatedMix.Active ? "<color=#7dffa8>オン</color>" : "オフ")}",
+        JokeToggleIndex => $"ネタ役：{(JokeRoles.Visible ? "<color=#7dffa8>表示</color>" : "非表示")}",
+        _ => actionLabels[index],
+    };
 
     /// <summary>TOH_Zero オリジナル役職(Zero闇鍋の対象)。新しく作ったら追加する</summary>
     public static readonly HashSet<CustomRoles> ZeroOriginalRoles = new()
@@ -152,6 +164,7 @@ public static class ZeroSettingUI
         CustomRoles.FriedPotato,
         CustomRoles.SpeedStar,
         CustomRoles.Infectioner,
+        CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
     };
     private static int pendingAction = -1;
     private static float pendingTime;
@@ -191,18 +204,18 @@ public static class ZeroSettingUI
             int actionIndex = i;
             bool danger = i == ResetActionIndex;
             var button = new SimpleButton(
-                parent, $"PresetAction{i}", new Vector3(0f, -0.2f - 0.53f * i, 0f),
+                parent, $"PresetAction{i}", ActionPosition(i),
                 danger ? DangerColor : ButtonColor, danger ? DangerHoverColor : ButtonHoverColor,
                 (Action)(() => OnActionClicked(actionIndex)), LabelFor(i));
-            button.Scale = new Vector2(3.6f, 0.47f);
+            button.Scale = new Vector2(3.1f, 0.47f);
             button.FontSize = 2.4f;
             actionButtons.Add(button);
         }
 
         var note = TMPTemplate.Create("PresetNote",
-            "闇鍋／属性入り闇鍋／Zero闇鍋：対象の役職を 100%・最大1 に　役職をリセット：全部 0% に\n指定闇鍋：全部リセットして、全員が「/add 役職名」で好きな役職を入れられる\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
+            "闇鍋／属性入り闇鍋／Zero闇鍋／ネタ役闇鍋：対象の役職を 100%・最大1 に　役職をリセット：全部 0% に\n指定闇鍋：全部リセットして、全員が「/add 役職名」で好きな役職を入れられる\nネタ役：表示の時だけ設定に出て、闇鍋・属性入り闇鍋にも入る(非表示だと出現しない)\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
             Color.white, 1.2f, TextAlignmentOptions.Center, true, parent);
-        note.transform.localPosition = new Vector3(0f, -2.85f, 0f);
+        note.transform.localPosition = new Vector3(0f, -2.6f, 0f);
 
         UpdatePresetPanel();
         presetPanel.SetActive(false);
@@ -235,14 +248,28 @@ public static class ZeroSettingUI
 
     private static void OnActionClicked(int index)
     {
+        // ネタ役の表示/非表示は押したらすぐ切り替える
+        if (index == JokeToggleIndex)
+        {
+            JokeRoles.SetVisible(!JokeRoles.Visible);
+            GameOptionsMenuPatch.RefreshChildSettings();
+            UpdatePresetPanel();
+            return;
+        }
+
         // 誤操作防止: 4秒以内にもう一度押したら実行
         if (pendingAction == index && Time.time - pendingTime <= ConfirmSeconds)
         {
             switch (index)
             {
-                case 0: SetAllRoles(includeRoles: true, includeAddons: false, on: true); break;
-                case 1: SetAllRoles(includeRoles: true, includeAddons: true, on: true); break;
-                case 2: SetAllRoles(includeRoles: true, includeAddons: true, on: true, onlyRoles: ZeroOriginalRoles); break;
+                case ChaosIndex: SetAllRoles(includeRoles: true, includeAddons: false, on: true); break;
+                case ChaosAddonIndex: SetAllRoles(includeRoles: true, includeAddons: true, on: true); break;
+                case ZeroChaosIndex: SetAllRoles(includeRoles: true, includeAddons: true, on: true, onlyRoles: ZeroOriginalRoles); break;
+                case JokeChaosIndex:
+                    // ネタ役だけをオンにする(非表示なら表示にする)
+                    if (!JokeRoles.Visible) JokeRoles.SetVisible(true);
+                    SetAllRoles(includeRoles: true, includeAddons: true, on: true, onlyRoles: JokeRoles.Roles);
+                    break;
                 case ResetActionIndex: SetAllRoles(includeRoles: true, includeAddons: true, on: false); break;
                 case DesignatedMixIndex:
                     if (DesignatedMix.Active) DesignatedMix.TurnOff();
@@ -286,7 +313,8 @@ public static class ZeroSettingUI
             bool isAddon = spawn.Tab == TabGroup.Addons;
             if (isAddon ? !includeAddons : !includeRoles) continue;
 
-            bool enable = on && (onlyRoles == null || onlyRoles.Contains(role));
+            // ネタ役が非表示の時は、ネタ役はオンにしない
+            bool enable = on && (onlyRoles == null || onlyRoles.Contains(role)) && !JokeRoles.IsDisabled(role);
             // オンにする時は、今のゲームモードで表示されていない役職は触らない
             if (enable && spawn.IsHiddenOn(Options.CurrentGameMode)) continue;
 

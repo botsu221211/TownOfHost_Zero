@@ -36,6 +36,7 @@ namespace TownOfHostY
                     __instance.GameRoomNameCode.text = GameCode.IntToGameName(AmongUsClient.Instance.GameId);
                     // Reset lobby countdown timer
                     timer = 600f;
+                    Modules.AutoLobby.OnLobbyStart();
 
                     HideName = Object.Instantiate(__instance.GameRoomNameCode, __instance.GameRoomNameCode.transform);
                     HideName.gameObject.SetActive(true);
@@ -197,6 +198,12 @@ namespace TownOfHostY
                     int seconds = (int)timer % 60;
                     string countDown = $"({minutes:00}:{seconds:00})";
                     if (timer <= 60) countDown = "";
+
+                    // 自動スタート
+                    Modules.AutoLobby.Update(__instance, timer);
+                    var autoLeft = Modules.AutoLobby.SecondsUntilAutoStart(timer);
+                    if (autoLeft != null && __instance.startState == GameStartManager.StartingStates.NotStarting)
+                        countDown += $"\n<size=70%>自動スタートまで {(int)autoLeft / 60:00}:{(int)autoLeft % 60:00}</size>";
 
                     // タイマーテキスト
                     if (__instance.StartButton != null && __instance.StartButton.buttonText != null)

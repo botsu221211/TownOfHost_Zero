@@ -179,6 +179,11 @@ public abstract class RoleBase : IDisposable
     /// <param name="killCooldown">キルクール</param>
     /// <param name="canResetAbilityCooldown">使用後アビリティクールをリセットするか</param>
     public virtual bool OnCheckVanish(ref float killCooldown, ref bool canResetAbilityCooldown) => true;
+    /// <summary>
+    /// 透明化をキャンセルした時、本人の画面で透明から戻すまでの秒数。
+    /// 本人の画面では透明の間キルボタンが押せないので、透明化の直後にキルする役職は短くする
+    /// </summary>
+    public virtual float VanishCancelAppearDelay => 1.0f;
 
     /// <summary>
     /// タスクターンに常時呼ばれる関数
@@ -208,6 +213,19 @@ public abstract class RoleBase : IDisposable
     /// <param name="id"></param>
     /// <returns>falseを返すとベントから追い出されます</returns>
     public virtual bool OnEnterVent(PlayerPhysics physics, int ventId) => true;
+
+    /// <summary>
+    /// ペットを撫でて能力を使う役職か(TownOfHost-Shell / hamo / Pko を参考)。
+    /// true にすると、撫でた時に <see cref="OnPet"/> が呼ばれ、クールダウンは <see cref="PetCooldown"/> で数える
+    /// </summary>
+    public virtual bool UsePetAbility => false;
+    /// <summary>
+    /// ペット能力のクールダウン(秒)。タスクターンの始まりと、撫でて使った後に、この秒数から数え直す。
+    /// <see cref="PetAbility.Unusable"/> 以上なら今は使えない
+    /// </summary>
+    public virtual float PetCooldown => 0f;
+    /// <summary>ペットを撫でた時に呼ばれる(ホストのみ・クールダウン中は呼ばれない)</summary>
+    public virtual void OnPet() { }
 
     /// <summary>
     /// ミーティングが始まった時に呼ばれる関数

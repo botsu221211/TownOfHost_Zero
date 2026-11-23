@@ -10,7 +10,7 @@ public sealed class Mayor : RoleBase
             typeof(Mayor),
             player => new Mayor(player),
             CustomRoles.Mayor,
-            () => OptionHasPortableButton.GetBool() ? RoleTypes.Engineer : RoleTypes.Crewmate,
+            () => RoleTypes.Crewmate, // 携帯ボタンはベントではなくペットで使う
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewTOH + 300,
             SetupOptionItem,
@@ -66,16 +66,12 @@ public sealed class Mayor : RoleBase
         if (Is(reporter) && target == null) //ボタン
             LeftButtonCount--;
     }
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== 携帯ボタン: ペットを撫でると緊急会議(元はベント) =====
+    public override bool UsePetAbility => HasPortableButton;
+    public override float PetCooldown => LeftButtonCount <= 0 ? PetAbility.Unusable : Main.NormalOptions.EmergencyCooldown;
+    public override void OnPet()
     {
-        if (LeftButtonCount > 0)
-        {
-            var user = physics.myPlayer;
-            physics.RpcBootFromVent(ventId);
-            user?.ReportDeadBody(null);
-        }
-
-        return false;
+        if (LeftButtonCount > 0) Player.ReportDeadBody(null);
     }
     public override (byte? votedForId, int? numVotes, bool doVote) ModifyVote(byte voterId, byte sourceVotedForId, bool isIntentional)
     {

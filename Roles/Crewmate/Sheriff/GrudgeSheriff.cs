@@ -17,7 +17,7 @@ public sealed class GrudgeSheriff : RoleBase
             typeof(GrudgeSheriff),
             player => new GrudgeSheriff(player),
             CustomRoles.GrudgeSheriff,
-            () => RoleTypes.Engineer,
+            () => RoleTypes.Crewmate, // 能力はベントではなくペットで使う
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewSheriff + 300,
             SetupOptionItem,
@@ -136,9 +136,12 @@ public sealed class GrudgeSheriff : RoleBase
         && MyTaskState.CompletedTasksCount >= TaskTrigger
         && ShotLimit > 0;
 
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== ペットで対象を選ぶ(元はベント) =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => CanUseKillButton() ? (IsCoolTimeOn ? KillCooldown : 0f) : PetAbility.Unusable;
+    public override void OnPet()
     {
-        if (!CanUseKillButton()) return false;
+        if (!CanUseKillButton()) return;
 
         IsCoolTimeOn = false;
         Player.MarkDirtySettings();
@@ -151,7 +154,6 @@ public sealed class GrudgeSheriff : RoleBase
         });
 
         Utils.NotifyRoles(SpecifySeer: Player);
-        return true;
     }
     public override void OnFixedUpdate(PlayerControl player)
     {

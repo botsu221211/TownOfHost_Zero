@@ -197,7 +197,7 @@ public static class Utils
     {
         PlayerControl killer = info.AppearanceKiller, target = info.AttemptTarget;
         // 霊界キルフラッシュ
-        if (seer.Is(CustomRoles.GM)) return true;
+        if (seer.Is(CustomRoles.GM)) return Modules.GMSettings.CanSeeKillFlash.GetBool();
         if (CheckKillFlashAfterDead(seer) && seer != target) return true;
         // ターゲット(属性)
         foreach (var subRole in PlayerState.GetByPlayerId(target.PlayerId).SubRoles)
@@ -427,7 +427,9 @@ public static class Utils
         var comms = IsActive(SystemTypes.Comms);
         //seer側による変更
         bool enabled = seer == seen
-                    || (Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherTasks.GetBool())
+                    || (Modules.GMSettings.IsGM(seer)
+                        ? Modules.GMSettings.CanSeeTaskProgress.GetBool()
+                        : Main.VisibleTasksCount && !seer.IsAlive() && !Options.GhostCantSeeOtherTasks.GetBool())
                     || (seen.Is(CustomRoles.Workaholic) && Workaholic.Seen && Workaholic.TaskSeen);
         string text = GetProgressText(seen.PlayerId, comms);
 
@@ -1523,6 +1525,7 @@ public static class Utils
             SelfLower.Append(VentEnterTask.GetLowerText(seer, isForMeeting: isForMeeting));
             //seer役職が対象のLowerText
             SelfLower.Append(seerRole?.GetLowerText(seer, isForMeeting: isForMeeting));
+            SelfLower.Append(PetAbility.GetLowerText(seer, isForMeeting));
             //seerに関わらず発動するLowerText
             SelfLower.Append(CustomRoleManager.GetLowerTextOthers(seer, isForMeeting: isForMeeting));
 

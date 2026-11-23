@@ -11,7 +11,7 @@ namespace TownOfHostY.Roles.Neutral;
 /// タイガー (TownOfHost-Shell より移植)
 /// ・通常は長いキルクールでキルする第三陣営
 /// ・ファントムボタンで「捕食」状態になる: 足が速くなり視界が狭くなり、すぐにキルできるようになる
-/// ・捕食中のキルは死体をマップの外に残す(通報されない)。キルに成功すると捕食は終わる
+/// ・捕食中のキルは死体を残さずにその場で消す(通報も会議での表示もされない)。キルに成功すると捕食は終わる
 /// ・捕食の時間内にキルできなければ自滅する。会議が始まると捕食は解除
 /// ・自分以外に生きているキル可能者がいなくなると単独勝利
 ///   (ほかのキル可能者を一度でも確認したか、自分が一度キルした後から判定する)
@@ -120,20 +120,29 @@ public sealed class Tiger : RoleBase, IKiller
         var token = ++generation;
         Logger.Info($"{Player.GetNameWithRole()} が捕食状態になった", nameof(Tiger));
 
-        // 足を速くする
-        if (Main.AllPlayerSpeed.TryGetValue(Player.PlayerId, out var speed)) normalSpeed = speed;
+        // 足を速くする(元の速さが取れなかった時はロビーの設定の速さ)
+        normalSpeed = Main.AllPlayerSpeed.TryGetValue(Player.PlayerId, out var speed) && speed > 0f
+            ? speed : Main.RealOptionsData.GetFloat(FloatOptionNames.PlayerSpeedMod);
         Main.AllPlayerSpeed[Player.PlayerId] = normalSpeed * OptionSpeed.GetFloat();
         Player.MarkDirtySettings();
 
-        // すぐにキルできるようにする(ファントムの処理の後にもう一度)
+        // すぐにキルできるようにする。本人の画面では一瞬透明になって戻る時にキルクールが戻ることがあるので、
+        // 戻った後にもう一度 0 にする
         killCooldown = 0.01f;
-        _ = new LateTask(() =>
+        foreach (var delay in new[] { 0.2f, VanishCancelAppearDelay + 0.15f })
         {
-            if (Player != null && hunting && generation == token && Player.IsAlive() && GameStates.IsInTask)
-                Player.SetKillCooldown(0.01f);
-        }, 0.2f, "TigerReadyToKill");
+            _ = new LateTask(() =>
+            {
+                if (Player != null && hunting && generation == token && Player.IsAlive() && GameStates.IsInTask)
+                    Player.SetKillCooldown(0.01f);
+            }, delay, "TigerReadyToKill");
+        }
         return false;
     }
+
+    // 本人の画面で透明になっている間はキルボタンが押せないので、すぐに戻す
+    public override float VanishCancelAppearDelay => 0.3f;
+    public override string GetAbilityButtonText() => "捕食";
 
     private void EndPredation()
     {
@@ -172,28 +181,27 @@ public sealed class Tiger : RoleBase, IKiller
     public void OnCheckMurderAsKiller(MurderInfo info)
     {
         if (!hunting || info.IsSuicide || !info.CanKill) return;
-        // 捕食中のキル: 普通のキルはやめて、対象をマップの外に移してから倒す(死体はマップの外に残る)
+        // 捕食中のキル: 普通のキルはやめて、死体を残さずにその場で消す(会議でも死体は出ない)
         info.DoKill = false;
         var target = info.AttemptTarget;
-        var origin = target.GetTruePosition();
+        if (target == null || target.Data == null || target.Data.IsDead) return;
         Logger.Info($"{Player.GetNameWithRole()} が {target.GetNameWithRole()} を捕食", nameof(Tiger));
 
-        target.RpcSnapTo(new Vector2(9999f, 9999f));
-        CustomRoleManager.CheckMurderInfos[target.PlayerId] = new MurderInfo(Player, target, target, target);
-        target.RpcMurderPlayer(target);
-        if (!target.Data.IsDead)
-        {
-            // キルが失敗した時は、対象をマップの外に置き去りにしない
-            CustomRoleManager.CheckMurderInfos.Remove(target.PlayerId);
-            target.RpcSnapTo(origin);
-            return;
-        }
-        // 死体はそのまま、キルの演出の後で幽霊だけ元の場所へ戻す
-        _ = new LateTask(() =>
-        {
-            if (GameStates.IsInTask && target != null && target.Data != null && target.Data.IsDead && !target.Data.Disconnected)
-                target.RpcSnapTo(origin);
-        }, 2f, "TigerRestoreGhost");
+        var state = PlayerState.GetByPlayerId(target.PlayerId);
+        state.DeathReason = CustomDeathReason.Eaten;
+        Main.AllPlayerSpeed[target.PlayerId] = Main.RealOptionsData.GetFloat(FloatOptionNames.PlayerSpeedMod);
+        target.NetTransform.Halt();
+        target.MarkDirtySettings();
+
+        // 死体なしで霊界へ送る(ジャニターの掃除と同じやり方)
+        state.SetDead();
+        target.RpcSetRoleNormal(RoleTypes.CrewmateGhost);
+        target.RpcExileV3();
+
+        // 普通のキルの後と同じ処理(恋人の後追い、タイガーのキルクールなど)を通す
+        CustomRoleManager.CheckMurderInfos[Player.PlayerId] = new MurderInfo(Player, target, Player, target);
+        CustomRoleManager.OnMurderPlayer(Player, target);
+        Utils.NotifyRoles(ForceLoop: true);
     }
 
     public void OnMurderPlayerAsKiller(MurderInfo info)

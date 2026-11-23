@@ -303,6 +303,7 @@ public enum CustomDeathReason
     CounterAttack,
     Telekinesis,
     IgnitionBombed,
+    Eaten,
 
     Win,
     etc = -1

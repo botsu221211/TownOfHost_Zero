@@ -127,12 +127,17 @@ namespace TownOfHostY
                     {
                         try
                         {
+                            // MODを入れている人の名前は色を変える(TownOfHost-Shell と同じ見せ方)
+                            // ・同じ TOH_Zero の同じバージョン: 水色
+                            // ・別のMOD(フォーク): オレンジで上に MOD の名前
+                            // ・バージョン違い: 赤で上にバージョン
+                            var playerName = __instance?.Data?.PlayerName;
                             if (Main.ForkId != ver.forkId) // フォークIDが違う場合
-                                __instance.cosmetics.nameText.text = $"<color=#ff0000><size=1.2>{ver.forkId}</size>\n{__instance?.name}</color>";
+                                __instance.cosmetics.nameText.text = $"<color=#f07d0d><size=1.2>{ver.forkId}</size>\n{playerName}</color>";
                             else if (Main.version.CompareTo(ver.version) != 0)
-                                __instance.cosmetics.nameText.text = $"<color=#ff0000><size=1.2>v{ver.version}</size>\n{__instance?.name}</color>";
+                                __instance.cosmetics.nameText.text = $"<color=#ff0000><size=1.2>v{ver.version}</size>\n{playerName}</color>";
                             else
-                                __instance.cosmetics.nameText.text = __instance?.Data?.PlayerName;
+                                __instance.cosmetics.nameText.text = $"<color=#a1b0ff>{playerName}</color>";
                         }
                         catch (Exception ex)
                         {

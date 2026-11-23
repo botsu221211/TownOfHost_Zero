@@ -32,6 +32,8 @@ namespace TownOfHostY
         public bool IsHeader { get; protected set; }
         public string IsHeaderName { get; protected set; }
         public bool IsHidden { get; protected set; }
+        /// <summary>ネタ役の出現率の設定か(ネタ役が非表示の時は隠す)</summary>
+        public bool IsJoke { get; set; }
         public bool IsFixValue { get; protected set; }
         public bool IsText { get; protected set; }
 
@@ -176,7 +178,7 @@ namespace TownOfHostY
         // Hidden判定
         public virtual bool IsHiddenOn(CustomGameMode mode)
         {
-            return IsHidden || (GameMode != CustomGameMode.All && GameMode != mode);
+            return IsHidden || (IsJoke && !Modules.JokeRoles.Visible) || (GameMode != CustomGameMode.All && GameMode != mode);
         }
 
         public string ApplyFormat(string value)

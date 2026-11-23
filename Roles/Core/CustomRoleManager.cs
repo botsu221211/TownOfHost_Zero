@@ -507,6 +507,7 @@ public enum CustomRoles
     HalfKiller,
     Frenzy,
     HateKiller,
+    NoLimiter,
 
     Godfather,
     Janitor,

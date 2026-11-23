@@ -13,7 +13,7 @@ public sealed class Medic : RoleBase
             typeof(Medic),
             player => new Medic(player),
             CustomRoles.Medic,
-            () => RoleTypes.Engineer,
+            () => RoleTypes.Crewmate, // 能力はベントではなくペットで使う
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewY + 900,
             SetupOptionItem,
@@ -98,9 +98,12 @@ public sealed class Medic : RoleBase
         return false;
     }
 
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== ペットで守る相手を選ぶ(元はベント) =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => CanUseVent() ? 0f : PetAbility.Unusable;
+    public override void OnPet()
     {
-        if (!CanUseVent()) return false;
+        if (!CanUseVent()) return;
 
         GuardPlayer = Player.VentPlayerSelect(() =>
         {
@@ -108,7 +111,6 @@ public sealed class Medic : RoleBase
         });
 
         Utils.NotifyRoles(SpecifySeer: Player);
-        return true;
     }
 
     public override bool OnCompleteTask()

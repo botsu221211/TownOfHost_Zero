@@ -317,8 +317,7 @@ namespace TownOfHostY
                         canceled = true;
                         if (GameStates.IsMeeting && MeetingHud.Instance != null)
                         {
-                            Logger.Info("/mf で会議を終了します", "ChatCommand");
-                            MeetingHud.Instance.RpcClose();
+                            Modules.Moderator.ForceEndMeeting();
                         }
                         else HudManager.Instance.Chat.AddChat(PlayerControl.LocalPlayer, "/mf は会議中だけ使えます");
                         break;

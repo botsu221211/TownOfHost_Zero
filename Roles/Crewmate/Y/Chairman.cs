@@ -11,7 +11,7 @@ public sealed class Chairman : RoleBase
             typeof(Chairman),
             player => new Chairman(player),
             CustomRoles.Chairman,
-            () => RoleTypes.Engineer,
+            () => RoleTypes.Crewmate, // ボタンはベントではなくペットで使う
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewY + 300,
             SetupOptionItem,
@@ -62,16 +62,12 @@ public sealed class Chairman : RoleBase
         if (reporter == Player && target == null) //ボタン
             LeftButtonCount--;
     }
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== ボタン: ペットを撫でると緊急会議(元はベント) =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => LeftButtonCount <= 0 ? PetAbility.Unusable : Main.NormalOptions.EmergencyCooldown;
+    public override void OnPet()
     {
-        if (LeftButtonCount > 0)
-        {
-            var user = physics.myPlayer;
-            physics.RpcBootFromVent(ventId);
-            user?.ReportDeadBody(null);
-        }
-
-        return false;
+        if (LeftButtonCount > 0) Player.ReportDeadBody(null);
     }
 
     public override (byte? votedForId, int? numVotes, bool doVote) ModifyVote(byte voterId, byte sourceVotedForId, bool isIntentional)

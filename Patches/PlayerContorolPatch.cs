@@ -427,13 +427,21 @@ public static class PlayerControlCheckVanishPatch
 
             if (phantom.IsAlive())
             {
-                if (phantom.PlayerId != PlayerControl.LocalPlayer.PlayerId)
+                if (phantom.PlayerId != PlayerControl.LocalPlayer.PlayerId
+                    && role.Player.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor == true)
+                {
+                    // ほかの人にクルーに見せている役職(タイガーなど)は、一瞬透明にする方法だと
+                    // 本人の体が透けたり、ほかの人がベントから追い出されたりする。
+                    // 透明にはせず、本人にだけ役職を送り直してボタンを元に戻す (TownOfHost-hamo と同じやり方)
+                    ResetPhantomButtonForSelf(phantom);
+                }
+                else if (phantom.PlayerId != PlayerControl.LocalPlayer.PlayerId)
                 {
                     SendVanishToSelfOnly(phantom);
                     _ = new LateTask(() =>
                     {
                         if (phantom != null && phantom.IsAlive()) SendAppearToSelfOnly(phantom);
-                    }, 1.0f, "PhantomVanishCancel");
+                    }, role.VanishCancelAppearDelay, "PhantomVanishCancel");
                 }
                 else
                 {
@@ -453,6 +461,18 @@ public static class PlayerControlCheckVanishPatch
         }
 
         return true;
+    }
+    private static void ResetPhantomButtonForSelf(PlayerControl phantom)
+    {
+        var clientId = phantom.GetClientId();
+        foreach (var roleType in new[] { RoleTypes.Impostor, RoleTypes.Phantom })
+        {
+            var writer = AmongUsClient.Instance.StartRpcImmediately(
+                phantom.NetId, (byte)RpcCalls.SetRole, SendOption.Reliable, clientId);
+            writer.Write((ushort)roleType);
+            writer.Write(true);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+        }
     }
     private static void SendVanishToSelfOnly(PlayerControl phantom)
     {

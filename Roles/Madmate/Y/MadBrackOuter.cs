@@ -31,9 +31,12 @@ public sealed class MadBrackOuter : RoleBase
     {
         Options.SetUpAddOnOptions(RoleInfo.ConfigId + 10, RoleInfo.RoleName, RoleInfo.Tab);
     }
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== ペットを撫でると停電(元はベント)。ベントは普通のマッドメイトと同じく移動に使える =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => Options.MadmateVentCooldown.GetFloat();
+    public override void OnPet()
     {
-        if (!AmongUsClient.Instance.AmHost) return true;
+        if (!AmongUsClient.Instance.AmHost) return;
 
         MessageWriter SabotageFixWriter = AmongUsClient.Instance.StartRpcImmediately(ShipStatus.Instance.NetId, (byte)RpcCalls.UpdateSystem, SendOption.Reliable, Player.GetClientId());
         SabotageFixWriter.Write((byte)SystemTypes.Electrical);
@@ -48,6 +51,5 @@ public sealed class MadBrackOuter : RoleBase
             SabotageFixWriter.WriteNetObject(target);
             AmongUsClient.Instance.FinishRpcImmediately(SabotageFixWriter);
         }
-        return true;
     }
 }

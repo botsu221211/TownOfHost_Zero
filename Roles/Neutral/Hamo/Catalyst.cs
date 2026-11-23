@@ -234,6 +234,9 @@ public static class CatalystPair
         if (others.Any(p => p.GetCountTypes() is not CountTypes.Crew || p.CanUseKillButton())) return false;
         var ids = Main.AllPlayerControls.Where(IsMember).Select(p => p.PlayerId).ToList();
         if (!CustomWinnerHolder.SetPriorityWinner(CustomWinner.Catalyst, 0, ids)) return false;
+        // 勝利画面に「カタリスト＆コンダクター勝利」と出す
+        if (Main.AllPlayerControls.Any(p => p.Is(CustomRoles.Conductor)) && !CustomWinnerHolder.AdditionalWinnerRoles.Contains(CustomRoles.Conductor))
+            CustomWinnerHolder.AdditionalWinnerRoles.Add(CustomRoles.Conductor);
         Logger.Info("カタリスト陣営の勝利", nameof(CatalystPair));
         return true;
     }

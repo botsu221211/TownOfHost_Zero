@@ -174,7 +174,10 @@ public sealed class Arsonist : RoleBase, IKiller
             }
         }
     }
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== 全員に油を塗り終えたら、ペットを撫でて船を燃やす(元はベント) =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => IsDouseDone(Player) ? 0f : PetAbility.Unusable;
+    public override void OnPet()
     {
         if (GameStates.IsInGame && IsDouseDone(Player))
         {
@@ -194,9 +197,7 @@ public sealed class Arsonist : RoleBase, IKiller
             }
             CustomWinnerHolder.ShiftWinnerAndSetWinner(CustomWinner.Arsonist); //焼殺で勝利した人も勝利させる
             CustomWinnerHolder.WinnerIds.Add(Player.PlayerId);
-            return true;
         }
-        return false;
     }
     public bool OverrideKillButtonText(out string text)
     {

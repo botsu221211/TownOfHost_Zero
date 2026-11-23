@@ -140,7 +140,7 @@ public static class Moderator
                     Reply(sender, "廃村は試合中(役職の割り当て後)だけ使えます。");
                 break;
             case "/mf":
-                if (GameStates.IsMeeting && MeetingHud.Instance != null) MeetingHud.Instance.RpcClose();
+                if (GameStates.IsMeeting && MeetingHud.Instance != null) ForceEndMeeting();
                 else Reply(sender, "/mf は会議中だけ使えます。");
                 break;
             case "/fm": HandleForceMeeting(sender); break;
@@ -316,8 +316,36 @@ public static class Moderator
         }
         sec = Mathf.Clamp(sec, 0, 600);
         var gsm = GameStartManager.Instance;
-        gsm.countDownTimer = Mathf.Max(sec, 0.1f);
-        gsm.startState = GameStartManager.StartingStates.Countdown;
+        if (gsm.startState != GameStartManager.StartingStates.NotStarting) return;
+        // スタートボタンと同じ処理(設定の確認・保存)を通してから、カウントダウンの秒数だけ変える
+        gsm.BeginGame();
+        if (gsm.startState == GameStartManager.StartingStates.Countdown)
+            gsm.countDownTimer = Mathf.Max(sec, 0.1f);
+    }
+
+    /// <summary>
+    /// /mf: 今の投票で会議を終わらせる(その時点で一番票が多い人が追放される)。
+    /// 投票の集計ができない時だけ、今まで通り会議を閉じる
+    /// </summary>
+    public static void ForceEndMeeting()
+    {
+        if (!AmongUsClient.Instance.AmHost || MeetingHud.Instance == null) return;
+        var manager = MeetingVoteManager.Instance;
+        if (manager != null)
+        {
+            try
+            {
+                Logger.Info("/mf で今の投票のまま会議を終了します", nameof(Moderator));
+                // 途中で終わらせるので、まだ投票していない人に「未投票」の罰(投票モード)は適用しない
+                manager.EndMeeting(applyVoteMode: false);
+                return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(ex, nameof(Moderator));
+            }
+        }
+        MeetingHud.Instance.RpcClose();
     }
 
     /// <summary>/h に足すモデレーター用コマンドの説明</summary>
@@ -362,14 +390,23 @@ public static class Moderator
     {
         if (!AmongUsClient.Instance.AmHost) return;
         namesStripped = true;
+        // ここで例外が出ると試合開始(AmongUsClient.StartGame)ごと止まって暗転したままになるので、絶対に外へ投げない
         foreach (var pc in Main.AllPlayerControls)
         {
-            if (pc == null || pc.Data == null) continue;
-            var current = pc.Data.PlayerName ?? "";
-            if (!HasPrefix(current)) continue;
-            var baseName = StripPrefix(current);
-            pc.RpcSetName(baseName);
-            if (Main.AllPlayerNames.ContainsKey(pc.PlayerId)) Main.AllPlayerNames[pc.PlayerId] = baseName;
+            try
+            {
+                if (pc == null || pc.Data == null) continue;
+                var current = pc.Data.PlayerName ?? "";
+                if (!HasPrefix(current)) continue;
+                var baseName = StripPrefix(current);
+                pc.RpcSetName(baseName);
+                // AllPlayerNames は最初の試合が始まるまで null
+                if (Main.AllPlayerNames != null && Main.AllPlayerNames.ContainsKey(pc.PlayerId)) Main.AllPlayerNames[pc.PlayerId] = baseName;
+            }
+            catch (Exception ex)
+            {
+                Logger.Exception(ex, nameof(Moderator));
+            }
         }
     }
 

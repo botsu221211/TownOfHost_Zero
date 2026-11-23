@@ -444,10 +444,13 @@ class IntroCutsceneDestroyPatch
             {
                 kvp.Value.IsBlackOut = false;
             }
+            // 暗転を解除しただけでは各プレイヤーに設定が送られず、視界 0 のまま始まることがあるので送り直す
+            Utils.MarkEveryoneDirtySettings();
 
             _ = new LateTask(() =>
             {
                 Utils.NotifyRoles(ForceLoop: true);
+                Utils.MarkEveryoneDirtySettings();
             }, 1.25f, "NotifyRoles");
         }
         else

@@ -56,8 +56,9 @@ class GameDataSerializePatch
     {
         original = null;
         if (!AmongUsClient.Instance.AmHost) return;
-        var host = PlayerControl.LocalPlayer;
-        if (host == null || host.IsAlive()) return;
+        // ホストの画面の名前(ホストから見えている役職など)が入ったまま全員に送られると、
+        // 役職が全員に透けてしまう。ホストが生きていても死んでいても、送る時は本当の名前に戻す
+        if (PlayerControl.LocalPlayer == null) return;
         if (Camouflage.IsCamouflage || MushroomMixupUpdateSystemPatch.InSabotage) return;
         if (Main.AllPlayerNames == null || !Main.AllPlayerNames.TryGetValue(info.PlayerId, out var realName)) return;
         var outfit = info.DefaultOutfit;

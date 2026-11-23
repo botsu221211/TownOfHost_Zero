@@ -273,10 +273,14 @@ static class ExtendedPlayerControl
             return;
         }
         Logger.Info($"アビリティクールダウンのリセット:{target.name}({target.PlayerId})", "RpcResetAbilityCooldown");
+        // ペットで能力を使う役職は、ペットのクールダウンも数え直す
+        PetAbility.ResetCooldown(target);
         if (PlayerControl.LocalPlayer == target)
         {
             //targetがホストだった場合
             PlayerControl.LocalPlayer.Data.Role.SetCooldown();
+            // ホストの画面ではクルーになっているファントム系の役職は、ボタンのクールダウンを自前で数える
+            if (HostPhantomAbility.IsActive) HostPhantomAbility.ResetCooldown();
         }
         else
         {
@@ -638,6 +642,11 @@ static class ExtendedPlayerControl
         if (seen.IsAlive())
         {
             return false;
+        }
+        // GMは霊界ではなくGMの設定で決める
+        if (Modules.GMSettings.IsGM(seer))
+        {
+            return Modules.GMSettings.CanSeeDeathReason.GetBool();
         }
         // seerが死亡済で，霊界から死因が見える設定がON
         if (!seer.IsAlive() && Options.GhostCanSeeDeathReason.GetBool())

@@ -93,6 +93,17 @@ namespace TownOfHostY
                     var p = Utils.GetPlayerById(subReader.ReadByte());
                     Logger.Info($"{__instance.GetNameWithRole()} => {p?.GetNameWithRole() ?? "null"}", "StartMeeting");
                     break;
+                case RpcCalls.CheckVanish:
+                    // ほかの人にはクルーに見せている役職(タイガー・カタリストなど)は、ホストから見るとファントムではないので
+                    // バニラの処理に任せると透明化のチェックまで届かないことがある。ここで直接役職の処理を呼ぶ
+                    if (AmongUsClient.Instance.AmHost && GameStates.IsInGame
+                        && __instance.GetCustomRole().GetRoleInfo() is { IsDesyncImpostor: true } vanishInfo
+                        && vanishInfo.BaseRoleType.Invoke() == RoleTypes.Phantom)
+                    {
+                        __instance.CheckVanish();
+                        return false;
+                    }
+                    break;
                 case RpcCalls.MurderPlayer: //MurderPlayerRPC
                     if (GameStates.IsLobby && Options.CheatLobbyKill.GetBool())
                     {

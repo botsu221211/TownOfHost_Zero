@@ -18,7 +18,7 @@ public sealed class Psychic : RoleBase
             typeof(Psychic),
             player => new Psychic(player),
             CustomRoles.Psychic,
-            () => RoleTypes.Engineer,
+            () => RoleTypes.Crewmate, // 能力はベントではなくペットで使う
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewY + 1200,
             SetupOptionItem,
@@ -97,9 +97,12 @@ public sealed class Psychic : RoleBase
         && DivinationLeftCount > 0
         && MyTaskState.CompletedTasksCount >= TaskTrigger;
 
-    public override bool OnEnterVent(PlayerPhysics physics, int ventId)
+    // ===== ペットで霊視する相手を選ぶ(元はベント) =====
+    public override bool UsePetAbility => true;
+    public override float PetCooldown => CanUseVent() ? (IsCoolTimeOn ? Cooldown : 0f) : PetAbility.Unusable;
+    public override void OnPet()
     {
-        if (!CanUseVent()) return false;
+        if (!CanUseVent()) return;
 
         IsCoolTimeOn = false;
         Player.MarkDirtySettings();
@@ -107,7 +110,6 @@ public sealed class Psychic : RoleBase
         VentSelect.PlayerSelect(Player);
 
         Utils.NotifyRoles(SpecifySeer: Player);
-        return true;
     }
     public override void OnFixedUpdate(PlayerControl player)
     {
