@@ -72,6 +72,8 @@ namespace TownOfHostY
                 {
                     // インフェクショナー: ほかの勝利と同時に感染が完了していれば、勝利優先度で置き換える
                     if (Infectioner.CheckWinOnGameEnd(originalWinnerTeam)) baseWinnerOverridden = true;
+                    // チャッター: 生き残っていれば勝利優先度で置き換える
+                    if (Chatter.CheckWinOnGameEnd(CustomWinnerHolder.WinnerTeam)) baseWinnerOverridden = true;
                     if (FoxSpirit.CheckWin() && !reason.Equals(GameOverReason.ImpostorsBySabotage))
                     {
                         CustomWinnerHolder.ResetAndSetWinner(CustomWinner.FoxSpirit);
@@ -425,6 +427,13 @@ namespace TownOfHostY
             public bool CheckGameEndByLivingPlayers(out GameOverReason reason)
             {
                 reason = GameOverReason.ImpostorsByKill;
+
+                // タイガー: 自分以外のキル可能者がいなくなれば単独勝利
+                if (Tiger.TryChooseWinner()) return true;
+                // カタリスト＆コンダクター: ほかのキル役がおらず、人数が自陣営以下なら勝利
+                if (CatalystPair.CheckInstantWin(out reason)) return true;
+                // タイガーが生きている間は、人数による勝利を保留する(タスク・サボタージュ勝利はそのまま)
+                if (Tiger.HasLivingTiger()) return false;
 
                 int Imp = Utils.AlivePlayersCount(CountTypes.Impostor);
                 int Jackal = Utils.AlivePlayersCount(CountTypes.Jackal);

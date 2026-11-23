@@ -134,14 +134,12 @@ public sealed class Infectioner : RoleBase, IAdditionalWinner
         SetSoloWinners();
     }
 
-    private static void SetSoloWinners()
+    private static bool SetSoloWinners()
     {
-        CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Infectioner);
-        foreach (var role in CustomRoleManager.AllActiveRoles.Values.OfType<Infectioner>())
-        {
-            if (!role.additionalWin && role.IsWinConditionMet())
-                CustomWinnerHolder.WinnerIds.Add(role.Player.PlayerId);
-        }
+        var ids = CustomRoleManager.AllActiveRoles.Values.OfType<Infectioner>()
+            .Where(r => !r.additionalWin && r.IsWinConditionMet())
+            .Select(r => r.Player.PlayerId).ToList();
+        return CustomWinnerHolder.SetPriorityWinner(CustomWinner.Infectioner, WinPriority, ids);
     }
 
     /// <summary>
@@ -154,9 +152,9 @@ public sealed class Infectioner : RoleBase, IAdditionalWinner
         var winners = CustomRoleManager.AllActiveRoles.Values.OfType<Infectioner>()
             .Where(r => !r.additionalWin && r.IsWinConditionMet()).ToList();
         if (winners.Count == 0) return false;
-        if (WinPriority <= 0) return false; // 通常の勝利の優先度(0)以下なら奪わない
-        Logger.Info($"{currentWinner} の勝利と同時に感染が完了したので、優先度 {WinPriority} のインフェクショナーが勝利", nameof(Infectioner));
-        SetSoloWinners();
+        // 今の勝者(通常の陣営勝利は優先度 0)と勝利優先度を比べる
+        if (!SetSoloWinners()) return false;
+        Logger.Info($"{currentWinner} の勝利と同時に感染が完了していたので、優先度 {WinPriority} のインフェクショナーが勝利", nameof(Infectioner));
         return true;
     }
 

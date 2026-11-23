@@ -506,6 +506,7 @@ public enum CustomRoles
     Mimic,
     HalfKiller,
     Frenzy,
+    HateKiller,
 
     Godfather,
     Janitor,
@@ -560,6 +561,7 @@ public enum CustomRoles
     Express,
     FriedPotato,
     SpeedStar,
+    Marshall,
     Sympathizer,
     Medic,
     CandleLighter,
@@ -585,6 +587,10 @@ public enum CustomRoles
     JClient,
     Workaholic,
     Infectioner,
+    Tiger,
+    Chatter,
+    Catalyst,
+    Conductor,
     DarkHide,
     LoveCutter,
     PlatonicLover,
@@ -600,6 +606,7 @@ public enum CustomRoles
 
     GM,
     GodfatherAndJanitor,
+    CatalystAndConductor,
     MaxMain,
     /************/
 

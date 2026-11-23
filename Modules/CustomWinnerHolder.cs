@@ -40,6 +40,38 @@ namespace TownOfHostY
             NeutralWinnerIds = new();
             CantWinPlayerIds = new();
             winners = new();
+            WinPriority = 0;
+        }
+
+        /// <summary>
+        /// 今の勝者の勝利優先度 (TOH_Zero)。通常の陣営勝利は 0。
+        /// 勝利優先度を持つ役職(インフェクショナー・タイガー・チャッターなど)は <see cref="SetPriorityWinner"/> で勝者を決める
+        /// </summary>
+        public static int WinPriority;
+
+        /// <summary>
+        /// 勝利優先度を比べて勝者を決める (TownOfHost_L の ResetAndSetAndChWinner を参考)。
+        /// まだ勝者がいないか、今の勝者より優先度が大きければ単独勝利。同じ優先度なら追加勝利(addWin が true の時)。
+        /// </summary>
+        public static bool SetPriorityWinner(CustomWinner winner, int priority, IEnumerable<byte> playerIds, bool addWin = true)
+        {
+            if (WinnerTeam is CustomWinner.Default || priority > WinPriority)
+            {
+                if (WinnerTeam is not CustomWinner.Default)
+                    Logger.Info($"勝利優先度 {WinPriority} の {WinnerTeam} を、優先度 {priority} の {winner} が上書き", "WinPriority");
+                ResetAndSetWinner(winner);
+                WinPriority = priority;
+                foreach (var id in playerIds) WinnerIds.Add(id);
+                return true;
+            }
+            if (priority == WinPriority && addWin)
+            {
+                Logger.Info($"勝利優先度が同じ {priority} なので {winner} が追加勝利", "WinPriority");
+                AdditionalWinnerRoles.Add((CustomRoles)winner);
+                foreach (var id in playerIds) WinnerIds.Add(id);
+                return true;
+            }
+            return false;
         }
         public static void ClearWinners()
         {

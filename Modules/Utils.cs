@@ -1129,6 +1129,9 @@ public static class Utils
         sb.Append($"\n/end - 廃村にする(Shift+Enter+L と同じ)");
         sb.Append($"\n/mf - 会議を即座に終了する(Shift+Enter+M と同じ)");
         sb.Append($"\n/add <役職名> - 指定闇鍋で好きな役職を入れる(ロビーのみ)");
+        sb.Append("\n/mod <ID・色・名前> - モデレーターに追加・解除(/mod だけで一覧)");
+        sb.Append("\n/kick ・ /ban <ID・色・名前> - キック・BAN");
+        sb.Append("\n/fm - 強制会議 ・ /start <秒> - 開始 ・ /cs - 開始を止める");
         sb.Append($"\n\n陣営で絞り込み: /n ・ /n r ・ /h n の後ろに I M C N U A (例: /n r i)");
         sb.Append($"\n\n視界が暗転した参加者が発生した場合は、\nチャットコマンド[/brackout・/bo]か、左Control,K,Lを同時に押下してください");
 
@@ -1160,6 +1163,7 @@ public static class Utils
         sb.Append("\n I(インポスター) M(マッド) C(クルー) N(ニュートラル) U(コンビ) A(属性)");
         sb.Append("\n(例) /n r i ・ /h n c");
         sb.Append("\n\n先頭に /cmd を付けると、打った文が他の人に見えません");
+        if (Modules.Moderator.IsModerator(GetPlayerById(playerId))) sb.Append(Modules.Moderator.HelpText());
 
         SendMessageAutoSplit(sb.ToString(), true, sendTo: playerId);
     }
@@ -1730,7 +1734,8 @@ public static class Utils
 
     public static void SetKillFlashAfterDead(PlayerControl pc, bool isHost = false)
     {
-        string name = pc.Data.PlayerName;
+        // ロビーのモデレーターの名前に付く「モデレーター - 」は外して登録する(試合中の名前と合わせる)
+        string name = Modules.Moderator.StripPrefix(pc.Data.PlayerName);
         if (!Main.KillFlashAfterDead.Contains(name))
         {
             // 登録

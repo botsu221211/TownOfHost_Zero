@@ -335,6 +335,17 @@ namespace TownOfHostY
                         SendPrivateMessage(PlayerControl.LocalPlayer, args);
                         break;
 
+                    // モデレーターの追加・解除(/mod)と、ホストも使えるモデレーター用コマンド
+                    case "/mod":
+                    case "/kick":
+                    case "/ban":
+                    case "/fm":
+                    case "/start":
+                    case "/cs":
+                        canceled = true;
+                        Modules.Moderator.TryHandleCommand(PlayerControl.LocalPlayer, args);
+                        break;
+
                     case "/killFlash":
                     case "/kf":
                         canceled = true;
@@ -718,7 +729,9 @@ namespace TownOfHostY
                 return;
             }
             // 霊界の人は送れない・霊界の人には送れない(ロビーでは全員生存扱い)
-            if (!sender.IsAlive())
+            // ただしホストとモデレーターは霊界からでも送れる(霊界の人にも送れる)
+            var privileged = Modules.Moderator.IsHostOrModerator(sender);
+            if (!sender.IsAlive() && !privileged)
             {
                 SendPrivateSystemMessage(sender, GetString("PrivateMessage.DeadCannotSend"));
                 return;
@@ -741,7 +754,7 @@ namespace TownOfHostY
                 SendPrivateSystemMessage(sender, GetString("PrivateMessage.CannotSendSelf"));
                 return;
             }
-            if (!target.IsAlive())
+            if (!target.IsAlive() && !privileged)
             {
                 SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.TargetDead"), ColoredPlayerName(target)));
                 return;
@@ -795,7 +808,7 @@ namespace TownOfHostY
         };
 
         /// <summary>色名(日本語/英語どちらでも可)から、その色のプレイヤーを探す</summary>
-        private static PlayerControl FindPlayerByColorName(string colorName)
+        public static PlayerControl FindPlayerByColorName(string colorName)
         {
             if (string.IsNullOrWhiteSpace(colorName)) return null;
             var key = colorName.Trim().ToLower();
@@ -893,6 +906,8 @@ namespace TownOfHostY
                 Utils.ShowPlayerHelp(player.PlayerId);
                 return;
             }
+            // モデレーター用のコマンド(/kick /ban /say /end /mf /fm /start /cs /bo)
+            if (Modules.Moderator.TryHandleCommand(player, args)) return;
 
             switch (args[0]?.ToLower())
             {
