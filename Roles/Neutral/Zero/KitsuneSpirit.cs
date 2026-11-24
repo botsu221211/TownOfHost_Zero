@@ -9,7 +9,7 @@ using TownOfHostY.Roles.Core.Interfaces;
 namespace TownOfHostY.Roles.Neutral;
 
 /// <summary>
-/// 白狐 / kitsune spirit (TOH_Zero。Nebula on the Ship のスペクターが元)
+/// 白狐 / kitsune spirit (TOH_Zero。Nebula on the Ship の妖狐を参考にした)
 /// ・お揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する
 /// ・マップの決められた場所にお皿が出る。最初は全部のお皿にお揚げが乗っている(茶色いダミー)
 /// ・お揚げの上でシェイプ(誰を選んでもよい)するとお揚げを食べる。食べたお皿は空(白いダミー)になり、
