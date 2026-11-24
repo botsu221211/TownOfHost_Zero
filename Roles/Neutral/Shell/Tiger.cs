@@ -216,7 +216,8 @@ public sealed class Tiger : RoleBase, IKiller
         => hunting ? Utils.ColorString(RoleInfo.RoleColor, "(捕食中)") : "";
 
     private bool HasOtherKiller()
-        => Main.AllAlivePlayerControls.Any(pc => pc.PlayerId != Player.PlayerId && pc.Data != null && !pc.Data.Disconnected && pc.CanUseKillButton());
+        => Main.AllAlivePlayerControls.Any(pc => pc.PlayerId != Player.PlayerId && pc.Data != null && !pc.Data.Disconnected && pc.CanUseKillButton()
+            && !pc.Is(CustomRoles.KitsuneSpirit)); // 白狐のキルボタンは満腹ゲージなのでキル役ではない
 
     private bool CanWin => Player.IsAlive() && !Player.Data.Disconnected && (sawOtherKiller || hasKilled) && !HasOtherKiller();
 

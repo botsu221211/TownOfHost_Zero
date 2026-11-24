@@ -556,6 +556,53 @@ public static class Utils
         }
     }
 
+    private static string TeamText(CustomRoleTypes type) => type switch
+    {
+        CustomRoleTypes.Impostor => "インポスター".Color(Palette.ImpostorRed),
+        CustomRoleTypes.Madmate => "インポスター(マッドメイト)".Color(Palette.ImpostorRed),
+        CustomRoleTypes.Crewmate => "クルー".Color(Palette.CrewmateBlue),
+        CustomRoleTypes.Neutral => "ニュートラル".Color(new Color32(170, 170, 170, 255)),
+        _ => type.ToString(),
+    };
+    private static string CountText(CountTypes type) => type switch
+    {
+        CountTypes.Impostor => "インポスター".Color(Palette.ImpostorRed),
+        CountTypes.Crew => "クルー".Color(Palette.CrewmateBlue),
+        CountTypes.None => "なし",
+        CountTypes.OutOfGame => "なし",
+        CountTypes.Jackal => GetRoleName(CustomRoles.Jackal).Color(GetRoleColor(CustomRoles.Jackal)),
+        CountTypes.Pirate => GetRoleName(CustomRoles.Pirate).Color(GetRoleColor(CustomRoles.Pirate)),
+        CountTypes.Catalyst => GetRoleName(CustomRoles.Catalyst).Color(GetRoleColor(CustomRoles.Catalyst)),
+        _ => type.ToString(),
+    };
+    private static string BaseRoleText(RoleTypes type) => type switch
+    {
+        RoleTypes.Crewmate => "クルーメイト",
+        RoleTypes.Impostor => "インポスター",
+        RoleTypes.Shapeshifter => "シェイプシフター",
+        RoleTypes.Phantom => "ファントム",
+        RoleTypes.Engineer => "エンジニア",
+        RoleTypes.Scientist => "科学者",
+        RoleTypes.Tracker => "トラッカー",
+        RoleTypes.Noisemaker => "ノイズメーカー",
+        RoleTypes.GuardianAngel => "守護天使",
+        RoleTypes.Viper => "ヴァイパー",
+        RoleTypes.Detective => "探偵",
+        _ => type.ToString(),
+    };
+    /// <summary>説明文の最初の「[クルー陣営]」「(ニュートラル):」の行は、上に陣営を出すので消す</summary>
+    private static string StripTeamLine(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        var nl = text.IndexOf('\n');
+        var first = (nl >= 0 ? text[..nl] : text).Trim();
+        if (first.Length > 0 && first.Length <= 20 && (first[0] is '[' or '(' or '（' or '【')
+            && (first.EndsWith("]") || first.EndsWith(")") || first.EndsWith("):") || first.EndsWith("]:") || first.EndsWith("】") || first.EndsWith("）")))
+            return nl >= 0 ? text[(nl + 1)..] : "";
+        // 「[インポスター陣営]:\n」のように同じ行に続かない形だけ消す。説明が同じ行に続く時はそのまま
+        return text;
+    }
+
     private static string GetRoleInfoLongText(CustomRoles role)
     {
         var r = role.VanillaRoleConversion();
@@ -600,8 +647,27 @@ public static class Utils
 
         string formatTag = "<size=70%><line-height=1.6pic>";
 
-        var roleString = $"<size=85%>{GetString(role.ToString())}</size>".Color(GetRoleColor(role).ToReadableColor());
-        sb.Append(roleString).Append(formatTag).Append(roleInfoLong).Append("</line-height></size>");
+        var roleInfo = role.GetRoleInfo();
+        if (roleInfo != null)
+        {
+            // TownOfHost-Pko と同じ見せ方: 役職名(大きく)・イントロ・陣営/判定/元の役職・説明
+            formatTag = "<size=60%><line-height=1.5pic>";
+            var color = GetRoleColor(role).ToReadableColor();
+            sb.Append($"<b><size=140%>{GetString(role.ToString())}</size></b>".Color(color)).Append('\n');
+            if (Translator.HasString($"{role}Info"))
+                sb.Append($"<size=85%>{GetString($"{role}Info")}</size>".Color(color)).Append('\n');
+            sb.Append("<size=62%>")
+              .Append($"陣営: {TeamText(roleInfo.CustomRoleType)}    ")
+              .Append($"判定: {CountText(roleInfo.CountType)}    ")
+              .Append($"元の役職: {BaseRoleText(roleInfo.BaseRoleType.Invoke())}")
+              .Append("</size>\n");
+            sb.Append(formatTag).Append(StripTeamLine(roleInfoLong)).Append("</line-height></size>");
+        }
+        else
+        {
+            var roleString = $"<size=85%>{GetString(role.ToString())}</size>".Color(GetRoleColor(role).ToReadableColor());
+            sb.Append(roleString).Append(formatTag).Append(roleInfoLong).Append("</line-height></size>");
+        }
 
         SendMessageAutoSplitAndClearSB(PlayerId, sb, "", formatTag);
 

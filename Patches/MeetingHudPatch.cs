@@ -280,7 +280,8 @@ public static class MeetingHudPatch
                     }
                     ChatUpdatePatch.DoBlockChat = false;
                 }, 3f, "SetName To Chat");
-                if (ReportDeadBodyPatch.SpecialMeeting)
+                // 通報者と死体が同じ人の古い形の強制会議だけ(今の強制会議は普通の会議と同じ処理をするので出さない)
+                if (ReportDeadBodyPatch.SpecialMeeting && ReportDeadBodyPatch.ReportTarget != null)
                 {
                     string formatTag = "<size=70%><line-height=1.6pic>";
 

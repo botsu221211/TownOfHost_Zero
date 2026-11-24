@@ -10,12 +10,6 @@ using TownOfHostY.Roles.Neutral;
 using static TownOfHostY.Translator;
 
 namespace TownOfHostY.Roles.Crewmate;
-/// <summary>
-/// シェリフ。設定「タスクモードで始める」がオンの時は TownOfHost-Pko と同じ仕様:
-/// ・タスクモードとシェリフ(キル)モードを、ペットを撫でて切り替える
-/// ・タスクモードの間はタスクができ、キルボタンはない。キルクールはタスクモードの間だけ減る
-/// ・キルしたら、または会議が始まったらタスクモードに戻る
-/// </summary>
 public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -23,7 +17,7 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
             typeof(Sheriff),
             player => new Sheriff(player),
             CustomRoles.Sheriff,
-            () => RequiresTasks ? RoleTypes.Crewmate : RoleTypes.Impostor,
+            () => RoleTypes.Impostor,
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewSheriff + 0,
             SetupOptionItem,
@@ -36,26 +30,12 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
     : base(
         RoleInfo,
         player,
-        () => RequiresTasks ? HasTask.True : HasTask.False
+        () => HasTask.False
     )
     {
         ShotLimit = ShotLimitOpt.GetInt();
         CurrentKillCooldown = KillCooldown.GetFloat();
-        Taskmode = RequiresTasks;
-        killReadyAt = 0f;
-        ghostFixed = false;
     }
-
-    private static OptionItem StartInTaskMode;
-    /// <summary>タスクモードとシェリフモードを切り替える仕様か</summary>
-    private static bool RequiresTasks => StartInTaskMode?.GetBool() ?? false;
-    /// <summary>今タスクモードか</summary>
-    public bool Taskmode;
-    /// <summary>キルクールが明ける時刻(タスクモードの間だけ減らすので、止まっている間は残り秒数を持つ)</summary>
-    private float killReadyAt;
-    private float pausedLeft = -1f;
-    private bool ghostFixed;
-    private static float Now => Time.realtimeSinceStartup;
 
     private static OptionItem KillCooldown;
     private static OptionItem ShotLimitOpt;
@@ -71,7 +51,6 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
         SheriffCanKillAllAlive,
         SheriffCanKillNeutrals,
         SheriffCanKill,
-        SheriffStartInTaskMode,
     }
     public static Dictionary<CustomRoles, OptionItem> KillTargetOptions = new();
     public static Dictionary<SchrodingerCat.TeamType, OptionItem> SchrodingerCatKillTargetOptions = new();
@@ -93,8 +72,6 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
         IsInfoPoor = BooleanOptionItem.Create(RoleInfo, 16, OptionName.SheriffIsInfoPoor, false, false);
         IsClumsy = BooleanOptionItem.Create(RoleInfo, 17, OptionName.SheriffIsClumsy, false, false);
         CanKillAllAlive = BooleanOptionItem.Create(RoleInfo, 15, OptionName.SheriffCanKillAllAlive, true, false);
-        StartInTaskMode = BooleanOptionItem.Create(RoleInfo, 18, OptionName.SheriffStartInTaskMode, true, false);
-        Options.OverrideTasksData.Create(RoleInfo, 19, StartInTaskMode);
         SetUpKillTargetOption(CustomRoles.Madmate, 13);
         CanKillNeutrals = StringOptionItem.Create(RoleInfo, 14, OptionName.SheriffCanKillNeutrals, KillOption, 0, false);
         SetUpNeutralOptions(30);
@@ -143,132 +120,24 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
         var playerId = Player.PlayerId;
         CurrentKillCooldown = KillCooldown.GetFloat();
         ShotLimit = ShotLimitOpt.GetInt();
-        Taskmode = RequiresTasks;
-        ResetKillTimer();
         Logger.Info($"{Utils.GetPlayerById(playerId)?.GetNameWithRole()} : 残り{ShotLimit}発", "Sheriff");
     }
     private void SendRPC()
     {
         using var sender = CreateSender(CustomRPC.SetSheriffShotLimit);
         sender.Writer.Write(ShotLimit);
-        sender.Writer.Write(Taskmode);
     }
     public override void ReceiveRPC(MessageReader reader, CustomRPC rpcType)
     {
         if (rpcType != CustomRPC.SetSheriffShotLimit) return;
 
         ShotLimit = reader.ReadInt32();
-        Taskmode = reader.ReadBoolean();
     }
     public float CalculateKillCooldown() => CanUseKillButton() ? CurrentKillCooldown : 0f;
     public bool CanUseKillButton()
-        => CanUseSheriffMode()
-        && !Taskmode;
-    private bool CanUseSheriffMode()
         => Player.IsAlive()
         && (CanKillAllAlive.GetBool() || GameStates.AlreadyDied)
         && ShotLimit > 0;
-
-    // ===== タスクモード / シェリフモード (TownOfHost-Pko と同じ仕様) =====
-    /// <summary>キルクールの残り秒数(タスクモードの間だけ減る)</summary>
-    private float KillCooldownLeft => pausedLeft >= 0f ? pausedLeft : Mathf.Max(0f, killReadyAt - Now);
-    private void ResetKillTimer()
-    {
-        killReadyAt = Now + CurrentKillCooldown;
-        pausedLeft = -1f;
-    }
-
-    public override bool UsePetAbility => RequiresTasks;
-    public override float PetCooldown => CanUseSheriffMode() ? 0f : PetAbility.Unusable;
-    public override void OnPet()
-    {
-        if (!RequiresTasks || !CanUseSheriffMode()) return;
-        SwitchMode(!Taskmode);
-    }
-
-    /// <summary>モードを切り替え、本人の画面の役職(クルー/インポスター)とキルボタンを合わせる</summary>
-    private void SwitchMode(bool toTaskmode)
-    {
-        if (!RequiresTasks) toTaskmode = false;
-        Taskmode = toTaskmode;
-        Logger.Info($"{Player.GetNameWithRole()} : {(Taskmode ? "タスク" : "シェリフ")}モード", "Sheriff");
-
-        var clientId = Player.GetClientId();
-        if (AmongUsClient.Instance.AmHost && Player.IsAlive() && clientId != -1 && Player != PlayerControl.LocalPlayer)
-        {
-            // 本人の画面でだけ役職を切り替える。シェリフモードの間はインポスターを仲間に見せないよう科学者にしておく
-            Player.RpcSetRoleDesync(Taskmode ? RoleTypes.Crewmate : RoleTypes.Impostor, clientId);
-            if (!Taskmode)
-            {
-                foreach (var pc in Main.AllAlivePlayerControls)
-                {
-                    if (pc == Player || pc.GetClientId() == -1) continue;
-                    var roleType = pc.GetCustomRole().GetRoleTypes();
-                    if (roleType is RoleTypes.Impostor or RoleTypes.Shapeshifter or RoleTypes.Phantom or RoleTypes.Viper
-                        || pc.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor == true)
-                        pc.RpcSetRoleDesync(RoleTypes.Scientist, clientId);
-                }
-            }
-        }
-        if (!Taskmode)
-        {
-            // 役職を変えるとキルクールが戻るので、少し後で残りのキルクールを合わせる
-            var left = Mathf.Max(KillCooldownLeft, 0.1f);
-            _ = new LateTask(() =>
-            {
-                if (Player != null && !Taskmode && Player.IsAlive()) Player.SetKillCooldown(Mathf.Max(KillCooldownLeft, 0.1f));
-            }, 0.3f, "Sheriff.ModeKillCooldown");
-        }
-        Player.MarkDirtySettings();
-        SendRPC();
-        Utils.NotifyRoles(SpecifySeer: Player);
-    }
-
-    public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
-    {
-        // 会議が始まったらタスクモードに戻す(会議の後は本人の画面もクルーに戻る)
-        if (RequiresTasks && Player.IsAlive() && !Taskmode) SwitchMode(true);
-    }
-    public override void AfterMeetingTasks()
-    {
-        if (RequiresTasks) ResetKillTimer();
-    }
-
-    public override void OnFixedUpdate(PlayerControl player)
-    {
-        if (!AmongUsClient.Instance.AmHost || !RequiresTasks) return;
-        if (!Player.IsAlive())
-        {
-            // 死んだらタスクができる幽霊にする(シェリフモードで死ぬとインポスターの幽霊になるため)
-            if (!ghostFixed && Player != PlayerControl.LocalPlayer && Player.GetClientId() != -1)
-            {
-                ghostFixed = true;
-                _ = new LateTask(() =>
-                {
-                    if (Player != null && GameStates.IsInGame) Player.RpcSetRoleDesync(RoleTypes.CrewmateGhost, Player.GetClientId());
-                }, 1.5f, "Sheriff.GhostRole");
-            }
-            return;
-        }
-        // キルクールはタスクモードの間だけ減る。会議中・シェリフモードの間は止める
-        var counting = Taskmode && GameStates.IsInTask && MeetingHud.Instance == null && ExileController.Instance == null;
-        if (counting && pausedLeft >= 0f)
-        {
-            killReadyAt = Now + pausedLeft;
-            pausedLeft = -1f;
-        }
-        else if (!counting && pausedLeft < 0f)
-        {
-            pausedLeft = Mathf.Max(0f, killReadyAt - Now);
-        }
-        var shown = Mathf.CeilToInt(KillCooldownLeft);
-        if (shown != lastShownCooldown)
-        {
-            lastShownCooldown = shown;
-            Utils.NotifyRoles(SpecifySeer: Player);
-        }
-    }
-    private int lastShownCooldown = -1;
     public bool CanUseImpostorVentButton() => false;
     public override void ApplyGameOptions(IGameOptions opt)
     {
@@ -296,25 +165,8 @@ public sealed class Sheriff : RoleBase, IKiller, ISchrodingerCatOwner
             return;
         }
         killer.ResetKillCooldown();
-        // 撃ったらタスクモードに戻り、キルクールを数え直す
-        if (RequiresTasks)
-        {
-            ResetKillTimer();
-            _ = new LateTask(() =>
-            {
-                if (Player != null && Player.IsAlive() && GameStates.IsInTask) SwitchMode(true);
-            }, 0.5f, "Sheriff.BackToTaskMode");
-        }
     }
-    public override string GetProgressText(bool comms = false)
-    {
-        var text = Utils.ColorString(CanUseSheriffMode() ? Color.yellow : Color.gray, $"〈{ShotLimit}〉");
-        if (RequiresTasks && Player.IsAlive() && !GameStates.IsMeeting)
-            text += Utils.ColorString(Color.yellow, Taskmode
-                ? $" [タスク]<color=#ffffff>({Mathf.CeilToInt(KillCooldownLeft)})</color>"
-                : " [シェリフ]");
-        return text;
-    }
+    public override string GetProgressText(bool comms = false) => Utils.ColorString(CanUseKillButton() ? Color.yellow : Color.gray, $"〈{ShotLimit}〉");
     public static bool CanBeKilledBy(PlayerControl player)
     {
         var cRole = player.GetCustomRole();

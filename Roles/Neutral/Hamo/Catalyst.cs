@@ -29,7 +29,8 @@ public sealed class Catalyst : RoleBase, IKiller
             null,
             "カタリスト",
             "#E60049",
-            isDesyncImpostor: true
+            isDesyncImpostor: true,
+            countType: CountTypes.Catalyst // 判定はクルーではなくカタリスト陣営
         );
     public Catalyst(PlayerControl player)
     : base(
@@ -149,7 +150,8 @@ public sealed class Conductor : RoleBase, IKiller
             null,
             "コンダクター",
             "#00E5FF",
-            isDesyncImpostor: true
+            isDesyncImpostor: true,
+            countType: CountTypes.Catalyst // 判定はクルーではなくカタリスト陣営
         );
     public Conductor(PlayerControl player)
     : base(
@@ -231,7 +233,7 @@ public static class CatalystPair
         if (team.Count == 0) return false;
         var others = alive.Where(p => !IsMember(p)).ToList();
         if (others.Count > team.Count) return false;
-        if (others.Any(p => p.GetCountTypes() is not CountTypes.Crew || p.CanUseKillButton())) return false;
+        if (others.Any(p => p.GetCountTypes() is not CountTypes.Crew || (p.CanUseKillButton() && !p.Is(CustomRoles.KitsuneSpirit)))) return false;
         var ids = Main.AllPlayerControls.Where(IsMember).Select(p => p.PlayerId).ToList();
         if (!CustomWinnerHolder.SetPriorityWinner(CustomWinner.Catalyst, 0, ids)) return false;
         // 勝利画面に「カタリスト＆コンダクター勝利」と出す

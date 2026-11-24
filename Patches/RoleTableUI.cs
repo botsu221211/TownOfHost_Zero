@@ -42,6 +42,8 @@ public static class RoleTableUI
 
     private class RowUI
     {
+        public CustomRoles Role;
+        public string Reading;
         public int SpawnIndex;
         public int CountIndex = -1;
         public OptionItem Spawn;
@@ -60,6 +62,8 @@ public static class RoleTableUI
         public PassiveButton Back;
         public CategoryHeaderMasked BackTitle;
         public readonly List<RowUI> Rows = new();
+        public PassiveButton[] SortButtons;
+        public CategoryHeaderMasked[] SortLabels;
         public readonly Dictionary<int, RowUI> RowBySpawn = new();
     }
     private class Snapshot
@@ -115,7 +119,7 @@ public static class RoleTableUI
 
             template ??= spawnBehaviour.transform.Find("PlusButton")?.GetComponent<PassiveButton>();
 
-            var row = new RowUI { SpawnIndex = spawnIndex, Spawn = spawn };
+            var row = new RowUI { Role = role, Reading = ReadingOf(role), SpawnIndex = spawnIndex, Spawn = spawn };
             TakeSnapshot(spawnIndex, spawnBehaviour);
             if (Options.CustomRoleCounts.TryGetValue(role, out var count) && optionIndex.TryGetValue(count, out var countIndex)
                 && ModGameOptionsMenu.BehaviourList.TryGetValue(countIndex, out var countBehaviour))
@@ -161,11 +165,121 @@ public static class RoleTableUI
             row.Gear = CloneButton(template, container, "Btn_Gear.png", () => OpenDetail(menu, tab, r.SpawnIndex));
         }
 
+        // 並び順の切り替え(MOD順 / あいうえお順)
+        ui.SortButtons = new[]
+        {
+            CreateBoxButton(template, container, SortMode.Mod, () => SetSort(menu, SortMode.Mod)),
+            CreateBoxButton(template, container, SortMode.Kana, () => SetSort(menu, SortMode.Kana)),
+        };
+        ui.SortLabels = new[]
+        {
+            NewText(menu, "MOD順", 0.6f, TextAlignmentOptions.Center),
+            NewText(menu, "あいうえお順", 0.6f, TextAlignmentOptions.Center),
+        };
+
         // 詳細表示の「戻る」
         ui.Back = CloneButton(template, container, "Btn_Back.png", () => CloseDetail(menu, tab));
         ui.BackTitle = NewText(menu, "", 0.8f, TextAlignmentOptions.Left);
 
         tables[tab] = ui;
+    }
+
+    /******** 並び順 ********/
+    public enum SortMode { Mod, Kana }
+    /// <summary>役職の並び順(全部の役職タブで共通)</summary>
+    public static SortMode Sort = SortMode.Mod;
+    private static readonly float[] SortButtonX = { 1.55f, 2.75f };
+    private const float SortButtonWidth = 1.1f;
+    private const float SortButtonHeight = 0.32f;
+    private static readonly Color SortSelectedColor = new(0.2f, 0.45f, 0.85f, 1f);
+    private static readonly Color SortNormalColor = new(0.16f, 0.2f, 0.3f, 1f);
+    private static readonly Color SortHoverColor = new(0.26f, 0.34f, 0.5f, 1f);
+    private static readonly Color SortSelectedHoverColor = new(0.3f, 0.55f, 0.95f, 1f);
+
+    /// <summary>ボタンの色: 選んでいる方は青、マウスを乗せている時は少し明るく(白くはしない)</summary>
+    private static void PaintSortButton(PassiveButton button, SortMode mode, bool hovered)
+    {
+        if (button == null) return;
+        var selected = Sort == mode;
+        var color = selected ? (hovered ? SortSelectedHoverColor : SortSelectedColor) : (hovered ? SortHoverColor : SortNormalColor);
+        foreach (var r in button.GetComponentsInChildren<SpriteRenderer>(true)) r.color = color;
+    }
+    private static Sprite boxSprite;
+
+    private static void SetSort(GameOptionsMenu menu, SortMode mode)
+    {
+        if (Sort == mode) return;
+        Sort = mode;
+        foreach (var tab in tables.Keys.ToArray())
+            if (ModGameOptionsMenu.SettingsMenus.TryGetValue(tab, out var m) && m != null) Layout(m, tab, true);
+    }
+
+    /// <summary>四角いボタン(文字は別に重ねる)</summary>
+    private static PassiveButton CreateBoxButton(PassiveButton template, Transform parent, SortMode mode, Action onClick)
+    {
+        if (boxSprite == null)
+        {
+            var tex = new Texture2D(4, 4);
+            var pixels = new Color32[16];
+            for (int i = 0; i < pixels.Length; i++) pixels[i] = new Color32(255, 255, 255, 255);
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            tex.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
+            boxSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f), 4f);
+            boxSprite.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
+        }
+        var button = Object.Instantiate(template, parent);
+        button.name = "Zero_SortButton";
+        button.transform.localScale = Vector3.one;
+        // 元のボタンのマウスを乗せた時の色替え(真っ白に光る・離しても戻らない)を外して、色は自分で付ける
+        foreach (var handler in button.GetComponentsInChildren<ButtonRolloverHandler>(true)) Object.Destroy(handler);
+        button.OnMouseOver = new();
+        button.OnMouseOut = new();
+        button.OnMouseOver.AddListener((Action)(() => PaintSortButton(button, mode, hovered: true)));
+        button.OnMouseOut.AddListener((Action)(() => PaintSortButton(button, mode, hovered: false)));
+        foreach (var tmp in button.GetComponentsInChildren<TextMeshPro>(true)) tmp.enabled = false;
+        foreach (var renderer in button.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            renderer.sprite = boxSprite;
+            renderer.drawMode = SpriteDrawMode.Simple;
+            renderer.transform.localScale = new Vector3(SortButtonWidth, SortButtonHeight, 1f);
+        }
+        var collider = button.GetComponent<BoxCollider2D>();
+        if (collider != null)
+        {
+            collider.size = new Vector2(SortButtonWidth, SortButtonHeight);
+            collider.offset = Vector2.zero;
+        }
+        button.OnClick = new();
+        button.OnClick.AddListener(onClick);
+        button.gameObject.SetActive(false);
+        return button;
+    }
+
+    // 漢字を含む役職名の読み
+    private static readonly Dictionary<string, string> KanjiReadings = new()
+    {
+        ["宿敵"] = "しゅくてき", ["パン屋"] = "ぱんや", ["探偵"] = "たんてい", ["決闘者"] = "けっとうしゃ",
+        ["花火職人"] = "はなびしょくにん", ["占い師"] = "うらないし", ["妖狐"] = "ようこ", ["一味"] = "いちみ",
+        ["神"] = "かみ", ["守護天使"] = "しゅごてんし", ["背徳者"] = "はいとくしゃ", ["白狐"] = "びゃっこ",
+        ["マッド科学者"] = "まっどかがくしゃ", ["猫又"] = "ねこまた", ["通常インポスター"] = "つうじょういんぽすたー",
+        ["科学者"] = "かがくしゃ", ["鬼"] = "おに", ["海賊"] = "かいぞく", ["純愛者"] = "じゅんあいしゃ",
+        ["霊媒師"] = "れいばいし", ["シュレディンガーの猫"] = "しゅれでぃんがーのねこ", ["自爆魔"] = "じばくま",
+        ["共鳴者"] = "きょうめいしゃ",
+    };
+
+    /// <summary>並べるための読み(ひらがな)。カタカナはひらがなにし、記号は除く</summary>
+    private static string ReadingOf(CustomRoles role)
+    {
+        var name = Utils.GetRoleName(role) ?? role.ToString();
+        if (KanjiReadings.TryGetValue(name, out var reading)) return reading;
+        var sb = new System.Text.StringBuilder();
+        foreach (var c in name)
+        {
+            if (c >= '\u30A1' && c <= '\u30F6') sb.Append((char)(c - 0x60)); // カタカナ → ひらがな
+            else if (c == 'ー' || (c >= '\u3041' && c <= '\u3096') || char.IsLetterOrDigit(c)) sb.Append(c);
+        }
+        return sb.Length > 0 ? sb.ToString() : name;
     }
 
     /******** 配置 ********/
@@ -217,6 +331,8 @@ public static class RoleTableUI
         }
         ui.Back.gameObject.SetActive(false);
         SetActive(ui.BackTitle, false);
+        foreach (var b in ui.SortButtons) b.gameObject.SetActive(false);
+        foreach (var l in ui.SortLabels) SetActive(l, false);
 
         float num = StartY;
         int detail = detailIndex.TryGetValue(tab, out var d) ? d : -1;
@@ -235,23 +351,24 @@ public static class RoleTableUI
             Place(ui.Columns[2], container, MaxCenter, num, center: true);
             num -= ColumnBlockHeight;
 
-            for (int index = 0; index < OptionItem.AllOptions.Count; index++)
+            // 並び順の切り替えボタン(タイトルの右)
+            for (int k = 0; k < ui.SortButtons.Length; k++)
             {
-                var option = OptionItem.AllOptions[index];
-                if (option.Tab != tab) continue;
+                var selected = (int)Sort == k;
+                var x = SortButtonX[k];
+                var button = ui.SortButtons[k];
+                button.transform.localPosition = new Vector3(x, StartY - 0.1f, -3f);
+                PaintSortButton(button, (SortMode)k, hovered: false);
+                button.gameObject.SetActive(true);
+                Place(ui.SortLabels[k], container, x, StartY - 0.1f, center: true);
+                ui.SortLabels[k].transform.localPosition += new Vector3(0f, 0f, -1.5f);
+                ui.SortLabels[k].Title.color = selected ? Color.white : new Color(0.75f, 0.8f, 0.9f);
+            }
 
-                // 区切りの見出し(役職ごとの見出しは表では出さない)
-                if (option is TextOptionItem && !option.IsHiddenOn(mode)
-                    && ModGameOptionsMenu.CategoryHeaderList.TryGetValue(index, out var section))
-                {
-                    section.transform.localPosition = new Vector3(HeaderX, num, -2f);
-                    section.gameObject.SetActive(true);
-                    num -= SectionHeight;
-                }
-
-                if (!ui.RowBySpawn.TryGetValue(index, out var row)) continue;
-                if (row.Spawn.IsHiddenOn(mode)) continue;
-                if (!ModGameOptionsMenu.BehaviourList.TryGetValue(index, out var spawnBehaviour)) continue;
+            void PlaceRow(RowUI row)
+            {
+                if (row.Spawn.IsHiddenOn(mode)) return;
+                if (!ModGameOptionsMenu.BehaviourList.TryGetValue(row.SpawnIndex, out var spawnBehaviour)) return;
 
                 spawnBehaviour.transform.localPosition = new Vector3(OptionX, num, -2f);
                 spawnBehaviour.gameObject.SetActive(true);
@@ -273,7 +390,32 @@ public static class RoleTableUI
                 row.Help.gameObject.SetActive(true);
                 row.Gear.gameObject.SetActive(true);
                 num -= RowHeight;
+            }
 
+            if (Sort == SortMode.Kana)
+            {
+                // あいうえお順: 区切りの見出しは出さずに、役職名の読みで並べる
+                foreach (var row in ui.Rows.OrderBy(r => r.Reading, StringComparer.Ordinal).ThenBy(r => r.SpawnIndex))
+                    PlaceRow(row);
+            }
+            else
+            {
+                // MOD順: 今まで通り、MOD の中の順番で区切りの見出しを付けて並べる
+                for (int index = 0; index < OptionItem.AllOptions.Count; index++)
+                {
+                    var option = OptionItem.AllOptions[index];
+                    if (option.Tab != tab) continue;
+
+                    if (option is TextOptionItem && !option.IsHiddenOn(mode)
+                        && ModGameOptionsMenu.CategoryHeaderList.TryGetValue(index, out var section))
+                    {
+                        section.transform.localPosition = new Vector3(HeaderX, num, -2f);
+                        section.gameObject.SetActive(true);
+                        num -= SectionHeight;
+                    }
+
+                    if (ui.RowBySpawn.TryGetValue(index, out var row)) PlaceRow(row);
+                }
             }
         }
         else

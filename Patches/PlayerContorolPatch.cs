@@ -25,6 +25,8 @@ class CheckProtectPatch
 {
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
+        // ダミー(CustomNetObject)が絡む時は CustomNetObject 側で捨てているので、ここでは何もしない
+        if (CustomNetObject.Is(target) || CustomNetObject.Is(__instance)) return false;
         if (!AmongUsClient.Instance.AmHost) return false;
         Logger.Info("CheckProtect発生: " + __instance.GetNameWithRole() + "=>" + target.GetNameWithRole(), "CheckProtect");
         if (__instance.Is(CustomRoles.Sheriff)
@@ -56,6 +58,8 @@ class CheckMurderPatch
     }
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
+        // ダミー(CustomNetObject)が絡む時は CustomNetObject 側で捨てているので、ここでは何もしない
+        if (CustomNetObject.Is(target) || CustomNetObject.Is(__instance)) return false;
         if (!AmongUsClient.Instance.AmHost || AmongUsClient.Instance.IsGameOver) return false;
         RevealVisualRoleBeforeMurder(__instance, target);
 
@@ -257,8 +261,21 @@ public static class PlayerControlCheckShapeshiftPatch
 
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target, [HarmonyArgument(1)] bool shouldAnimate)
     {
+        // 変身先がダミーの時は CustomNetObject 側で処理している(白狐はダミーを選んでも食べられる)
+        if (CustomNetObject.Is(target) || CustomNetObject.Is(__instance)) return false;
         if (AmongUsClient.Instance.IsGameOver || !AmongUsClient.Instance.AmHost)
         {
+            return false;
+        }
+
+        // 白狐はシェイプを「お揚げを食べる」ボタンとして使う(変身はしない)。
+        // 白狐の画面では変身したままに見えていることがあり、その時は自分を選んだ「変身解除」の合図が来る。
+        // 下の無効な変身のチェックで弾かれると食べられないので、白狐はここで先に処理する
+        if (__instance.GetRoleClass() is Roles.Neutral.KitsuneSpirit kitsune)
+        {
+            var animate = false;
+            kitsune.OnCheckShapeshift(target ?? __instance, ref animate);
+            __instance.RpcRejectShapeshift();
             return false;
         }
 
@@ -359,6 +376,8 @@ class ShapeshiftPatch
 {
     public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
+        // ダミー(CustomNetObject)の見た目合わせの変身は、プレイヤーの変身として扱わない
+        if (CustomNetObject.Is(__instance)) return;
         Logger.Info($"{__instance?.GetNameWithRole()} => {target?.GetNameWithRole()}", "Shapeshift");
 
         var shapeshifter = __instance;
@@ -554,13 +573,30 @@ class ReportDeadBodyPatch
     public static List<byte> CannotReportByDeadBodyList;
     public static List<byte> DontReportMarkList;
     public static Dictionary<byte, List<NetworkedPlayerInfo>> WaitReport = new();
+
+    private static bool forceNext;
+    /// <summary>
+    /// 強制会議(設定画面のボタン・/fm)。緊急ボタンと同じ見た目(アニメーション)で開き、
+    /// ボタンの回数・サボタージュ中・通報禁止などの制限は通さないが、会議の前の処理(役職の処理・名前の表示など)は普通に行う
+    /// </summary>
+    public static void ForceMeeting(PlayerControl reporter)
+    {
+        if (reporter == null || !AmongUsClient.Instance.AmHost) return;
+        forceNext = true;
+        reporter.ReportDeadBody(null);
+        forceNext = false;
+    }
+
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] NetworkedPlayerInfo target)
     {
+        var forced = forceNext;
+        forceNext = false;
         reporter = __instance.Data;
         ReportTarget = target;
-        SpecialMeeting = reporter?.PlayerId == ReportTarget?.PlayerId;
+        SpecialMeeting = forced || reporter?.PlayerId == ReportTarget?.PlayerId;
         if (GameStates.IsMeeting) return false;
-        Logger.Info($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
+        Logger.Info($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}{(forced ? " (強制会議)" : "")}", "ReportDeadBody");
+        if (forced && AmongUsClient.Instance.AmHost && !__instance.Data.IsDead) goto MeetingConfirmed;
         if (SpecialMeeting) return true;
         if (Options.IsStandardHAS && target != null && __instance == target.Object) return true; //[StandardHAS] ボタンでなく、通報者と死体が同じなら許可
         if (Options.CurrentGameMode == CustomGameMode.HideAndSeek || Options.IsStandardHAS) return false;
@@ -629,10 +665,10 @@ class ReportDeadBodyPatch
             }
         }
 
-        //=============================================
-        //以下、ボタンが押されることが確定したものとする。
-        //=============================================
-
+    //=============================================
+    //以下、ボタンが押されることが確定したものとする。
+    //=============================================
+    MeetingConfirmed:
         MeetingStates.MeetingCalled = true;
 
         foreach (var pc in Main.AllPlayerControls)

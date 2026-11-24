@@ -13,6 +13,7 @@ public static class PlayMenuImages
 {
     private const string LocalImage = "PlayLocal.png";
     private const string OnlineImage = "PlayOnline.png";
+    private const string CreateGameImage = "PlayCreateGame.png";
     // ==== 見た目の調整用 ====
     /// <summary>絵の横幅(元の絵の横幅に対する割合)</summary>
     private const float ImageWidthRatio = 0.79f;
@@ -26,17 +27,183 @@ public static class PlayMenuImages
     private static bool loggedHierarchy;
 
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start)), HarmonyPostfix]
-    public static void StartPostfix(MainMenuManager __instance) => Apply(__instance);
+    public static void StartPostfix(MainMenuManager __instance)
+    {
+        Apply(__instance);
+        ApplyCreateGame(__instance);
+    }
 
     [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.OpenGameModeMenu)), HarmonyPostfix]
     public static void OpenGameModeMenuPostfix(MainMenuManager __instance) => Apply(__instance);
+
+    // オンラインを押した後の「ゲーム作成」ボタン
+    [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.OpenOnlineMenu)), HarmonyPostfix]
+    public static void OpenOnlineMenuPostfix(MainMenuManager __instance) => ApplyCreateGame(__instance);
+
+    private static bool loggedCreateHierarchy;
+    private const string CreateLabelName = "ZeroCreateGameLabel";
+    /// <summary>普段の明るさ(マウスを乗せると 1 になって光る)</summary>
+    private const float NormalBrightness = 0.8f;
+    private static readonly Color DisabledColor = new(0.45f, 0.45f, 0.45f, 1f);
+
+    // 光らせる処理で使う(毎フレーム、マウスが乗っているかを自分で調べて色を決める)
+    private static PassiveButton localButtonRef, onlineButtonRef, createButtonRef;
+    private static SpriteRenderer localArtRef, onlineArtRef;
+    private static GameObject createLabelHighlight, createLabelInactive;
+    private static bool onlineEnabled = true;
+
+    /// <summary>
+    /// オンラインを押した後の「ゲーム作成」ボタンを、ローカル・オンラインと同じ見た目にする:
+    /// 同じ大きさの絵(枠付き)と、その下に同じ大きさの「ゲーム作成」の札
+    /// </summary>
+    private static void ApplyCreateGame(MainMenuManager menu)
+    {
+        try
+        {
+            var button = menu?.createGameButton;
+            if (button == null) return;
+            createButtonRef = button;
+            if (!loggedCreateHierarchy)
+            {
+                loggedCreateHierarchy = true;
+                LogHierarchy(button.transform, "CreateGame");
+            }
+            var scaler = button.transform.Find("Scaler");
+            if (scaler == null || scaler.Find(CreateLabelName) != null) return; // もう作ってある
+
+            // お手本: ローカルのボタン(先に差し替えておく)
+            Apply(menu);
+            var localButton = menu.playLocalButton;
+            var localArt = localButton?.transform.Find("Scaler/Background")?.GetComponent<SpriteRenderer>();
+            var localLabel = localButton?.transform.Find("Scaler/Label");
+            var localBar = localLabel?.Find("Inactive")?.GetComponent<SpriteRenderer>();
+            if (localArt == null || !IsOurs(localArt.sprite) || localLabel == null || localBar == null)
+            {
+                Logger.Warn("お手本のローカルのボタンが見つからないので、ゲーム作成のボタンを変えられません", nameof(PlayMenuImages));
+                return;
+            }
+            // ローカルの絵と札の、画面上の大きさと位置関係
+            var imgWorld = Vector2.Scale(localArt.sprite.bounds.size, localArt.transform.lossyScale);
+            var labelOffset = localLabel.position - localArt.transform.position;
+            var barWorld = Vector2.Scale(localBar.sprite.bounds.size, localBar.transform.lossyScale);
+            var barCenterOffset = labelOffset + (localBar.transform.position - localLabel.position);
+
+            // ゲーム作成のボタンは状態ごとに別の絵を持っている
+            // (マウスを乗せた時 Highlight/Background・普段 Inactive/BackgroundDesat・押した時 Clicked/Background (1))
+            var states = new (string path, float brightness)[]
+            {
+                ("Scaler/Label/Highlight/Background", 1f),
+                ("Scaler/Label/Inactive/BackgroundDesat", NormalBrightness),
+                ("Scaler/Label/Clicked/Background (1)", 0.9f),
+            };
+            var arts = new System.Collections.Generic.List<(SpriteRenderer art, float brightness)>();
+            foreach (var (path, brightness) in states)
+            {
+                var art = button.transform.Find(path)?.GetComponent<SpriteRenderer>();
+                if (art != null) arts.Add((art, brightness));
+            }
+            if (arts.Count == 0)
+            {
+                Logger.Warn("ゲーム作成のボタンの絵が見つかりませんでした", nameof(PlayMenuImages));
+                return;
+            }
+
+            // 絵と札をまとめた全体が、元のボタンの絵の真ん中に来るようにする
+            var areaCenter = arts[0].art.transform.position;
+            var top = imgWorld.y / 2f;
+            var bottom = barCenterOffset.y - barWorld.y / 2f;
+            var imgCenter = areaCenter - new Vector3(0f, (top + bottom) / 2f, 0f);
+
+            var tex = Framed(CreateGameImage);
+            if (tex == null) return;
+            foreach (var (art, brightness) in arts)
+            {
+                var scaleX = Mathf.Max(art.transform.lossyScale.x, 0.0001f);
+                var ppu = tex.width / (imgWorld.x / scaleX);
+                var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), ppu);
+                sprite.name = $"ZeroPlay_{CreateGameImage}";
+                sprite.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;
+                art.drawMode = SpriteDrawMode.Simple;
+                art.sprite = sprite;
+                // 元の絵はボタンの枠の中でだけ見える(マスク)。同じ大きさにすると枠からはみ出すので外す
+                art.maskInteraction = SpriteMaskInteraction.None;
+                art.color = new Color(brightness, brightness, brightness, 1f);
+                art.transform.position = new Vector3(imgCenter.x, imgCenter.y, art.transform.position.z);
+            }
+            // 元の文字(絵の上に重なる)は隠す
+            var origLabel = button.transform.Find("Scaler/Label");
+            if (origLabel != null)
+                foreach (var tmp in origLabel.GetComponentsInChildren<TMPro.TextMeshPro>(true))
+                    tmp.gameObject.SetActive(false);
+
+            // ローカルの札を写して、同じ大きさ・同じ位置関係で付ける
+            var label = UnityEngine.Object.Instantiate(localLabel.gameObject, scaler).transform;
+            label.name = CreateLabelName;
+            var parentScale = scaler.lossyScale;
+            label.localScale = new Vector3(
+                localLabel.lossyScale.x / Mathf.Max(parentScale.x, 0.0001f),
+                localLabel.lossyScale.y / Mathf.Max(parentScale.y, 0.0001f),
+                localLabel.localScale.z);
+            label.position = new Vector3(imgCenter.x + labelOffset.x, imgCenter.y + labelOffset.y, arts[0].art.transform.position.z - 0.5f);
+            foreach (var tmp in label.GetComponentsInChildren<TMPro.TextMeshPro>(true))
+            {
+                foreach (var tr in tmp.GetComponents<TextTranslatorTMP>()) UnityEngine.Object.Destroy(tr);
+                tmp.text = "ゲーム作成";
+            }
+            createLabelHighlight = label.Find("Highlight")?.gameObject;
+            createLabelInactive = label.Find("Inactive")?.gameObject;
+            label.Find("Disabled")?.gameObject.SetActive(false);
+            createLabelHighlight?.SetActive(false);
+            createLabelInactive?.SetActive(true);
+            label.gameObject.SetActive(true);
+        }
+        catch (Exception ex)
+        {
+            Logger.Exception(ex, nameof(PlayMenuImages));
+        }
+    }
+
+    /// <summary>マウスがボタンに乗っているか(ボタンの当たり判定で自分で調べる)</summary>
+    private static bool IsHovered(PassiveButton button)
+    {
+        if (button == null || !button.isActiveAndEnabled || Camera.main == null) return false;
+        var point = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        foreach (var collider in button.GetComponents<Collider2D>())
+            if (collider != null && collider.enabled && collider.OverlapPoint(point)) return true;
+        return false;
+    }
+
+    /// <summary>
+    /// マウスを乗せた時に光らせる(普段は少し暗く)。
+    /// オンラインはバニラが乗せた時・離した時に絵を入れ替える作りで、こちらの色が上書きされるので、毎フレーム色を決め直す
+    /// </summary>
+    [HarmonyPatch(typeof(ModManager), nameof(ModManager.LateUpdate)), HarmonyPostfix]
+    public static void HoverPostfix()
+    {
+        try
+        {
+            if (localArtRef != null && localButtonRef != null && IsOurs(localArtRef.sprite))
+                localArtRef.color = IsHovered(localButtonRef) ? Color.white : Normal();
+            if (onlineArtRef != null && onlineButtonRef != null && IsOurs(onlineArtRef.sprite))
+                onlineArtRef.color = !onlineEnabled ? DisabledColor : IsHovered(onlineButtonRef) ? Color.white : Normal();
+            if (createButtonRef != null && (createLabelHighlight != null || createLabelInactive != null))
+            {
+                var hovered = IsHovered(createButtonRef);
+                if (createLabelHighlight != null && createLabelHighlight.activeSelf != hovered) createLabelHighlight.SetActive(hovered);
+                if (createLabelInactive != null && createLabelInactive.activeSelf == hovered) createLabelInactive.SetActive(!hovered);
+            }
+        }
+        catch { }
+    }
+    private static Color Normal() => new(NormalBrightness, NormalBrightness, NormalBrightness, 1f);
 
     // オンラインはログイン前など押せない時に白黒の絵になる。差し替えた絵は灰色にして表す
     [HarmonyPatch(typeof(PlayOnlineButtonSprite), nameof(PlayOnlineButtonSprite.SetState)), HarmonyPostfix]
     public static void SetStatePostfix(PlayOnlineButtonSprite __instance, bool __0)
     {
         if (__instance.Sprite == null || !IsOurs(__instance.Sprite.sprite)) return;
-        __instance.Sprite.color = __0 ? Color.white : new Color(0.45f, 0.45f, 0.45f, 1f);
+        onlineEnabled = __0;
+        __instance.Sprite.color = __0 ? Normal() : DisabledColor;
     }
 
     private static bool IsOurs(Sprite sprite) => sprite != null && sprite.name.StartsWith("ZeroPlay");
@@ -68,6 +235,8 @@ public static class PlayMenuImages
                     {
                         onlineSprite.Colored = sprite;
                         onlineSprite.Greyscale = sprite;
+                        onlineButtonRef = onlineButton;
+                        onlineArtRef = onlineArt;
                     }
                 }
             }
@@ -85,7 +254,11 @@ public static class PlayMenuImages
                     localArt = path == null ? null : localButton.transform.Find(path)?.GetComponent<SpriteRenderer>();
                 }
                 localArt ??= FindLargestArt(localButton);
-                if (localArt != null) Replace(localArt, LocalImage);
+                if (localArt != null && Replace(localArt, LocalImage) != null)
+                {
+                    localButtonRef = localButton;
+                    localArtRef = localArt;
+                }
                 else Logger.Warn("ローカルのボタンの絵が見つかりませんでした", nameof(PlayMenuImages));
             }
         }
@@ -96,7 +269,8 @@ public static class PlayMenuImages
     }
 
     /// <summary>元の絵と同じ大きさで差し替える。差し替えた絵を返す</summary>
-    private static Sprite Replace(SpriteRenderer renderer, string file)
+    private static Sprite Replace(SpriteRenderer renderer, string file) => Replace(renderer, file, ImageWidthRatio);
+    private static Sprite Replace(SpriteRenderer renderer, string file, float widthRatio, float heightRatio = 1f)
     {
         if (renderer == null) return null;
         if (IsOurs(renderer.sprite)) return renderer.sprite;
@@ -109,7 +283,7 @@ public static class PlayMenuImages
         var texture = Framed(file);
         if (texture == null) return null;
         // 横幅を元の絵より少し細くして、隣のボタンの絵と重ならないようにする
-        var ppu = Mathf.Max(texture.width / (size.x * ImageWidthRatio), texture.height / size.y);
+        var ppu = Mathf.Max(texture.width / (size.x * widthRatio), texture.height / (size.y * heightRatio));
         var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), ppu);
         sprite.name = $"ZeroPlay_{file}";
         sprite.hideFlags |= HideFlags.HideAndDontSave | HideFlags.DontUnloadUnusedAsset;

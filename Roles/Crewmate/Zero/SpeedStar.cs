@@ -6,7 +6,7 @@ using TownOfHostY.Roles.Core;
 namespace TownOfHostY.Roles.Crewmate;
 
 /// <summary>
-/// スピードスター (TOH_Zero)
+/// シフトスター (TOH_Zero。内部名は SpeedStar のまま。他 MOD と名前が被るので表示名だけ変えた)
 /// 設定秒数ごとに、自分の足の速さが最小〜最大倍率の間でランダムに変わる。
 /// </summary>
 public sealed class SpeedStar : RoleBase
@@ -20,7 +20,7 @@ public sealed class SpeedStar : RoleBase
             CustomRoleTypes.Crewmate,
             (int)Options.offsetId.CrewY + 2100,
             SetupOptionItem,
-            "スピードスター",
+            "シフトスター",
             "#ffd400"
         );
     public SpeedStar(PlayerControl player)
@@ -58,9 +58,9 @@ public sealed class SpeedStar : RoleBase
     {
         OptionInterval = FloatOptionItem.Create(RoleInfo, 10, OptionName.SpeedStarInterval, new(1f, 30f, 0.5f), 5f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionMinRate = FloatOptionItem.Create(RoleInfo, 11, OptionName.SpeedStarMinRate, new(0f, 3f, 0.25f), 0.5f, false)
+        OptionMinRate = FloatOptionItem.Create(RoleInfo, 11, OptionName.SpeedStarMinRate, new(0f, 10f, 0.25f), 0.5f, false)
             .SetValueFormat(OptionFormat.Multiplier);
-        OptionMaxRate = FloatOptionItem.Create(RoleInfo, 12, OptionName.SpeedStarMaxRate, new(0.25f, 3f, 0.25f), 3f, false)
+        OptionMaxRate = FloatOptionItem.Create(RoleInfo, 12, OptionName.SpeedStarMaxRate, new(0.25f, 10f, 0.25f), 10f, false)
             .SetValueFormat(OptionFormat.Multiplier);
     }
 

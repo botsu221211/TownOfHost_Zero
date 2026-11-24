@@ -421,8 +421,30 @@ public class GameSettingMenuPatch
             __instance.ChangeTab(1, Controller.currentTouchType == Controller.TouchType.Joystick);
         }
         __instance.StartCoroutine(__instance.CoSelectDefault());
+        KeepDescriptionClearOfIcon(__instance);
 
         return false;
+    }
+
+    /// <summary>
+    /// 説明欄の右下にある MOD のアイコンと文字が重ならないよう、文字の右側に余白を取る
+    /// </summary>
+    private static void KeepDescriptionClearOfIcon(GameSettingMenu menu)
+    {
+        try
+        {
+            var text = menu.MenuDescriptionText;
+            if (text == null) return;
+            var width = text.rectTransform.rect.width;
+            if (width <= 0f) return;
+            var margin = text.margin;
+            margin.z = width * 0.17f; // 右の余白(アイコンの幅くらい)
+            text.margin = margin;
+        }
+        catch (System.Exception ex)
+        {
+            Logger.Exception(ex, "GameSettingMenu.DescriptionMargin");
+        }
     }
     [HarmonyPatch(nameof(GameSettingMenu.Close)), HarmonyPostfix]
     private static void ClosePostfix(GameSettingMenu __instance)

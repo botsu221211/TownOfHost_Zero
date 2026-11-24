@@ -298,7 +298,7 @@ public static class Moderator
         // 本編は死んだ人の通報を受け付けないので、送った人が死んでいれば生きている誰かを通報者にする
         var reporter = sender.IsAlive() ? sender : Main.AllAlivePlayerControls.FirstOrDefault();
         if (reporter == null) return;
-        reporter.ReportDeadBody(reporter.Data);
+        ReportDeadBodyPatch.ForceMeeting(reporter);
     }
 
     private static void HandleStart(PlayerControl sender, string[] args)

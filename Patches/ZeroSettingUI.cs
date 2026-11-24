@@ -164,6 +164,7 @@ public static class ZeroSettingUI
         CustomRoles.FriedPotato,
         CustomRoles.SpeedStar,
         CustomRoles.Infectioner,
+        CustomRoles.KitsuneSpirit,
         CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
     };
     private static int pendingAction = -1;

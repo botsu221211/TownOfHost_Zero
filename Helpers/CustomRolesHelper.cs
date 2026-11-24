@@ -127,6 +127,8 @@ static class CustomRolesHelper
     public static bool IsDontShowOptionRole(this CustomRoles role)
     {
         return role is CustomRoles.Godfather or CustomRoles.Janitor
+            // カタリスト＆コンダクターは「カタリスト＆コンダクター」(コンビ役職)の設定で出す
+            or CustomRoles.Catalyst or CustomRoles.Conductor
             // 期間限定で
             or CustomRoles.Gang
             or CustomRoles.SKMadmate
@@ -335,4 +337,6 @@ public enum CountTypes
     Impostor,
     Jackal,
     Pirate,
+    /// <summary>カタリスト＆コンダクター(自陣営の人数で勝つキル人外)</summary>
+    Catalyst,
 }

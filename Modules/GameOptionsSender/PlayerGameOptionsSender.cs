@@ -163,7 +163,8 @@ namespace TownOfHostY.Modules
 
             if (Main.AllPlayerSpeed.TryGetValue(player.PlayerId, out var speed))
             {
-                AURoleOptions.PlayerSpeedMod = Mathf.Clamp(speed, Main.MinSpeed, 3f);
+                // 速さの上限は 10 (TownOfHost-Pko / hamo と同じ。本編の設定画面の上限 3 より速くできる)
+                AURoleOptions.PlayerSpeedMod = Mathf.Clamp(speed, Main.MinSpeed, 10f);
             }
 
             state.taskState.hasTasks = Utils.HasTasks(player.Data, false);

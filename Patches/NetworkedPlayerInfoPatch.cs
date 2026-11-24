@@ -21,6 +21,12 @@ class GameDataSerializePatch
             __result = true;
             return true;
         }
+        // ダミー(CustomNetObject)の見た目を送る間は、ホストの名前を絵に書き換えたまま送る必要があるので触らない
+        if (CustomNetObject.SerializingSprite)
+        {
+            __result = true;
+            return true;
+        }
         if (DontTouch)
         {
             __instance.ClearDirtyBits();

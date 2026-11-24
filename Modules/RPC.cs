@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
+using InnerNet;
 
 using TownOfHostY.Roles.Core;
 using static TownOfHostY.Translator;
@@ -101,6 +102,18 @@ namespace TownOfHostY
                         && vanishInfo.BaseRoleType.Invoke() == RoleTypes.Phantom)
                     {
                         __instance.CheckVanish();
+                        return false;
+                    }
+                    break;
+                case RpcCalls.CheckShapeshift:
+                    // ほかの人にはクルーに見せているシェイプシフター役職(白狐など)も、タイガーと同じくここで直接処理する
+                    if (AmongUsClient.Instance.AmHost && GameStates.IsInGame
+                        && __instance.GetCustomRole().GetRoleInfo() is { IsDesyncImpostor: true } shapeInfo
+                        && shapeInfo.BaseRoleType.Invoke() == RoleTypes.Shapeshifter)
+                    {
+                        var shapeTarget = MessageExtensions.ReadNetObject<PlayerControl>(subReader);
+                        var animate = subReader.ReadBoolean();
+                        __instance.CheckShapeshift(shapeTarget, animate);
                         return false;
                     }
                     break;

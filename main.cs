@@ -304,6 +304,7 @@ public enum CustomDeathReason
     Telekinesis,
     IgnitionBombed,
     Eaten,
+    Starved,
 
     Win,
     etc = -1

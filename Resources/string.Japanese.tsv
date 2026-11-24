@@ -192,8 +192,9 @@ NBakery	(第三)覚醒パン屋
 Nekomata	猫又
 Express	エクスプレス
 FriedPotato	フライドポテト
-SpeedStar	スピードスター
+SpeedStar	シフトスター
 Infectioner	インフェクショナー
+KitsuneSpirit	白狐
 Tiger	タイガー
 Chatter	チャッター
 Catalyst	カタリスト
@@ -240,6 +241,7 @@ ExpressInfo	気持ちよく駆け回ろう
 FriedPotatoInfo	僕はフライドポテト!
 SpeedStarInfo	見ろ私のこの速さを
 InfectionerInfo	感染はもう始まっている。
+KitsuneSpiritInfo	具現する怨嗟
 TigerInfo	全てを喰らい尽くせ
 ChatterInfo	早く発言しないと...
 CatalystInfo	触媒となって命を刈り取れ
@@ -270,7 +272,7 @@ BaitInfoLong	(クルー陣営):\nキルされた時に、自身をキルした�
 LighterInfoLong	(クルー陣営):\n条件を満たすと、自分の視界を広げることができる。
 MayorInfoLong	(クルー陣営):\n会議の票を複数持ち、まとめて一人または\nスキップに入れることができる。(設定有)\nポータブルボタンを持っている時は、ペットを撫でると緊急会議を開ける。
 SabotageMasterInfoLong	(クルー陣営):\nリアクター・O2・通信妨害を一人で修理可能。\n停電は一箇所のレバーに触れる事で全て直る。\nドアを開けるとその部屋の全てのドアが開く。
-SheriffInfoLong	(クルー陣営):\nインポスター陣営をキルすることができる。\n※ニュートラルをキル可能にする設定有。\nｸﾙｰﾒｲﾄをキルすると自殺する。タスクはない。\n「タスクモードで始める」がオンの時は、ペットを撫でてタスクモードとシェリフモードを切り替える。タスクモードの間はタスクができ、キルクールが減る。シェリフモードの間だけキルでき、撃つか会議が始まるとタスクモードに戻る。
+SheriffInfoLong	(クルー陣営):\nインポスター陣営をキルすることができる。\n※ニュートラルをキル可能にする設定有。\nｸﾙｰﾒｲﾄをキルすると自殺する。タスクはない。
 SnitchInfoLong	(クルー陣営):\nタスク完了と同時にインポスターの名前の色が\n赤く表示され逆に自身のタスクが少なくなると\n名前の横に★が表示されｲﾝﾎﾟｽﾀｰに暴かれる。
 SpeedBoosterInfoLong	(クルー陣営):\nタスクを終わらせると、ランダムな生存者のスピードを上げる事ができる。
 DoctorInfoLong	(クルー陣営):\nプレイヤーの死因を知ることができる。\nまた、充電がある限りどこでもバイタルを確認できる。
@@ -286,6 +288,7 @@ ExpressInfoLong	[クルー陣営]\nただ足が速い。
 FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の名前が「フライドポテト」として届く。\nキルされると、次の会議で「フライドポテトが捕食された」と全員に通知される。
 SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
 InfectionerInfoLong	[ニュートラル]\n会議で自分が投票した相手を感染させる(設定回数まで)。\nまた、感染している人が投票した相手にも感染が広がる。\n感染状況の可視化がオンのとき、感染者には自分にしか見えないマーク(◆)がつく。\n自分が生存していて、自分以外の生存者が全員感染状態になった時点で単独勝利。\nほかの勝利と同時になったときは勝利優先度の高い方が勝つ。
+KitsuneSpiritInfoLong	[ニュートラル]\nお揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する。\nマップの決められた場所にお皿(白いダミー)があり、そのうち数枚にお揚げ(茶色いダミー)が乗っている。お揚げの上でシェイプ(誰を選んでもよい)すると食べられ、お揚げは別のお皿へ移る。\n満腹度はキルボタンのクールダウンで表示される(キルはできない)。\n生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利。
 TigerInfoLong	[ニュートラル]\n通常は長いキルクールでキルする第三陣営。ファントム能力で「捕食」状態になると、足が速くなり視界が狭くなり、すぐにキルできるようになる。\n捕食中のキルは死体を残さずにその場で消す(通報も会議での表示もされない)。キルに成功すると捕食は終わり、時間内にキルできなければ自滅する。会議が始まると捕食は解除される。\n自分以外に生きているキル可能者がいなくなると単独勝利(ほかのキル可能者を一度確認するか、自分がキルした後から判定)。タイガーが生きている間は人数による陣営勝利は保留になる。\n勝利優先度は大きい数値ほど優先。\n(TownOfHost-Shell より移植)
 ChatterInfoLong	[ニュートラル]\n会議で設定時間チャットしなかったら死亡する(会議開始から10秒は猶予。/cmd から始まる文は数えない)。\n試合が終わった時に生き残っていれば単独勝利。勝利優先度は大きい数値ほど優先。\n(TownOfHost-Pko より移植)
 CatalystInfoLong	[ニュートラル]\n必ずコンダクターと同時にアサインされる。キルボタンは通常使えない(設定で使える)。\n共鳴: ファントムボタンで、コンダクターのキル範囲内にいる一番近いプレイヤーをキルし、その地点にワープする。コンダクターが自分の視界に入っていない時だけ使える。\nコンダクターが死ぬと自分も死ぬ(設定でオポチュニストになる)。\n勝利条件: 他のキル役がおらず、ほかの生存者の人数が自陣営の人数以下になること。\n(TownOfHost-hamo より移植)
@@ -765,7 +768,6 @@ SheriffCanKillAll	<color=#00cccc>全てオン</color>
 SheriffCanKillSeparately	個別に設定
 SheriffIsInfoPoor	アドミン・カメラ等の機器が使用できない
 SheriffIsClumsy	停電・通信妨害が直せない
-SheriffStartInTaskMode	タスクモードで始める(ペットで切り替え)
 In%team%	(%team%陣営)
 SheriffMisfireKillsTarget	誤爆時、ターゲットも死ぬ
 SheriffShotLimit	キル可能回数
@@ -1170,6 +1172,7 @@ DeathReason.CounterAttack	反撃
 DeathReason.Telekinesis	念殺
 DeathReason.IgnitionBombed	爆死
 DeathReason.Eaten	捕食
+DeathReason.Starved	餓死
 Alive	生存
 Win	勝利
 	
@@ -1699,6 +1702,12 @@ InfectionerInfectCount	自身から感染させられる回数
 InfectionerWinPriority	勝利優先度
 InfectionerVisualize	感染状況の可視化
 InfectionerAdditionalWin	追加勝利にする
+KitsuneArrowToKiller	キラーの位置を矢印で可視化
+KitsuneMaxOage	お揚げの最大出現数
+KitsuneOageSatiety	お揚げ1個の腹持ち
+KitsuneMaxSatiety	最大満腹度
+KitsuneInitialSatiety	初期満腹度
+KitsuneWinSatiety	勝利に必要な満腹度
 TigerWinPriority	勝利優先度
 TigerKillCooldown	通常キルクール
 TigerAbilityCooldown	捕食のクールダウン

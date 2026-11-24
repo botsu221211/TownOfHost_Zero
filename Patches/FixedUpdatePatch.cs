@@ -35,6 +35,8 @@ namespace TownOfHostY
             try
             {
                 if (__instance == null) return; // 安全ガード
+                // ダミー(CustomNetObject)にも本編は FixedUpdate を呼ぶので、プレイヤーとして扱わない
+                if (CustomNetObject.Is(__instance)) return;
 
                 var player = __instance;
 

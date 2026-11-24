@@ -88,7 +88,7 @@ namespace TownOfHostY
                 : System.Linq.Enumerable.FirstOrDefault(Main.AllAlivePlayerControls);
             if (reporter == null) return;
             Logger.Info($"設定画面の強制会議ボタン (通報者: {reporter.GetNameWithRole()})", "ForceMeeting");
-            reporter.ReportDeadBody(reporter.Data);
+            ReportDeadBodyPatch.ForceMeeting(reporter);
 
             // 設定画面を閉じる
             if (ClientActionItem.CustomBackground != null) ClientActionItem.CustomBackground.gameObject.SetActive(false);

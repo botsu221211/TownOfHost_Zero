@@ -438,9 +438,12 @@ namespace TownOfHostY
                 int Imp = Utils.AlivePlayersCount(CountTypes.Impostor);
                 int Jackal = Utils.AlivePlayersCount(CountTypes.Jackal);
                 int Pirate = Utils.AlivePlayersCount(CountTypes.Pirate);
+                int Catalyst = Utils.AlivePlayersCount(CountTypes.Catalyst);
                 int Crew = Utils.AlivePlayersCount(CountTypes.Crew);
+                // 自陣営の人数で勝つキル人外(カタリスト陣営)が生きている間は、ほかの陣営は人数では勝てない
+                // (カタリスト陣営の勝ちは CatalystPair.CheckInstantWin で先に判定している)
 
-                if (Imp == 0 && Crew == 0 && Jackal == 0 && Pirate == 0) //全滅
+                if (Imp == 0 && Crew == 0 && Jackal == 0 && Pirate == 0 && Catalyst == 0) //全滅
                 {
                     reason = GameOverReason.ImpostorsByKill;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);
@@ -450,12 +453,12 @@ namespace TownOfHostY
                     reason = GameOverReason.ImpostorsByKill;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Lovers);
                 }
-                else if (Jackal == 0 && Pirate == 0 && Crew <= Imp) //インポスター勝利
+                else if (Jackal == 0 && Pirate == 0 && Catalyst == 0 && Crew <= Imp) //インポスター勝利
                 {
                     reason = GameOverReason.ImpostorsByKill;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Impostor);
                 }
-                else if (Imp == 0 && Pirate == 0 && Crew <= Jackal) //ジャッカル勝利
+                else if (Imp == 0 && Pirate == 0 && Catalyst == 0 && Crew <= Jackal) //ジャッカル勝利
                 {
                     reason = GameOverReason.ImpostorsByKill;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Jackal);
@@ -463,7 +466,7 @@ namespace TownOfHostY
                     CustomWinnerHolder.WinnerRoles.Add(CustomRoles.JClient);
                     CustomWinnerHolder.WinnerRoles.Add(CustomRoles.JSidekick);
                 }
-                else if (Imp == 0 && Jackal == 0 && Crew <= Pirate) //海賊勝利
+                else if (Imp == 0 && Jackal == 0 && Catalyst == 0 && Crew <= Pirate) //海賊勝利
                 {
                     reason = GameOverReason.ImpostorsByKill;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Pirate);
@@ -471,7 +474,7 @@ namespace TownOfHostY
                     CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Gang);
                     CustomWinnerHolder.AdditionalWinnerRoles.Add(CustomRoles.Gang);
                 }
-                else if (Jackal == 0 && Pirate == 0 && Imp == 0) //クルー勝利
+                else if (Jackal == 0 && Pirate == 0 && Catalyst == 0 && Imp == 0) //クルー勝利
                 {
                     reason = GameOverReason.CrewmatesByVote;
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Crewmate);

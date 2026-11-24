@@ -64,6 +64,13 @@ public static class AntiBlackout
         Impostor,
         Jackal,
         Pirate,
+        Catalyst,
+        /// <summary>
+        /// 上のどれもいないのに試合が続く時(タイガーなど、判定がクルーのキル人外が生きている時)。
+        /// 身代わりのインポスターが 0 人だと、客は追放の後に「インポスター全滅で試合終了」と判断して暗転するので、
+        /// 生きているキル人外を身代わりにする
+        /// </summary>
+        NeutralKiller,
     }
     private static bool IsRecognizeType(PlayerControl pc, RecognizeType type)
     {
@@ -77,6 +84,8 @@ public static class AntiBlackout
             RecognizeType.Impostor => countType == CountTypes.Impostor,
             RecognizeType.Jackal => countType == CountTypes.Jackal,
             RecognizeType.Pirate => countType == CountTypes.Pirate,
+            RecognizeType.Catalyst => countType == CountTypes.Catalyst,
+            RecognizeType.NeutralKiller => customRole.IsNeutral() && customRole != CustomRoles.KitsuneSpirit && pc.CanUseKillButton(),
             _ => false,
         };
     }
@@ -183,8 +192,12 @@ public static class AntiBlackout
             foreach (var dummy in list)
             {
                 if (killer != null && dummy.PlayerId == pc.PlayerId) continue;
+                // 身代わりは客の画面でインポスター側の役職に見えないと意味がない
+                var dummyRole = dummy.GetCustomRole().GetRoleTypes();
+                if (dummyRole is not (RoleTypes.Impostor or RoleTypes.Shapeshifter or RoleTypes.Phantom or RoleTypes.Viper))
+                    dummyRole = RoleTypes.Impostor;
                 sender.StartRpc(dummy.NetId, RpcCalls.SetRole)
-                    .Write((ushort)dummy.GetCustomRole().GetRoleTypes())
+                    .Write((ushort)dummyRole)
                     .Write(true)
                     .EndRpc();
                 count++;

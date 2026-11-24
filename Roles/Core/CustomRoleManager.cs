@@ -592,6 +592,7 @@ public enum CustomRoles
     Chatter,
     Catalyst,
     Conductor,
+    KitsuneSpirit,
     DarkHide,
     LoveCutter,
     PlatonicLover,

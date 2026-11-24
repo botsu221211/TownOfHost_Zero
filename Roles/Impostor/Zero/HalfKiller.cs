@@ -65,6 +65,11 @@ public sealed class HalfKiller : RoleBase, IImpostor
         marked.Add(target.PlayerId);
         Logger.Info($"{killer.GetNameWithRole()} → {target.GetNameWithRole()}: 1回目なので印を付ける", nameof(HalfKiller));
         Player.SetKillCooldown();
+        // キルが取り消された知らせ(FailedError)の後にもう一度キルクールを合わせる(取り消しで 0 に戻ることがある)
+        _ = new LateTask(() =>
+        {
+            if (Player != null && Player.IsAlive() && GameStates.IsInTask) Player.SetKillCooldown();
+        }, 0.5f, "HalfKiller.MarkCooldown");
         Utils.NotifyRoles(SpecifySeer: Player);
     }
 

@@ -18,6 +18,7 @@ namespace TownOfHostY
             public static void Postfix(CustomNetworkTransform __instance, [HarmonyArgument(0)] Vector2 position)
             {
                 if (!AmongUsClient.Instance.AmHost) return;
+                if (CustomNetObject.Is(__instance.myPlayer)) return; // ダミーはプレイヤーではない
                 if (position == new Vector2(-25f, 40f)) return; //最初の湧き地点ならreturn
                 if (GameStates.IsInTask)
                 {
