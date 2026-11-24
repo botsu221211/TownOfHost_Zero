@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TownOfHost-Zero 役職Wiki</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Hiragino Sans", "Yu Gothic", sans-serif; line-height: 1.7; color: #1f2430; background: #f5f6fa; }
+    .wrap { display: flex; min-height: calc(100vh - 146px); position: relative; }
+    aside { width: 232px; background: #fff; border-right: 1px solid #e8ebf2; padding: 18px 14px 20px; flex-shrink: 0; }
+    .listtitle { text-align: center; font-size: 22px; font-weight: 700; margin: 4px 0 16px; color: #1f2430; }
+    .search { position: relative; margin-bottom: 16px; }
+    .search::before { content: "🔍"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: 0.5; pointer-events: none; }
+    aside input { width: 100%; padding: 9px 12px 9px 32px; border: 1px solid #e3e7f0; border-radius: 10px; background: #f7f8fb; font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+    aside input::placeholder { color: #a3aabb; }
+    aside input:focus { border-color: #8db8ea; box-shadow: 0 0 0 3px rgba(74,144,217,.14); background: #fff; }
+    .tagfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
+    body.typing aside a { pointer-events: none; }
+    .tagbtn { font-size: 12px; padding: 4px 11px; border-radius: 999px; border: 1px solid #e3e7f0; background: #fff; color: #5a6276; cursor: pointer; transition: all .15s; }
+    .tagbtn:hover { border-color: #c5ccdb; color: #1f2430; }
+    .tagbtn.on { background: #1f2430; border-color: #1f2430; color: #fff; }
+    aside h3 { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8a92a6; margin: 0; padding: 14px 8px 6px; border-top: 1px solid #eef0f5; }
+    aside h3:first-of-type { border-top: none; padding-top: 4px; }
+    aside a { display: flex; align-items: center; gap: 10px; padding: 6px 10px; margin: 0; text-decoration: none; border-radius: 6px; font-size: 14px; line-height: 1.5; transition: background .15s, color .15s; }
+    aside a::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; flex-shrink: 0; }
+    aside a:hover { background: #f5f7fb; }
+    aside a + a { margin-top: 1px; }
+    aside a.active { background: #f0f4fb; font-weight: 600; }
+    aside a.active::before { opacity: 1; }
+    .panel { flex: 1; min-width: 0; background: #fff; }
+    .close { display: none; }
+    main { padding: 28px 32px; max-width: 760px; }
+    .hero { border-radius: 16px; padding: 22px 24px; margin-bottom: 20px; background: #fff; border: 1px solid #e3e6ee; border-left-width: 6px; box-shadow: 0 2px 10px rgba(20,30,60,.05); }
+    main h1 { font-size: 26px; margin: 0 0 4px; }
+    main h2 { font-size: 15px; margin: 24px 0 8px; color: #5a6276; font-weight: 600; }
+    main p { margin: 0 0 8px; }
+    main ul { margin: 0; padding-left: 22px; }
+    main li { margin: 4px 0; }
+    .meta { color: #7a8294; font-size: 14px; margin: 0; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: #f0f3f9; color: #3a4256; }
+    .block { background: #fafbfd; border: 1px solid #eef1f6; border-radius: 12px; padding: 14px 16px; }
+    .tagfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+    .tagbtn { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #d7dce6; background: #f9fafc; color: #3a4256; cursor: pointer; }
+    .tagbtn.on { background: #4a90d9; border-color: #4a90d9; color: #fff; }
+    .en { color: #8a92a6; font-size: 14px; margin: 2px 0 0; }
+    .catch { font-style: italic; color: #5a6276; margin: 4px 0 0; }
+    .tagpill { display: inline-block; font-size: 12px; padding: 3px 12px; margin: 0 6px 6px 0; border: 1px solid; border-radius: 999px; background: transparent; }
+    .intro { font-size: 16px; line-height: 1.9; margin: 18px 0 24px; color: #2a3142; }
+    .description { white-space: pre-line; }
+    .logo { display: block; height: 72px; width: 72px; object-fit: contain; }
+    .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 20; height: 64px; background: #fff; border-bottom: 1px solid #e3e6ee; display: flex; align-items: center; justify-content: space-between; padding: 0 16px 0 0; }
+    .logo-area { display: flex; align-items: center; height: 64px; flex: 1; min-width: 0; padding-left: 12px; }
+    .theme { display: flex; flex-shrink: 0; margin-left: auto; border: 1px solid #e3e7f0; border-radius: 999px; padding: 3px; gap: 2px; }
+    .themebtn { border: none; background: transparent; color: #5a6276; font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+    .themebtn.on { background: #1f2430; color: #fff; }
+    .wrap { margin-top: 64px; }
+    .foot { display: flex; justify-content: center; padding: 28px 16px; border-top: 1px solid #e8ebf2; background: #fff; }
+    .ghbtn { padding: 9px 20px; border-radius: 999px; background: #1f2430; color: #fff; text-decoration: none; font-size: 14px; transition: opacity .15s; }
+    .ghbtn:hover { opacity: .85; }
+    .empty { color: #7a8294; padding: 24px 8px; text-align: left; font-size: 15px; word-break: keep-all; line-height: 1.8; margin: 0; }
+    @media (max-width: 900px) {
+      .wrap { display: block; min-height: 0; }
+      aside { width: auto; border-right: none; }
+      .panel {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        overflow-y: auto; z-index: 2;
+        transform: translateX(100%);
+        transition: transform 0.35s ease;
+      }
+      .panel { top: 64px; }
+      body.detail-open .panel { transform: translateX(0); }
+      .close {
+        display: block; position: sticky; top: 0; z-index: 3;
+        width: 100%; padding: 14px 16px; border: none; border-bottom: 1px solid #e3e6ee;
+        background: #fff; font-size: 15px; text-align: left; color: #1f2430; cursor: pointer;
+      }
+      main { padding: 20px 18px; }
+    }
+    body.dark { background: #13161c; color: #e4e7ee; }
+    body.dark .topbar, body.dark aside, body.dark .panel, body.dark .foot { background: #1a1e26; border-color: #2a2f3b; }
+    body.dark .topbar, body.dark .foot { border-top-color: #2a2f3b; }
+    body.dark .theme { border-color: #2f3543; }
+    body.dark .themebtn { color: #aab1c0; }
+    body.dark .themebtn.on { background: #e4e7ee; color: #13161c; }
+    body.dark aside input { background: #222730; border-color: #2f3543; color: #e4e7ee; }
+    body.dark aside input::placeholder { color: #6f7889; }
+    body.dark aside input:focus { background: #1a1e26; border-color: #4a6d96; box-shadow: 0 0 0 3px rgba(74,144,217,.2); }
+    body.dark .listtitle { color: #e4e7ee; }
+    body.dark aside h3 { color: #7d8799; border-top-color: #2a2f3b; }
+    body.dark aside a:hover { background: #222730; }
+    body.dark aside a.active { background: #26304a; }
+    body.dark .tagbtn { background: #1a1e26; border-color: #2f3543; color: #aab1c0; }
+    body.dark .tagbtn:hover { border-color: #4a5366; color: #e4e7ee; }
+    body.dark .tagbtn.on { background: #e4e7ee; border-color: #e4e7ee; color: #13161c; }
+    body.dark main h2 { color: #aab1c0; border-bottom-color: #2a2f3b; }
+    body.dark .meta, body.dark .empty, body.dark .catch { color: #8a92a6; }
+    body.dark .ghbtn { background: #e4e7ee; color: #13161c; }
+    body.dark .hero { background: #1a1e26; border-color: #2a2f3b; box-shadow: none; }
+    body.dark .close { background: #1a1e26; border-color: #2a2f3b; color: #e4e7ee; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div id="logo-area" class="logo-area"></div>
+    <div class="theme">
+      <button type="button" id="light" class="themebtn on">Light</button>
+      <button type="button" id="dark" class="themebtn">Dark</button>
+    </div>
+  </header>
+  <div class="wrap">
+    <aside>
+      <p class="listtitle">役職一覧</p>
+    <div class="search"><input id="search" type="search" placeholder="役職名で検索"></div>
+      <div id="tagfilter"></div>
+      <div id="list"></div>
+    </aside>
+    <section class="panel">
+      <button id="close" class="close" type="button">← キャンセル</button>
+      <main id="content"></main>
+    </section>
+  </div>
+  <footer class="foot">
+    <a id="github" class="ghbtn" href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+
+  <!-- 役職データ（HJSON）。ここを編集する -->
+  <script type="text/hjson" id="roles-data">
+  [
+    {
+      name: "フライドポテト"
+      en: "Fried Poteto"
+      team: "クルー"
+      color: "#f5ad42"
+      tags: ["クルー","通常役職"]
+      intro: "僕はフライドポテト！"
+      desc: "個人秘匿の時に自身の名前が「フライドポテト」で秘匿されます。\nキルされた際に「フライドポテトが捕食された」と会議で通知されます。\n以上。"
+      options: ["秘匿のフライドポテト", "通知"]
+    },
+    {
+      name: "ミミック"
+      en: "Mimic"
+      team: "インポスター"
+      color: "#ff1919"
+      tags: ["インポスター","通常役職"]
+      intro: "君にならないと生きていけない..."
+      desc: "シェイプする事で自殺クールが上昇し、していないと自殺クールが減少し自殺してしまう役職。【死因：自殺】\n自殺クールが設定されており1秒につき1減少する。シェイプをしている最中は自殺クールが上昇していく。\n自殺クールは会議を持ち越す。"
+      options: ["キルクール", "自殺クールの上限","シェイプクール","シェイプできる秒数"]
+    },
+    {
+      name: "フレンジー"
+      en: "Frenzy"
+      team: "インポスター"
+      color: "#ff1919"
+      tags: ["インポスター","通常役職"]
+      intro: "周りなど気にしない"
+      desc: "視界が狭い代わり、短いキルクールダウンを持つインポスターです。\nまた、味方のインポスターをキルすることがあります。"
+      options: ["キルクールダウン", "視界倍率"]
+    },
+    {
+      name: "ハーフキラー"
+      en: "Half Killer"
+      team: "インポスター"
+      color: "#ff1919"
+      tags: ["インポスター","通常役職"]
+      intro: "このキルはいつか喉元に届く"
+      desc: "キルクールが短い代わりに対象を2回キルしないとキルが出来ない。\n1度目のキルを対象にすると自身にしか見えないマークがつく。\nマークがついているプレイヤーにキルをすると対象は死亡する。"
+      options: ["キルクール"]
+    },
+    {
+      name: "インフェクショナー"
+      en: "Infectioner"
+      team: "ニュートラル"
+      color: "#969696"
+      tags: ["ニュートラル","通常役職"]
+      intro: "感染はもう始まっている。"
+      desc: "設定回数まで自信が会議で投票した相手を感染させる。\nまた、感染している人が投票した相手にも感染する。\n感染状況の可視化がオンのとき、感染者はインフェクショナーからしか見えないマークがつく。\n生存しているプレイヤーが全員感染状態になった時点で単独勝利。"
+      options: ["自身から感染させれる回数", "勝利優先度", "感染状況の可視化", "追加勝利にする"]
+    },
+    {
+      name: "白狐"
+      en: "Kitsune Spirit"
+      team: "ニュートラル"
+      color: "#e6e0c8"
+      tags: ["ニュートラル","通常役職"]
+      intro: "具現する怨嗟"
+      desc: "『白狐はお揚げを食べながら身を潜める第三陣営です。\n満腹ゲージが底を尽きてしまうと餓死してしまいます。餓死を免れるため、また勝利のため、他プレイヤーにバレないようにお揚げを食べ続けなければなりません。』\n(Nosのwikiから一部引用)\nお揚げのお皿は白いダミーで表示。\nお揚げが乗っている場合は茶色いダミーで表示。\nお皿は白狐がいる時のみマップの決められた場所に出現します。\n全お皿の中からランダムな3つなお皿にお揚げが出現します。\nお揚げを食べるとまた別なランダムなお皿に移動します。\nお揚げの上でシェイプで適当な人を選択するとそのお揚げを食べることができます。\n満腹ゲージはキルクールで表示。"
+      win: "『生存し、かつ「勝利に必要な満腹度」で設定したお揚げゲージの量を保ちながらゲームが終了する』\n(Nosのwikiから引用)"
+    　options: ["キラーの位置を矢印で可視化", "お揚げの最大出現数", "お揚げ1個の腹持ち", "最大満腹度", "初期満腹度", "勝利に必要な満腹度"]
+    },
+    {
+      name: "シフトスター"
+      en: "Shift Star"
+      team: "クルー"
+      color: "#ffd105"
+      tags: ["クルー","通常役職"]
+      intro: "見ろ私のこの速さを"
+      desc: "設定秒数ごとに自身の足がランダムな速さに変わります。"
+      options: ["速度変化秒数","速度変化最小倍率", "速度変化最大倍率"]
+    },
+    {
+      name: "マッドアンノウン"
+      en: "Mad Unknown"
+      team: "マッドメイト"
+      color: "#ff1919"
+      tags: ["マッドメイト","通常役職"]
+      intro: "さあ、正体不明の怪奇に怯えるがいい"
+      desc: "キルボタンを押す事で対象にインポスター陣営にしか見えないマークをつけることができ、\nファントムボタンを押すことでマークのついてる人のスキンの色をランダムに変え名前を？？？に出来る、\n自分が死亡するまで効果は継続する。\nファントムを使う前に会議に入るとマークはリセットされる。\nベントに入ることで自分にもマークをつけることができる。"
+      options: ["キルクール","ファントムクール","ベントクール", "ファントムの使用回数"]
+    },
+    {
+      name: "ノーリミッター"
+    　en: "Non Limiter"
+      team: "インポスター"
+      color: "#ff1919"
+      tags: ["インポスター","ネタ役職"]
+      intro: "私に制御という文字はない"
+      desc: "キルクールが早い代わりに、キルクールが明けると自動でキルします。\nキルクールが明けた時にキルできる対象がいなかった場合、自身が死亡します。"
+      options: ["キルクール"]
+    }
+  ]
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/hjson@3.2.2/bundle/hjson.min.js"></script>
+
+  <script>
+    const LOGO_PATH = "logo.png"
+    const GITHUB_URL = "https://github.com/";
+    document.getElementById('github').href = GITHUB_URL;
+    if (LOGO_PATH) {
+      const img = document.createElement('img');
+      img.src = LOGO_PATH;
+      img.alt = 'ロゴ';
+      img.className = 'logo';
+      img.onerror = () => { img.remove(); document.body.classList.remove('has-logo'); };
+      document.getElementById('logo-area').appendChild(img);
+      document.body.classList.add('has-logo');
+    }
+
+    const roles = (() => {
+      try {
+        return Hjson.parse(document.getElementById('roles-data').textContent);
+      } catch (e) {
+        console.error('役職データのHJSONに誤りがあります', e);
+        return [];
+      }
+    })();
+
+    const TAG_COLORS = {
+      "クルー": "#8cffff",
+      "インポスター": "#ff1919",
+      "マッドメイト": "#ff1919",
+      "ニュートラル": "#969696",
+      "通常役職": "#bbbbbb",
+      "ネタ役職": "#ff5cf7"
+    };
+    const TAG_PALETTE = ["#4a90d9", "#2e9e6a", "#e08a2e", "#2aa3b8", "#c28a1f", "#d05f9c", "#6f7fd0", "#4f9d4f"];
+    function tagColor(t) {
+      if (TAG_COLORS[t]) return TAG_COLORS[t];
+      let h = 0;
+      for (const ch of t) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return TAG_PALETTE[h % TAG_PALETTE.length];
+    }
+
+    const TEAMS = ["クルー", "インポスター", "マッドメイト", "ニュートラル", "通常役職", "ネタ役職"];
+    const list = document.getElementById('list');
+    const content = document.getElementById('content');
+    const search = document.getElementById('search');
+    const closeBtn = document.getElementById('close');
+
+    let activeTag = null;
+    let currentId = -1;
+    let pressedLink = null;
+    document.addEventListener('pointerdown', e => {
+      pressedLink = e.target.closest ? e.target.closest('aside a') : null;
+    }, true);
+    const tagBox = document.createElement('div');
+    tagBox.className = 'tagfilter';
+    document.getElementById('tagfilter').replaceWith(tagBox);
+
+    function slug(i) { return 'r' + i; }
+
+    function renderTagFilter() {
+      const all = [...new Set(roles.flatMap(r => r.tags || []))];
+      tagBox.innerHTML = '';
+      for (const t of all) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tagbtn' + (activeTag === t ? ' on' : '');
+        b.textContent = t;
+        const c = tagColor(t);
+        b.style.borderColor = c;
+        b.style.color = activeTag === t ? '#fff' : c;
+        if (activeTag === t) b.style.background = c;
+        b.addEventListener('click', () => {
+          activeTag = activeTag === t ? null : t;
+          renderTagFilter();
+          renderList(search.value);
+        });
+        tagBox.appendChild(b);
+      }
+    }
+
+    function renderList(filter = '') {
+      list.innerHTML = '';
+      for (const team of TEAMS) {
+        const items = roles
+          .map((r, i) => ({ r, i }))
+          .filter(({ r }) => r.team === team && r.name.includes(filter) && (!activeTag || (r.tags || []).includes(activeTag)));
+        if (items.length === 0) continue;
+        const h = document.createElement('h3');
+        h.textContent = team + '陣営';
+        list.appendChild(h);
+        for (const { r, i } of items) {
+          const a = document.createElement('a');
+          a.href = '#';
+          a.dataset.i = i;
+          a.textContent = r.name;
+          a.addEventListener('click', e => {
+            e.preventDefault();
+            if (pressedLink !== a) return;
+            pressedLink = null;
+            if (Date.now() < guardUntil) return;
+            currentId = i;
+            renderDetail();
+          });
+          a.style.color = r.color || '#222';
+          list.appendChild(a);
+        }
+      }
+    }
+
+    function renderDetail() {
+      const i = currentId;
+      document.querySelectorAll('aside a').forEach(a =>
+        a.classList.toggle('active', Number(a.dataset.i) === i));
+      if (i < 0) {
+        document.body.classList.remove('detail-open');
+        content.innerHTML = '';
+        return;
+      }
+      const r = roles[i];
+      const tags = (r.tags || []).map(t => `<span class="tagpill" style="border-color:${tagColor(t)};color:${tagColor(t)}">${t}</span>`).join('');
+      const win = r.win ? `<h2>勝利条件</h2><p>${r.win}</p>` : '';
+      const opts = (r.options || []).map(o => `<li>${o}</li>`).join('');
+      content.innerHTML = `
+        <div class="hero">
+          <h1 style="color:${r.color || '#1f2430'}">${r.name}</h1>
+          ${r.en ? `<p class="en">${r.en}</p>` : ''}
+          ${r.intro ? `<p class="catch">${r.intro}</p>` : ''}
+          <div class="tags" style="margin-top:12px">${tags}</div>
+        </div>
+        <h2>役職説明</h2><p class="description">${r.desc}</p>
+        ${win}
+        <h2>設定項目</h2><ul>${opts}</ul>
+      `;
+      document.body.classList.add('detail-open');
+      document.querySelector('.panel').scrollTop = 0;
+    }
+
+    closeBtn.addEventListener('click', () => {
+      currentId = -1;
+      renderDetail();
+    });
+    const lightBtn = document.getElementById('light');
+    const darkBtn = document.getElementById('dark');
+    function setTheme(mode) {
+      document.body.classList.toggle('dark', mode === 'dark');
+      lightBtn.classList.toggle('on', mode !== 'dark');
+      darkBtn.classList.toggle('on', mode === 'dark');
+    }
+    lightBtn.addEventListener('click', () => setTheme('light'));
+    darkBtn.addEventListener('click', () => setTheme('dark'));
+    let guardUntil = 0;
+    function guardLinks() { guardUntil = Date.now() + 700; }
+    search.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); guardLinks(); search.blur(); }
+    });
+    search.addEventListener('blur', guardLinks);
+    search.addEventListener('focus', () => {
+      document.body.classList.add('typing');
+
+      // 検索欄を操作したときに、スマホ用の詳細パネルが残っていたら閉じる
+      currentId = -1;
+      renderDetail();
+    });
+    search.addEventListener('blur', () => setTimeout(() => document.body.classList.remove('typing'), 600));
+    search.addEventListener('input', () => renderList(search.value));
+    renderTagFilter();
+    renderList();
+    renderDetail();
+  </script>
+</body>
+</html>
