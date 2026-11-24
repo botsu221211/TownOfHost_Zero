@@ -64,9 +64,8 @@ public static class AntiBlackout
         Impostor,
         Jackal,
         Pirate,
-        Catalyst,
         /// <summary>
-        /// 上のどれもいないのに試合が続く時(タイガーなど、判定がクルーのキル人外が生きている時)。
+        /// 上のどれもいないのに試合が続く時(判定がクルーのキル人外が生きている時など)。
         /// 身代わりのインポスターが 0 人だと、客は追放の後に「インポスター全滅で試合終了」と判断して暗転するので、
         /// 生きているキル人外を身代わりにする
         /// </summary>
@@ -84,7 +83,6 @@ public static class AntiBlackout
             RecognizeType.Impostor => countType == CountTypes.Impostor,
             RecognizeType.Jackal => countType == CountTypes.Jackal,
             RecognizeType.Pirate => countType == CountTypes.Pirate,
-            RecognizeType.Catalyst => countType == CountTypes.Catalyst,
             RecognizeType.NeutralKiller => customRole.IsNeutral() && customRole != CustomRoles.KitsuneSpirit && pc.CanUseKillButton(),
             _ => false,
         };

@@ -1121,7 +1121,7 @@ public static class StandardIntroHelper
                 if (pc.GetClientId() == -1) continue;
                 if (pc.GetCustomRole().GetRoleTypes() != RoleTypes.Phantom) continue;
                 // ファントムを全員に送ると、インポスターから見て仲間(ファントム)に見えてしまう。
-                // ほかの人にクルーに見せる役職(タイガー・カタリストなどのキルできるニュートラル)はここで送らない(本人にだけ後で送る)
+                // ほかの人にクルーに見せる役職(ファントムが元のキルできるニュートラルなど)はここで送らない(本人にだけ後で送る)
                 if (pc.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor == true) continue;
                 pc.RpcSetRoleNormal(RoleTypes.Phantom, true);
             }

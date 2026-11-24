@@ -45,7 +45,7 @@ namespace TownOfHostY
 
         /// <summary>
         /// 今の勝者の勝利優先度 (TOH_Zero)。通常の陣営勝利は 0。
-        /// 勝利優先度を持つ役職(インフェクショナー・タイガー・チャッターなど)は <see cref="SetPriorityWinner"/> で勝者を決める
+        /// 勝利優先度を持つ役職(インフェクショナーなど)は <see cref="SetPriorityWinner"/> で勝者を決める
         /// </summary>
         public static int WinPriority;
 

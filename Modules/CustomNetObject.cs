@@ -49,6 +49,8 @@ public sealed class CustomNetObject
     private const float ResnapDelay = 0.3f;
     private const float SpritePacketGap = 0.2f;
     private const int MaxPacketBytes = 1000;
+    /// <summary>同時に出している途中にしてよいダミーの数</summary>
+    private const int MaxInFlight = 3;
 
     private enum State { Waiting, Spawned, Visible, Sprited, Live, Gone }
 
@@ -194,12 +196,15 @@ public sealed class CustomNetObject
         foreach (var obj in all)
             if (obj.pc && PlayerControl.AllPlayerControls.Contains(obj.pc)) PlayerControl.AllPlayerControls.Remove(obj.pc);
 
-        bool spawning = false;
+        // 出している途中(可視化・見た目・位置の段階)のダミーの数。決まった数までは並べて進める
+        int inFlight = 0;
+        foreach (var obj in all)
+            if (obj.state is State.Spawned or State.Visible or State.Sprited) inFlight++;
         for (int i = all.Count - 1; i >= 0; i--)
         {
             if (i >= all.Count) continue;
             var obj = all[i];
-            try { obj.Tick(now, ref spawning); }
+            try { obj.Tick(now, ref inFlight); }
             catch (Exception ex)
             {
                 Logger.Exception(ex, Tag);
@@ -208,19 +213,20 @@ public sealed class CustomNetObject
         }
     }
 
-    private void Tick(float now, ref bool spawning)
+    private void Tick(float now, ref int inFlight)
     {
         switch (state)
         {
             case State.Waiting:
-                if (spawning || !CanStartSpawn(now)) return;
+                // 出し始めの間隔(可視化は max(0.2 秒, 客の数 / 12) 空ける)と、見た目の包みの間隔(0.2 秒)は守ったまま、
+                // 前のダミーが出し終わるのを待たずに次を出し始める(全部出るまでが速くなる)
+                if (inFlight >= MaxInFlight || !CanStartSpawn(now)) return;
                 Spawn(now);
-                spawning = true;
+                inFlight++;
                 return;
             case State.Spawned:
             case State.Visible:
             case State.Sprited:
-                spawning = true;
                 if (now < stepAt) return;
                 if (!pc) { Despawn(); return; }
                 if (state == State.Spawned) SendVisibility(now);

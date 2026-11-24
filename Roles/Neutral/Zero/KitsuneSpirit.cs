@@ -11,8 +11,9 @@ namespace TownOfHostY.Roles.Neutral;
 /// <summary>
 /// 白狐 / kitsune spirit (TOH_Zero。Nebula on the Ship のスペクターが元)
 /// ・お揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する
-/// ・マップの決められた場所にお皿(白いダミー)が出る。そのうちランダムな数枚にお揚げ(茶色いダミー)が乗る
-/// ・お揚げの上でシェイプ(誰を選んでもよい)するとお揚げを食べる。食べたお揚げは別のお皿へ移る
+/// ・マップの決められた場所にお皿が出る。最初は全部のお皿にお揚げが乗っている(茶色いダミー)
+/// ・お揚げの上でシェイプ(誰を選んでもよい)するとお揚げを食べる。食べたお皿は空(白いダミー)になり、
+///   設定秒数たつとまたお揚げが乗る(会議の間は止まり、会議の後に続きから数える)
 /// ・満腹度はキルボタンのクールダウンで表示する(キルはできない)
 /// ・生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利
 /// </summary>
@@ -43,7 +44,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     }
 
     private static OptionItem OptionArrowToKiller;
-    private static OptionItem OptionMaxOage;
+    private static OptionItem OptionOageRespawn;
     private static OptionItem OptionOageSatiety;
     private static OptionItem OptionMaxSatiety;
     private static OptionItem OptionInitialSatiety;
@@ -51,7 +52,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     enum OptionName
     {
         KitsuneArrowToKiller,
-        KitsuneMaxOage,
+        KitsuneOageRespawn,
         KitsuneOageSatiety,
         KitsuneMaxSatiety,
         KitsuneInitialSatiety,
@@ -69,9 +70,10 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     private static void SetupOptionItem()
     {
         OptionArrowToKiller = BooleanOptionItem.Create(RoleInfo, 10, OptionName.KitsuneArrowToKiller, false, false);
-        OptionMaxOage = IntegerOptionItem.Create(RoleInfo, 11, OptionName.KitsuneMaxOage, new(1, 10, 1), 3, false)
-            .SetValueFormat(OptionFormat.Pieces);
-        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(0.5f, 180f, 0.5f), 15f, false)
+        // 11 は前の「お揚げの最大出現数」で使っていた番号なので空けておく(保存された値と混ざらないように)
+        OptionOageRespawn = FloatOptionItem.Create(RoleInfo, 16, OptionName.KitsuneOageRespawn, new(2.5f, 180f, 2.5f), 30f, false)
+            .SetValueFormat(OptionFormat.Seconds);
+        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(0.5f, 180f, 0.5f), 10f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionMaxSatiety = FloatOptionItem.Create(RoleInfo, 13, OptionName.KitsuneMaxSatiety, new(0.5f, 180f, 0.5f), 100f, false)
             .SetValueFormat(OptionFormat.Seconds);
@@ -85,7 +87,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
 
     public override void Add()
     {
-        if (AmongUsClient.Instance.AmHost) KitsuneDishes.Prepare(OptionMaxOage.GetInt());
+        if (AmongUsClient.Instance.AmHost) KitsuneDishes.Prepare(OptionOageRespawn.GetFloat());
         // 矢印は設定がオンの時だけ(オフでも登録すると、矢印の更新で名前の書き換えが無駄に増える)
         if (OptionArrowToKiller.GetBool())
             foreach (var pc in Main.AllPlayerControls)
@@ -220,8 +222,8 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
 }
 
 /// <summary>
-/// 白狐のお皿とお揚げ。マップの決められた場所(各部屋の端末の位置)にお皿(白いダミー)を置き、
-/// そのうちランダムな数枚にお揚げ(茶色いダミー)を乗せる。ホストだけが持つ
+/// 白狐のお皿とお揚げ。マップの決められた場所(ランダムスポーンの地点)にお皿を置き、最初は全部にお揚げを乗せる。
+/// 食べられたお皿は空(白)になり、設定秒数たつとまたお揚げ(茶色)が乗る。ホストだけが持つ
 /// </summary>
 public static class KitsuneDishes
 {
@@ -231,20 +233,27 @@ public static class KitsuneDishes
     {
         public Vector2 Position;
         public CustomNetObject Object;
-        public bool HasOage;
+        public bool HasOage = true;
+        /// <summary>お揚げがまた乗るまでの残り秒数(タスク中だけ減る。会議の間は止まる)</summary>
+        public float RespawnLeft;
     }
 
     private static readonly List<Dish> dishes = new();
+    private static float respawnSeconds = 30f;
+    private static float lastTick = -1f;
 
     [Attributes.GameModuleInitializer]
     public static void Init()
     {
         dishes.Clear();
+        lastTick = -1f;
         CustomNetObject.HiddenForMeeting -= OnHiddenForMeeting;
         CustomNetObject.HiddenForMeeting += OnHiddenForMeeting;
     }
 
-    // 会議の前にダミーが消されたら、お皿の場所とお揚げはそのままで、会議の後に出し直す
+    private static byte ColorOf(Dish dish) => dish.HasOage ? CustomNetObject.ColorBrown : CustomNetObject.ColorWhite;
+
+    // 会議の前にダミーが消されたら、お皿の場所・お揚げの有無・復活までの残り秒数はそのままで、会議の後に出し直す
     private static void OnHiddenForMeeting()
     {
         foreach (var dish in dishes) dish.Object = null;
@@ -259,33 +268,31 @@ public static class KitsuneDishes
         foreach (var dish in dishes)
         {
             if (dish.Object != null && !dish.Object.IsGone) continue;
-            dish.Object = CustomNetObject.Create("", dish.Position, dish.HasOage ? CustomNetObject.ColorBrown : CustomNetObject.ColorWhite);
+            dish.Object = CustomNetObject.Create("", dish.Position, ColorOf(dish));
         }
     }
 
-    /// <summary>お皿を置く(白狐がいる時だけ・1 回だけ)</summary>
-    public static void Prepare(int maxOage)
+    /// <summary>お皿を置く(白狐がいる時だけ・1 回だけ)。最初は全部のお皿にお揚げが乗っている</summary>
+    public static void Prepare(float respawn)
     {
         if (dishes.Count > 0 || ShipStatus.Instance == null) return;
-        var spots = PickSpots(maxOage);
-        foreach (var pos in spots)
-            dishes.Add(new Dish { Position = pos });
-
-        foreach (var dish in dishes.OrderBy(_ => IRandom.Instance.Next(1000000)).Take(Mathf.Min(maxOage, dishes.Count)))
-            dish.HasOage = true;
+        respawnSeconds = Mathf.Max(0.5f, respawn);
+        lastTick = -1f;
+        foreach (var pos in PickSpots())
+            dishes.Add(new Dish { Position = pos, HasOage = true });
 
         foreach (var dish in dishes)
         {
-            dish.Object = CustomNetObject.Create("", dish.Position, dish.HasOage ? CustomNetObject.ColorBrown : CustomNetObject.ColorWhite);
+            dish.Object = CustomNetObject.Create("", dish.Position, ColorOf(dish));
             if (dish.Object == null) Logger.Warn($"お皿のダミーを作れませんでした ({dish.Position})", nameof(KitsuneDishes));
         }
-        Logger.Info($"お皿を{dishes.Count}枚置いた (お揚げ {dishes.Count(d => d.HasOage)}個)", nameof(KitsuneDishes));
+        Logger.Info($"お皿を{dishes.Count}枚置いた (全部にお揚げ・{respawnSeconds}秒で復活)", nameof(KitsuneDishes));
     }
 
     /// <summary>
     /// 決められた場所: ランダムスポーンの地点(Images/*_Random_Map.png の星の所)。全部の地点にお皿を置く
     /// </summary>
-    private static List<Vector2> PickSpots(int count)
+    private static List<Vector2> PickSpots()
     {
         Dictionary<string, Vector2> positions = (MapNames)Main.NormalOptions.MapId switch
         {
@@ -309,7 +316,7 @@ public static class KitsuneDishes
         return spots;
     }
 
-    /// <summary>pos の近くにお揚げがあれば食べる。食べたお揚げは別のランダムなお皿へ移る</summary>
+    /// <summary>pos の近くにお揚げがあれば食べる。食べたお皿は空になり、設定秒数たつとまたお揚げが乗る</summary>
     public static bool TryEat(Vector2 pos)
     {
         var dish = dishes.Where(d => d.HasOage && Vector2.Distance(d.Position, pos) <= EatDistance)
@@ -318,19 +325,47 @@ public static class KitsuneDishes
         if (dish == null) return false;
 
         dish.HasOage = false;
-        dish.Object?.SetLook(CustomNetObject.ColorWhite);
-        var empty = dishes.Where(d => !d.HasOage && d != dish).ToList();
-        if (empty.Count > 0)
-        {
-            var next = empty[IRandom.Instance.Next(empty.Count)];
-            next.HasOage = true;
-            next.Object?.SetLook(CustomNetObject.ColorBrown);
-        }
-        else
-        {
-            dish.HasOage = true; // ほかに空のお皿が無ければ同じお皿に戻す
-            dish.Object?.SetLook(CustomNetObject.ColorBrown);
-        }
+        dish.RespawnLeft = respawnSeconds;
+        dish.Object?.SetLook(ColorOf(dish));
         return true;
+    }
+
+    /// <summary>
+    /// お揚げの復活を数える(ホストで毎フレーム)。タスク中だけ減らすので、会議を挟んでも残り秒数はそのまま続く
+    /// </summary>
+    private static void Tick()
+    {
+        if (dishes.Count == 0 || !AmongUsClient.Instance || !AmongUsClient.Instance.AmHost) return;
+        var counting = GameStates.IsInGame && GameStates.IsInTask && Main.introDestroyed
+            && MeetingHud.Instance == null && ExileController.Instance == null;
+        var now = Time.realtimeSinceStartup;
+        if (!counting)
+        {
+            lastTick = -1f;
+            return;
+        }
+        var delta = lastTick < 0f ? 0f : Mathf.Min(now - lastTick, 1f);
+        lastTick = now;
+        if (delta <= 0f) return;
+
+        foreach (var dish in dishes)
+        {
+            if (dish.HasOage) continue;
+            dish.RespawnLeft -= delta;
+            if (dish.RespawnLeft > 0f) continue;
+            dish.HasOage = true;
+            dish.RespawnLeft = 0f;
+            dish.Object?.SetLook(ColorOf(dish));
+        }
+    }
+
+    [HarmonyLib.HarmonyPatch(typeof(ModManager), nameof(ModManager.LateUpdate))]
+    private static class TickPatch
+    {
+        public static void Postfix()
+        {
+            try { Tick(); }
+            catch (System.Exception ex) { Logger.Exception(ex, nameof(KitsuneDishes)); }
+        }
     }
 }

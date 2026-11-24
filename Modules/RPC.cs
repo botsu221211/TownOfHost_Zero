@@ -95,7 +95,7 @@ namespace TownOfHostY
                     Logger.Info($"{__instance.GetNameWithRole()} => {p?.GetNameWithRole() ?? "null"}", "StartMeeting");
                     break;
                 case RpcCalls.CheckVanish:
-                    // ほかの人にはクルーに見せている役職(タイガー・カタリストなど)は、ホストから見るとファントムではないので
+                    // ほかの人にはクルーに見せている役職は、ホストから見るとファントムではないので
                     // バニラの処理に任せると透明化のチェックまで届かないことがある。ここで直接役職の処理を呼ぶ
                     if (AmongUsClient.Instance.AmHost && GameStates.IsInGame
                         && __instance.GetCustomRole().GetRoleInfo() is { IsDesyncImpostor: true } vanishInfo
@@ -106,7 +106,7 @@ namespace TownOfHostY
                     }
                     break;
                 case RpcCalls.CheckShapeshift:
-                    // ほかの人にはクルーに見せているシェイプシフター役職(白狐など)も、タイガーと同じくここで直接処理する
+                    // ほかの人にはクルーに見せているシェイプシフター役職(白狐など)も、ここで直接処理する
                     if (AmongUsClient.Instance.AmHost && GameStates.IsInGame
                         && __instance.GetCustomRole().GetRoleInfo() is { IsDesyncImpostor: true } shapeInfo
                         && shapeInfo.BaseRoleType.Invoke() == RoleTypes.Shapeshifter)

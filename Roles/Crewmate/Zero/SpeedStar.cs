@@ -53,6 +53,7 @@ public sealed class SpeedStar : RoleBase
     /// <summary>基準の速さに足している量(速さは代入せず増減で変える決まりのため)</summary>
     private float appliedDelta;
     private float timer;
+    private float lastTick = -1f;
 
     private static void SetupOptionItem()
     {
@@ -66,11 +67,14 @@ public sealed class SpeedStar : RoleBase
 
     public override void OnFixedUpdate(PlayerControl player)
     {
-        if (!AmongUsClient.Instance.AmHost || !Player.IsAlive()) return;
+        if (!AmongUsClient.Instance.AmHost || !Player.IsAlive()) { lastTick = -1f; return; }
         // 会議中・追放の画面の間は数えない
-        if (!GameStates.IsInTask || ExileController.Instance) return;
+        if (!GameStates.IsInTask || ExileController.Instance) { lastTick = -1f; return; }
 
-        timer += Time.fixedDeltaTime;
+        // 処理の回数ではなく本当の時間で数える(重い時に遅れないように)
+        var now = Time.realtimeSinceStartup;
+        if (lastTick >= 0f) timer += Mathf.Min(now - lastTick, 1f);
+        lastTick = now;
         if (timer < interval) return;
         timer = 0f;
         ChangeSpeed();

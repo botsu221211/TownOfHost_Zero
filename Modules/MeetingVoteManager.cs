@@ -166,8 +166,6 @@ public class MeetingVoteManager
 
         // インフェクショナー: この会議の投票で感染を広げる
         Roles.Neutral.Infectioner.OnMeetingEnd(AllVotes);
-        // ヘイトキラー: この会議で自分に入った票で次のキルクールを決める
-        Roles.Impostor.HateKiller.OnMeetingEnd(AllVotes);
 
         if (exiled != null) AntiBlackout.ExiledPlayerId = exiled.PlayerId;
         Logger.Info($"ExiledPlayerIdSet exiled: {exiled?.name}", "AntiBlackout");
@@ -260,8 +258,7 @@ public class MeetingVoteManager
                 overruleNonce = vote.JudgeNonce;
             }
 
-            // マーシャルの戒厳令を受けている人は投票力が 1 減る
-            votes[vote.VotedFor] += Roles.Crewmate.Marshall.AdjustPower(vote.Voter, vote.NumVotes);
+            votes[vote.VotedFor] += vote.NumVotes;
         }
 
         return new VoteResult(votes, isAntiComp, overrideExiled, overruleNonce);
@@ -440,8 +437,6 @@ public class MeetingVoteManager
             if (!isAntiComp)
             {
                 (IsTie, Exiled) = TieBreaker.BreakingVote(IsTie, Exiled, votedCounts, maxVoteNum);
-                // マーシャル: 同数の時はマーシャルの投票先を優先
-                (IsTie, Exiled) = Roles.Crewmate.Marshall.PreferOnTie(IsTie, Exiled, votedCounts);
                 Exiled = Refusing.VoteChange(Exiled);
                 Exiled = Nimrod.VoteChange(Exiled);
                 Exiled = MadNimrod.VoteChange(Exiled);

@@ -86,17 +86,22 @@ public sealed class Mimic : RoleBase, IImpostor
         AURoleOptions.ShapeshifterDuration = shapeshiftDuration;
     }
 
+    private float lastTick = -1f;
+
     private bool IsShapeshifting
         => Main.CheckShapeshift.TryGetValue(Player.PlayerId, out var shapeshifting) && shapeshifting;
 
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (Player == null || !Player.IsAlive()) return;
+        if (Player == null || !Player.IsAlive()) { lastTick = -1f; return; }
         // 会議中・追放画面中は止める(値はそのまま持ち越す)
-        if (!GameStates.IsInTask || ExileController.Instance) return;
+        if (!GameStates.IsInTask || ExileController.Instance) { lastTick = -1f; return; }
 
-        elapsed += Time.fixedDeltaTime;
+        // 処理の回数ではなく本当の時間で数える(重い時に遅れないように)
+        var now = Time.realtimeSinceStartup;
+        if (lastTick >= 0f) elapsed += Mathf.Min(now - lastTick, 1f);
+        lastTick = now;
         if (elapsed < 1f) return;
         elapsed -= 1f;
 

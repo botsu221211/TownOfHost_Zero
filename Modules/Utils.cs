@@ -516,9 +516,8 @@ public static class Utils
         string RoleInfoTitleString = $"{GetString("RoleInfoTitle")}";
         string RoleInfoTitle = $"{ColorString(GetRoleColor(myRole), RoleInfoTitleString)}";
 
-        var roleString = $"<size=85%>{GetString(roleName)}</size>".Color(GetRoleColor(myRole).ToReadableColor());
-        var roleInfoString = $"{roleInfoLong}</line-height></size>";
-        sb.Append(roleString).Append(formatTag).Append(roleInfoString);
+        // /h r と同じ見せ方(役職名・イントロ・陣営/判定/元の役職・説明)
+        formatTag = AppendRoleHeader(sb, myRole, roleName, roleInfoLong);
 
         SendMessageAutoSplitAndClearSB(PlayerId, sb, RoleInfoTitle, formatTag);
 
@@ -556,6 +555,33 @@ public static class Utils
         }
     }
 
+    /// <summary>
+    /// 役職の説明の頭を TownOfHost-Pko と同じ見せ方で書く(役職名を大きく・イントロ・陣営/判定/元の役職・説明)。
+    /// /h r と最初の会議の役職説明で同じものを使う。続けて使う書式タグを返す
+    /// </summary>
+    private static string AppendRoleHeader(StringBuilder sb, CustomRoles role, string roleNameKey, string infoLong)
+    {
+        var roleInfo = role.GetRoleInfo();
+        var color = GetRoleColor(role).ToReadableColor();
+        if (roleInfo == null)
+        {
+            const string oldTag = "<size=70%><line-height=1.6pic>";
+            sb.Append($"<size=85%>{GetString(roleNameKey)}</size>".Color(color)).Append(oldTag).Append(infoLong).Append("</line-height></size>");
+            return oldTag;
+        }
+        const string formatTag = "<size=60%><line-height=1.5pic>";
+        sb.Append($"<b><size=140%>{GetString(roleNameKey)}</size></b>".Color(color)).Append('\n');
+        if (Translator.HasString($"{role}Info"))
+            sb.Append($"<size=85%>{GetString($"{role}Info")}</size>".Color(color)).Append('\n');
+        sb.Append("<size=62%>")
+          .Append($"陣営: {TeamText(roleInfo.CustomRoleType)}    ")
+          .Append($"判定: {CountText(roleInfo.CountType)}    ")
+          .Append($"元の役職: {BaseRoleText(roleInfo.BaseRoleType.Invoke())}")
+          .Append("</size>\n");
+        sb.Append(formatTag).Append(StripTeamLine(infoLong)).Append("</line-height></size>");
+        return formatTag;
+    }
+
     private static string TeamText(CustomRoleTypes type) => type switch
     {
         CustomRoleTypes.Impostor => "インポスター".Color(Palette.ImpostorRed),
@@ -572,7 +598,6 @@ public static class Utils
         CountTypes.OutOfGame => "なし",
         CountTypes.Jackal => GetRoleName(CustomRoles.Jackal).Color(GetRoleColor(CustomRoles.Jackal)),
         CountTypes.Pirate => GetRoleName(CustomRoles.Pirate).Color(GetRoleColor(CustomRoles.Pirate)),
-        CountTypes.Catalyst => GetRoleName(CustomRoles.Catalyst).Color(GetRoleColor(CustomRoles.Catalyst)),
         _ => type.ToString(),
     };
     private static string BaseRoleText(RoleTypes type) => type switch
@@ -647,27 +672,7 @@ public static class Utils
 
         string formatTag = "<size=70%><line-height=1.6pic>";
 
-        var roleInfo = role.GetRoleInfo();
-        if (roleInfo != null)
-        {
-            // TownOfHost-Pko と同じ見せ方: 役職名(大きく)・イントロ・陣営/判定/元の役職・説明
-            formatTag = "<size=60%><line-height=1.5pic>";
-            var color = GetRoleColor(role).ToReadableColor();
-            sb.Append($"<b><size=140%>{GetString(role.ToString())}</size></b>".Color(color)).Append('\n');
-            if (Translator.HasString($"{role}Info"))
-                sb.Append($"<size=85%>{GetString($"{role}Info")}</size>".Color(color)).Append('\n');
-            sb.Append("<size=62%>")
-              .Append($"陣営: {TeamText(roleInfo.CustomRoleType)}    ")
-              .Append($"判定: {CountText(roleInfo.CountType)}    ")
-              .Append($"元の役職: {BaseRoleText(roleInfo.BaseRoleType.Invoke())}")
-              .Append("</size>\n");
-            sb.Append(formatTag).Append(StripTeamLine(roleInfoLong)).Append("</line-height></size>");
-        }
-        else
-        {
-            var roleString = $"<size=85%>{GetString(role.ToString())}</size>".Color(GetRoleColor(role).ToReadableColor());
-            sb.Append(roleString).Append(formatTag).Append(roleInfoLong).Append("</line-height></size>");
-        }
+        formatTag = AppendRoleHeader(sb, role, role.ToString(), roleInfoLong);
 
         SendMessageAutoSplitAndClearSB(PlayerId, sb, "", formatTag);
 

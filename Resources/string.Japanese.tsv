@@ -195,14 +195,7 @@ FriedPotato	フライドポテト
 SpeedStar	シフトスター
 Infectioner	インフェクショナー
 KitsuneSpirit	白狐
-Tiger	タイガー
-Chatter	チャッター
-Catalyst	カタリスト
-Conductor	コンダクター
-CatalystAndConductor	<color=#E60049>カタリスト</color>＆<color=#00E5FF>コンダクター</color>
-HateKiller	ヘイトキラー
 NoLimiter	ノーリミッター
-Marshall	マーシャル
 Chairman	チェアマン
 TaskManager	タスクマネージャー
 RainbowResize	<size=8><color=#ffff00>★</color></size><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><size=8><color=#ffff00>★</color></size>
@@ -242,14 +235,7 @@ FriedPotatoInfo	僕はフライドポテト!
 SpeedStarInfo	見ろ私のこの速さを
 InfectionerInfo	感染はもう始まっている。
 KitsuneSpiritInfo	具現する怨嗟
-TigerInfo	全てを喰らい尽くせ
-ChatterInfo	早く発言しないと...
-CatalystInfo	触媒となって命を刈り取れ
-ConductorInfo	殺意の波長を合わせろ。
-CatalystAndConductorInfo	二人で殺意を響かせろ
-HateKillerInfo	疑心こそが力となる
 NoLimiterInfo	私に制御という文字はない
-MarshallInfo	最高統帥権
 ChairmanInfo	会議開閉を操ろう
 SillySheriffInfo	ごめん、ちょっと調子悪いみたい
 SympathizerInfo	ふたりで白をとり合おう
@@ -288,15 +274,8 @@ ExpressInfoLong	[クルー陣営]\nただ足が速い。
 FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の名前が「フライドポテト」として届く。\nキルされると、次の会議で「フライドポテトが捕食された」と全員に通知される。
 SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
 InfectionerInfoLong	[ニュートラル]\n会議で自分が投票した相手を感染させる(設定回数まで)。\nまた、感染している人が投票した相手にも感染が広がる。\n感染状況の可視化がオンのとき、感染者には自分にしか見えないマーク(◆)がつく。\n自分が生存していて、自分以外の生存者が全員感染状態になった時点で単独勝利。\nほかの勝利と同時になったときは勝利優先度の高い方が勝つ。
-KitsuneSpiritInfoLong	[ニュートラル]\nお揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する。\nマップの決められた場所にお皿(白いダミー)があり、そのうち数枚にお揚げ(茶色いダミー)が乗っている。お揚げの上でシェイプ(誰を選んでもよい)すると食べられ、お揚げは別のお皿へ移る。\n満腹度はキルボタンのクールダウンで表示される(キルはできない)。\n生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利。
-TigerInfoLong	[ニュートラル]\n通常は長いキルクールでキルする第三陣営。ファントム能力で「捕食」状態になると、足が速くなり視界が狭くなり、すぐにキルできるようになる。\n捕食中のキルは死体を残さずにその場で消す(通報も会議での表示もされない)。キルに成功すると捕食は終わり、時間内にキルできなければ自滅する。会議が始まると捕食は解除される。\n自分以外に生きているキル可能者がいなくなると単独勝利(ほかのキル可能者を一度確認するか、自分がキルした後から判定)。タイガーが生きている間は人数による陣営勝利は保留になる。\n勝利優先度は大きい数値ほど優先。\n(TownOfHost-Shell より移植)
-ChatterInfoLong	[ニュートラル]\n会議で設定時間チャットしなかったら死亡する(会議開始から10秒は猶予。/cmd から始まる文は数えない)。\n試合が終わった時に生き残っていれば単独勝利。勝利優先度は大きい数値ほど優先。\n(TownOfHost-Pko より移植)
-CatalystInfoLong	[ニュートラル]\n必ずコンダクターと同時にアサインされる。キルボタンは通常使えない(設定で使える)。\n共鳴: ファントムボタンで、コンダクターのキル範囲内にいる一番近いプレイヤーをキルし、その地点にワープする。コンダクターが自分の視界に入っていない時だけ使える。\nコンダクターが死ぬと自分も死ぬ(設定でオポチュニストになる)。\n勝利条件: 他のキル役がおらず、ほかの生存者の人数が自陣営の人数以下になること。\n(TownOfHost-hamo より移植)
-ConductorInfoLong	[ニュートラル]\n必ずカタリストと同時にアサインされる。キルボタンは通常使えない(設定で使える)。\n不協和音: ファントムボタンで、一時的にカタリストの共鳴を使えなくする。\nカタリストが死ぬと自分も死ぬ(設定でオポチュニストになる)。\n勝利条件: 他のキル役がおらず、ほかの生存者の人数が自陣営の人数以下になること。\n(TownOfHost-hamo より移植)
-CatalystAndConductorInfoLong	[ニュートラル]\nカタリストとコンダクターの二人組。お互いの役職がわかる。\nカタリスト: ファントムボタン(共鳴)で、コンダクターの近くにいる一番近い人をキルしてその場所へワープする。コンダクターが視界に入っていない時だけ使える。\nコンダクター: ファントムボタン(不協和音)で、しばらくカタリストの共鳴を止める。\n相方が死ぬと後追いする(設定でオポチュニストになる)。\n勝利条件: 他のキル役がおらず、ほかの生存者の人数が自陣営の人数以下になること。\n(TownOfHost-hamo より移植)
-HateKillerInfoLong	[インポスター陣営]\n会議で自分に投票された票数1票につき、次のターンだけキルクールが設定値だけ短くなる(最低キルクールまで)。\n仲間のインポスターの票・自投票を数えるかは設定で決める。\n(TownOfHost-Pko より移植)
+KitsuneSpiritInfoLong	[ニュートラル]\nお揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する。\nマップの決められた場所にお皿があり、最初は全部のお皿にお揚げ(茶色いダミー)が乗っている。お揚げの上でシェイプ(誰を選んでもよい)すると食べられ、そのお皿は空(白いダミー)になる。空のお皿には、設定した秒数がたつとまたお揚げが乗る(会議の間は止まり、会議の後に続きから数える)。\n満腹度はキルボタンのクールダウンで表示される(キルはできない)。\n生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利。
 NoLimiterInfoLong	[インポスター陣営]\nキルクールが短い代わりに、キルクールが明けた瞬間にキル範囲内に人がいると自動でキルする(一番近い人)。\nキルクールが明けた時にキルできる相手がいなければ、自分が死亡する。【死因：自殺】\n(ネタ役)
-MarshallInfoLong	[クルー陣営]\n緊急会議の回数が追加される。\n最多票が同数の時、マーシャルが投票していた候補(スキップを含む)が優先される。マーシャル同士の投票先が分かれたら通常の同数処理になる。\n会議中に起きた死亡について、名前・役職・死因を本人だけが確認できる。\n戒厳令: 自分に投票してから別の生存者を選ぶと、その会議の間その人の投票力を1減らす。自投票かスキップで選択を解除。同じ人への戒厳令は会議ごとに1回まで。\n(TownOfHost-Shell より移植)
 ChairmanInfoLong	[クルー陣営]\n・ペットを撫でると会議が開ける。サボタージュ中は会議を開けない。\n通常ボタン回数と同時に消費する。(通常ボタン回数1回の時、先にペットで使うと、通常ボタンは使えなくなる。)\n・誰かに投票することでその会議を即中断できる(追放は起こらずスキップ扱い)。\nスキップ・自投票以外の普通の投票は出来ず、能力を発動してしまう。
 SillySheriffInfoLong	[クルー陣営]\n普通のシェリフとはちょっと違うバカなシェリフ。正しく陣営を認識できない時、人外に向かって自爆したりクルーをキルする時がある
 SympathizerInfoLong	[クルー陣営]\n共鳴者は必ず2人でしか設定できない。\n設定タスク数まで完了させると自身にしか見えない◎がつく。2人ともタスクが互いに設定数を超えた時、相手にも◎が付きもう1人の共鳴者が誰か分かる。
@@ -1703,35 +1682,11 @@ InfectionerWinPriority	勝利優先度
 InfectionerVisualize	感染状況の可視化
 InfectionerAdditionalWin	追加勝利にする
 KitsuneArrowToKiller	キラーの位置を矢印で可視化
-KitsuneMaxOage	お揚げの最大出現数
+KitsuneOageRespawn	お揚げが復活するまでの秒数
 KitsuneOageSatiety	お揚げ1個の腹持ち
 KitsuneMaxSatiety	最大満腹度
 KitsuneInitialSatiety	初期満腹度
 KitsuneWinSatiety	勝利に必要な満腹度
-TigerWinPriority	勝利優先度
-TigerKillCooldown	通常キルクール
-TigerAbilityCooldown	捕食のクールダウン
-TigerDuration	自滅までの時間
-TigerSpeed	捕食中の移動速度倍率
-TigerVision	捕食中の視界倍率
-ChatterWinPriority	勝利優先度
-ChatterTimeLimit	チャット制限時間
-CatalystResonanceCooldown	カタリストの共鳴クールダウン
-CatalystCanKill	カタリストがキルボタンを使える
-CatalystKillCooldown	カタリストのキルクール
-CatalystToOpportunist	コンダクター死亡時、カタリストがオポチュニストになる
-ConductorDissonanceCooldown	コンダクターの不協和音クールダウン
-ConductorDissonanceDuration	不協和音の効果時間
-ConductorCanKill	コンダクターがキルボタンを使える
-ConductorKillCooldown	コンダクターのキルクール
-ConductorToOpportunist	カタリスト死亡時、コンダクターがオポチュニストになる
-HateKillerDecreaseKillCool	1票で短くなるキルクール
-HateKillerMinimumKillCool	最低キルクール
-HateKillerCountImpostorVotes	自分以外のインポスターの投票も含める
-HateKillerCountSelfVotes	自投票も含める
-MarshallAdditionalButtons	追加の緊急会議の回数
-MarshallTotalUses	戒厳令の合計回数
-MarshallMeetingUses	会議ごとの戒厳令の回数(0で無制限)
 ForceMeeting	<color=#ffb347>強制会議</color>
 ForceMeetingConfirm	<color=#ffd84d>もう一度押すと会議</color>
 ForceMeetingUnavailable	タスク中のホストのみ

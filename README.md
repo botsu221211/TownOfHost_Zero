@@ -62,11 +62,7 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
   - エスカレーショナー/Escalation Gamemode・シンクロカラーモード/twin,50-50,clone Gamemode
 
 ## 移植クレジット (TOH_Zero)
-- TownOfHost-Shell
-  - タイガー・マーシャル
 - TownOfHost-hamo
-  - カタリスト＆コンダクター・モデレーター
-- TownOfHost-Pko
-  - ヘイトキラー・チャッター
+  - モデレーター
 - [TownOfHost_L](https://github.com/haru03741-glitch/TownOfHost_L)
   - 勝利優先度の仕組み
