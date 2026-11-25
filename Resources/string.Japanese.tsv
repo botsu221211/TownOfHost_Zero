@@ -1694,6 +1694,7 @@ KitsuneOageSatiety	お揚げ1個の腹持ち
 KitsuneMaxSatiety	最大満腹度
 KitsuneInitialSatiety	初期満腹度
 KitsuneWinSatiety	勝利に必要な満腹度
+KitsuneSatietyDrainRate	満腹度が減る速さ
 NineTailedFoxAbilityCooldown	焼き殺す能力のクールダウン
 NineTailedFoxCanVent	ベントを使える
 NineTailedFoxBurnTurns	焼け跡を残すターン数

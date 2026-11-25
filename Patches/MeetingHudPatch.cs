@@ -454,6 +454,7 @@ public static class MeetingHudPatch
                         pc.RpcSetRoleDesync(baseRole, pc.GetClientId());
                         Logger.Info($"AfterMeeting baseRole: {pc.GetNameWithRole()} -> {baseRole}", "AfterMeeting_RoleSync");
                     }
+                    StandardIntroHelper.HideImpostorsFromDesyncPlayers();
 
                     Utils.NotifyRoles();
                 }, 0.5f, "AfterMeeting_RoleSync");

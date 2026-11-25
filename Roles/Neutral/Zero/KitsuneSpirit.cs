@@ -50,6 +50,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     private static OptionItem OptionMaxSatiety;
     private static OptionItem OptionInitialSatiety;
     private static OptionItem OptionWinSatiety;
+    private static OptionItem OptionDrainRate;
     enum OptionName
     {
         KitsuneArrowToKiller,
@@ -58,9 +59,10 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         KitsuneMaxSatiety,
         KitsuneInitialSatiety,
         KitsuneWinSatiety,
+        KitsuneSatietyDrainRate,
     }
 
-    /// <summary>満腹度(秒)。タスクターンの間 1 秒に 1 ずつ減る</summary>
+    /// <summary>満腹度。タスクターンの間 1 秒に「減る速さ」ずつ減る</summary>
     private float satiety;
     /// <summary>キルボタンの表示を今の満腹度に合わせたか(タスクターンの始まりに合わせ直す)</summary>
     private bool displaySynced;
@@ -82,6 +84,9 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
             .SetValueFormat(OptionFormat.Seconds);
         OptionWinSatiety = FloatOptionItem.Create(RoleInfo, 15, OptionName.KitsuneWinSatiety, new(0.5f, 180f, 0.5f), 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
+        // 満腹度が減る速さ(1 秒にいくつ減るか)。1 で 1 秒に 1、0.5 なら半分の速さ
+        OptionDrainRate = FloatOptionItem.Create(RoleInfo, 17, OptionName.KitsuneSatietyDrainRate, new(0.1f, 2f, 0.1f), 0.7f, false)
+            .SetValueFormat(OptionFormat.Multiplier);
     }
 
     private static float MaxSatiety => OptionMaxSatiety.GetFloat();
@@ -100,8 +105,11 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     public bool CanUseKillButton() => Player.IsAlive();
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => false;
-    // キルクールの上限を最大満腹度にしておき、満腹度は SetKillCooldown で合わせる
-    public float CalculateKillCooldown() => MaxSatiety;
+    // キルボタンのクールダウンには「餓死までの残り秒数」(満腹度 ÷ 減る速さ)を出す。
+    // ボタンの数字は 1 秒に 1 ずつ減るので、減る速さを変えてもずれないようにする
+    private static float DrainRate => Mathf.Max(OptionDrainRate.GetFloat(), 0.01f);
+    private float SecondsLeft => Mathf.Max(satiety / DrainRate, 0.1f);
+    public float CalculateKillCooldown() => MaxSatiety / DrainRate;
     public void OnCheckMurderAsKiller(MurderInfo info)
     {
         if (!info.IsSuicide) info.DoKill = false;
@@ -128,6 +136,21 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     }
     // ホストが白狐の時も、変身ボタン(HostShapeshiftAbility)から同じ OnCheckShapeshift が呼ばれる
 
+    /// <summary>
+    /// シェイプの返事。変身を断るだけだとモーションが出ないので、全員の画面に
+    /// 「自分への変身(見た目は変わらない)」をモーション付きで送る。ほかの人にもシェイプの煙が見える
+    /// </summary>
+    public void RespondShapeshift()
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (!Player.IsAlive())
+        {
+            Player.RpcRejectShapeshift();
+            return;
+        }
+        Player.RpcShapeshift(Player, true);
+    }
+
     private void TryEat()
     {
         if (!AmongUsClient.Instance.AmHost || !Player.IsAlive() || !GameStates.IsInTask) return;
@@ -142,7 +165,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         noOageMessageUntil = 0f;
         satiety = Mathf.Min(MaxSatiety, satiety + OptionOageSatiety.GetFloat());
         Logger.Info($"{Player.GetNameWithRole()} : お揚げを食べた (満腹度 {satiety:0.0})", nameof(KitsuneSpirit));
-        Player.SetKillCooldown(Mathf.Max(satiety, 0.1f));
+        Player.SetKillCooldown(SecondsLeft);
         Utils.NotifyRoles(SpecifySeer: Player);
     }
 
@@ -160,12 +183,12 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         {
             // タスクターンの始まり: キルボタンのクールダウンを満腹度に合わせる
             displaySynced = true;
-            Player.SetKillCooldown(Mathf.Max(satiety, 0.1f));
+            Player.SetKillCooldown(SecondsLeft);
         }
 
         // 処理の回数ではなく本当の時間で減らす(重い時に遅れないように)
         var now = Time.realtimeSinceStartup;
-        if (lastTick >= 0f) satiety -= Mathf.Min(now - lastTick, 1f);
+        if (lastTick >= 0f) satiety -= Mathf.Min(now - lastTick, 1f) * DrainRate;
         lastTick = now;
         if (satiety <= 0f)
         {

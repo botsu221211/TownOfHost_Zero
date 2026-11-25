@@ -275,7 +275,7 @@ public static class PlayerControlCheckShapeshiftPatch
         {
             var animate = false;
             kitsune.OnCheckShapeshift(target ?? __instance, ref animate);
-            __instance.RpcRejectShapeshift();
+            kitsune.RespondShapeshift();
             return false;
         }
 

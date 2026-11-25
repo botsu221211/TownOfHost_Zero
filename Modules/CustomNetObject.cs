@@ -600,6 +600,8 @@ public sealed class CustomNetObject
             {
                 var animate = false;
                 kitsune.OnCheckShapeshift(__instance, ref animate);
+                kitsune.RespondShapeshift();
+                return false;
             }
             __instance.RpcRejectShapeshift();
             return false;

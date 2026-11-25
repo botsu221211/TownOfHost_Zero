@@ -26,10 +26,18 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 **最新バージョンは[こちらからダウンロード](https://github.com/botsu221211/TownOfHost_Zero/releases/latest)**<br>
 
 ### 導入方法
+#### はじめて導入する場合(おすすめ)
+1. リリースから、自分の Among Us に合う zip をダウンロードします。BepInEx と TOH_Zero が入っています。
+   - Steam版: `TownOfHost_Zero_steam_v(バージョン).zip`
+   - Epic版: `TownOfHost_Zero_epic_v(バージョン).zip`
+2. zip の中身を全部、Among Us のフォルダ(`Among Us.exe` があるフォルダ)にそのまま入れます。
+
+#### BepInEx を自分で入れている場合
 1. [BepInEx (IL2CPP版)](https://builds.bepinex.dev/projects/bepinex_be) を Among Us のフォルダに導入します。
    - 動作確認しているのは `BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.735` です。
-2. リリースから `TownOfHost_Zero.dll` をダウンロードし、`Among Us/BepInEx/plugins/` に入れます。
-3. TOH_Y など他のTOH系MODのdllが plugins フォルダに残っている場合は削除してください。
+2. リリースから `TownOfHost_Zero-v(バージョン).dll` (例: `TownOfHost_Zero-v1.0.0.dll`)をダウンロードし、`Among Us/BepInEx/plugins/` に入れます。
+
+※TOH_Y など他のTOH系MODのdllや、古いバージョンの TOH_Zero の dll が plugins フォルダに残っている場合は削除してください(2つ入れると動きません)。
 
 ※[TownOfHost_Y](https://github.com/Yumenopai/TownOfHost_Y) Fork / [TownOfHost](https://github.com/tukasa0001/TownOfHost) Fork<br>
 
