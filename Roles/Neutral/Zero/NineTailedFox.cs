@@ -72,6 +72,13 @@ public sealed class NineTailedFox : RoleBase, IKiller
     }
 
     // ===== キルボタン = 妖術をかける =====
+    /// <summary>焼き殺している最中だけ true(ガード・役職のキル防止などを効かせる)</summary>
+    private bool burning;
+    /// <summary>
+    /// 妖術をかけるだけの時はキルではないので、相手のガードを消費したり、相手の「キルされそうになった時」の能力を
+    /// 動かしたりしない。焼き殺す時だけキル役として扱う
+    /// </summary>
+    public bool IsKiller => burning;
     public bool CanUseKillButton() => Player.IsAlive();
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => OptionCanVent.GetBool();
@@ -123,12 +130,22 @@ public sealed class NineTailedFox : RoleBase, IKiller
             return false;
         }
 
+        // ベントの中・昇降機・はしごの途中の相手は今は焼けない(妖術もクールダウンもそのまま)
+        if (target.inVent || target.inMovingPlat || target.onLadder || target.walkingToVent
+            || target.MyPhysics.Animations.IsPlayingEnterVentAnimation() || target.MyPhysics.Animations.IsPlayingAnyLadderAnimation())
+        {
+            Logger.Info($"{Player.GetNameWithRole()} : {target.GetNameWithRole()} は今は焼けない状態", nameof(NineTailedFox));
+            return false;
+        }
+
         var position = target.GetTruePosition();
         var state = PlayerState.GetByPlayerId(target.PlayerId);
         var oldReason = state.DeathReason;
         state.DeathReason = CustomDeathReason.Torched;
         // 遠くからのキルなので、相手の自殺の形で倒す(ガード・役職のキル防止などは普通のキルと同じく効く)
-        CustomRoleManager.OnCheckMurder(Player, target, target, target, killerMyselfInvoke: true);
+        burning = true;
+        try { CustomRoleManager.OnCheckMurder(Player, target, target, target, killerMyselfInvoke: true); }
+        finally { burning = false; }
         if (target.IsAlive())
         {
             // 防がれた時は死因を戻す

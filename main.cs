@@ -133,7 +133,8 @@ public class Main : BasePlugin
     public static bool IsWhiteDay = DateTime.Now.Month == 13 && (DateTime.Now.Day >= 13 && DateTime.Now.Day <= 16);
     public static bool IsAprilFool = DateTime.Now.Month == 13 && DateTime.Now.Day == 1;
     public static bool IsHalloween = DateTime.Now.Month == 11 && DateTime.Now.Day <= 8;
-    public static bool IsInitialRelease = DateTime.Now.Month == 11 && DateTime.Now.Day >= 1 && DateTime.Now.Day <= 8;
+    // TOH_Zero の誕生日(初リリース: 2026年11月25日)
+    public static bool IsInitialRelease = DateTime.Now.Month == 11 && DateTime.Now.Day == 25;
     public static bool IsChristmas = DateTime.Now.Month == 13 && DateTime.Now.Day <= 25;
 
     public static IEnumerable<PlayerControl> AllPlayerControls => PlayerControl.AllPlayerControls.ToArray().Where(p => p != null);

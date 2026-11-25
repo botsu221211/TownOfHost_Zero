@@ -82,6 +82,9 @@ namespace TownOfHostY
                         }
                         if (assets[i]["name"].ToString() == $"TownOfHost_Zero-v{latestVersion}.dll")
                             downloadUrl = assets[i]["browser_download_url"].ToString();
+                        // バージョンの付いていない名前(README で案内している TownOfHost_Zero.dll)でも更新できるようにする
+                        else if (downloadUrl == null && assets[i]["name"].ToString() == "TownOfHost_Zero.dll")
+                            downloadUrl = assets[i]["browser_download_url"].ToString();
                     }
                     hasUpdate = latestVersion.CompareTo(Main.version) > 0;
                 }

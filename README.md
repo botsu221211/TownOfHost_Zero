@@ -13,6 +13,7 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 
 - **TOH_Y・本家TOHを含む**、別MODとの共存はできません。必ず1つのMODを共有して使用してください。
 - ホストのみの導入でプレイできます。ホスト以外の導入はサポートしていません。
+- Innersloth の [Among Us Mod Policy](https://www.innersloth.com/among-us-mod-policy/) に従ってご利用ください。
 
 ### よくある質問
 - 公開ルームは使えないの？
@@ -26,6 +27,7 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 
 ### 導入方法
 1. [BepInEx (IL2CPP版)](https://builds.bepinex.dev/projects/bepinex_be) を Among Us のフォルダに導入します。
+   - 動作確認しているのは `BepInEx-Unity.IL2CPP-win-x64-6.0.0-be.735` です。
 2. リリースから `TownOfHost_Zero.dll` をダウンロードし、`Among Us/BepInEx/plugins/` に入れます。
 3. TOH_Y など他のTOH系MODのdllが plugins フォルダに残っている場合は削除してください。
 
