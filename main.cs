@@ -333,6 +333,7 @@ public enum CustomWinner
     God = CustomRoles.God,
     FoxSpirit = CustomRoles.FoxSpirit,
     Pirate = CustomRoles.Pirate,
+    NineTailedFox = CustomRoles.NineTailedFox,
 
     //CC
     RedL = CustomRoles.CCRedLeader,

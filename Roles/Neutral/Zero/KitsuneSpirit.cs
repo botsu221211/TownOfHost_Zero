@@ -15,6 +15,7 @@ namespace TownOfHostY.Roles.Neutral;
 /// ・お揚げの上でシェイプ(誰を選んでもよい)するとお揚げを食べる。食べたお皿は空(白いダミー)になり、
 ///   設定秒数たつとまたお揚げが乗る(会議の間は止まり、会議の後に続きから数える)
 /// ・満腹度はキルボタンのクールダウンで表示する(キルはできない)
+/// ・キル役のいる方向が、その役職の色の矢印で分かる(設定)
 /// ・生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利
 /// </summary>
 public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
@@ -69,11 +70,11 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
 
     private static void SetupOptionItem()
     {
-        OptionArrowToKiller = BooleanOptionItem.Create(RoleInfo, 10, OptionName.KitsuneArrowToKiller, false, false);
+        OptionArrowToKiller = BooleanOptionItem.Create(RoleInfo, 10, OptionName.KitsuneArrowToKiller, true, false);
         // 11 は前の「お揚げの最大出現数」で使っていた番号なので空けておく(保存された値と混ざらないように)
         OptionOageRespawn = FloatOptionItem.Create(RoleInfo, 16, OptionName.KitsuneOageRespawn, new(2.5f, 180f, 2.5f), 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(0.5f, 180f, 0.5f), 10f, false)
+        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(0.5f, 180f, 0.5f), 20f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionMaxSatiety = FloatOptionItem.Create(RoleInfo, 13, OptionName.KitsuneMaxSatiety, new(0.5f, 180f, 0.5f), 100f, false)
             .SetValueFormat(OptionFormat.Seconds);
@@ -217,7 +218,16 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
             .Select(pc => pc.PlayerId)
             .ToArray();
         if (killers.Length == 0) return "";
-        return Utils.ColorString(Color.red, TargetArrow.GetArrows(Player, killers));
+        // 矢印はキル役ごとに、その役職の色で出す
+        var sb = new System.Text.StringBuilder();
+        foreach (var id in killers)
+        {
+            var arrow = TargetArrow.GetArrows(Player, id);
+            if (string.IsNullOrEmpty(arrow)) continue;
+            var killer = Utils.GetPlayerById(id);
+            sb.Append(Utils.ColorString(Utils.GetRoleColor(killer.GetCustomRole()), arrow));
+        }
+        return sb.ToString();
     }
 }
 
@@ -228,6 +238,8 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
 public static class KitsuneDishes
 {
     private const float EatDistance = 1.5f;
+    /// <summary>お皿の数(ランダムスポーンの地点から、試合ごとにランダムに選ぶ。その試合中は同じ場所)</summary>
+    private const int DishCount = 7;
 
     private sealed class Dish
     {
@@ -278,7 +290,8 @@ public static class KitsuneDishes
         if (dishes.Count > 0 || ShipStatus.Instance == null) return;
         respawnSeconds = Mathf.Max(0.5f, respawn);
         lastTick = -1f;
-        foreach (var pos in PickSpots())
+        var spots = PickSpots().OrderBy(_ => IRandom.Instance.Next(1000000)).Take(DishCount);
+        foreach (var pos in spots)
             dishes.Add(new Dish { Position = pos, HasOage = true });
 
         foreach (var dish in dishes)
@@ -290,7 +303,7 @@ public static class KitsuneDishes
     }
 
     /// <summary>
-    /// 決められた場所: ランダムスポーンの地点(Images/*_Random_Map.png の星の所)。全部の地点にお皿を置く
+    /// お皿を置く候補: ランダムスポーンの地点(Images/*_Random_Map.png の星の所)。この中からランダムに選ぶ
     /// </summary>
     private static List<Vector2> PickSpots()
     {

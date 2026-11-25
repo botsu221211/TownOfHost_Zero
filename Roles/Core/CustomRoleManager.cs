@@ -521,6 +521,7 @@ public enum CustomRoles
     MadGuesser,
     MadConnecter,
     MadUnknown,
+    MadFriedPotato,
 
     SKMadmate,
     //Crewmate(Vanilla)
@@ -587,6 +588,7 @@ public enum CustomRoles
     Workaholic,
     Infectioner,
     KitsuneSpirit,
+    NineTailedFox,
     DarkHide,
     LoveCutter,
     PlatonicLover,

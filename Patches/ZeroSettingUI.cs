@@ -134,23 +134,24 @@ public static class ZeroSettingUI
     private static GameObject presetPanel;
     private static TextMeshPro presetNameText;
     private static readonly List<SimpleButton> actionButtons = new();
-    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "ネタ役闇鍋", "指定闇鍋", "ネタ役", "役職をリセット" };
+    private static readonly string[] actionLabels = { "闇鍋", "属性入り闇鍋", "Zero闇鍋", "ネタ役闇鍋", "指定闇鍋", "ネタ役", "バニラ役", "役職をリセット" };
     private const int ChaosIndex = 0;
     private const int ChaosAddonIndex = 1;
     private const int ZeroChaosIndex = 2;
     private const int JokeChaosIndex = 3;
     private const int DesignatedMixIndex = 4;
     private const int JokeToggleIndex = 5;
-    private const int ResetActionIndex = 6;
-    /// <summary>ボタンの位置(2列。リセットだけ下の段の真ん中)</summary>
-    private static Vector3 ActionPosition(int index) => index == ResetActionIndex
-        ? new Vector3(0f, -0.2f - 0.53f * 3, 0f)
-        : new Vector3(index % 2 == 0 ? -1.65f : 1.65f, -0.2f - 0.53f * (index / 2), 0f);
+    private const int VanillaToggleIndex = 6;
+    private const int ResetActionIndex = 7;
+    /// <summary>ボタンの位置(2列×4段)</summary>
+    private static Vector3 ActionPosition(int index)
+        => new(index % 2 == 0 ? -1.65f : 1.65f, -0.2f - 0.53f * (index / 2), 0f);
     /// <summary>ボタンの文字。指定闇鍋・ネタ役はオン/オフの状態も出す</summary>
     private static string LabelFor(int index) => index switch
     {
         DesignatedMixIndex => $"指定闇鍋：{(DesignatedMix.Active ? "<color=#7dffa8>オン</color>" : "オフ")}",
         JokeToggleIndex => $"ネタ役：{(JokeRoles.Visible ? "<color=#7dffa8>表示</color>" : "非表示")}",
+        VanillaToggleIndex => $"バニラ役：{(VanillaRoles.Visible ? "<color=#7dffa8>表示</color>" : "非表示")}",
         _ => actionLabels[index],
     };
 
@@ -162,9 +163,11 @@ public static class ZeroSettingUI
         CustomRoles.Frenzy,
         CustomRoles.MadUnknown,
         CustomRoles.FriedPotato,
+        CustomRoles.MadFriedPotato,
         CustomRoles.SpeedStar,
         CustomRoles.Infectioner,
         CustomRoles.KitsuneSpirit,
+        CustomRoles.NineTailedFox,
         CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
     };
     private static int pendingAction = -1;
@@ -214,7 +217,7 @@ public static class ZeroSettingUI
         }
 
         var note = TMPTemplate.Create("PresetNote",
-            "闇鍋／属性入り闇鍋／Zero闇鍋／ネタ役闇鍋：対象の役職を 100%・最大1 に　役職をリセット：全部 0% に\n指定闇鍋：全部リセットして、全員が「/add 役職名」で好きな役職を入れられる\nネタ役：表示の時だけ設定に出て、闇鍋・属性入り闇鍋にも入る(非表示だと出現しない)\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
+            "闇鍋／属性入り闇鍋／Zero闇鍋／ネタ役闇鍋：対象の役職を 100%・最大1 に　役職をリセット：全部 0% に\n指定闇鍋：全部リセットして、全員が「/add 役職名」で好きな役職を入れられる\nネタ役・バニラ役：表示の時だけ設定に出て、闇鍋・属性入り闇鍋にも入る(非表示だと出現しない)\n<color=#9fb8e0>※今選んでいるプリセットだけが変わります。押すと確認が出ます</color>",
             Color.white, 1.2f, TextAlignmentOptions.Center, true, parent);
         note.transform.localPosition = new Vector3(0f, -2.6f, 0f);
 
@@ -253,6 +256,14 @@ public static class ZeroSettingUI
         if (index == JokeToggleIndex)
         {
             JokeRoles.SetVisible(!JokeRoles.Visible);
+            GameOptionsMenuPatch.RefreshChildSettings();
+            UpdatePresetPanel();
+            return;
+        }
+        // バニラ役の表示/非表示も押したらすぐ切り替える
+        if (index == VanillaToggleIndex)
+        {
+            VanillaRoles.SetVisible(!VanillaRoles.Visible);
             GameOptionsMenuPatch.RefreshChildSettings();
             UpdatePresetPanel();
             return;
@@ -314,8 +325,8 @@ public static class ZeroSettingUI
             bool isAddon = spawn.Tab == TabGroup.Addons;
             if (isAddon ? !includeAddons : !includeRoles) continue;
 
-            // ネタ役が非表示の時は、ネタ役はオンにしない
-            bool enable = on && (onlyRoles == null || onlyRoles.Contains(role)) && !JokeRoles.IsDisabled(role);
+            // ネタ役・バニラ役が非表示の時は、それらはオンにしない
+            bool enable = on && (onlyRoles == null || onlyRoles.Contains(role)) && !JokeRoles.IsDisabled(role) && !VanillaRoles.IsDisabled(role);
             // オンにする時は、今のゲームモードで表示されていない役職は触らない
             if (enable && spawn.IsHiddenOn(Options.CurrentGameMode)) continue;
 

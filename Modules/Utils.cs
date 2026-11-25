@@ -598,6 +598,7 @@ public static class Utils
         CountTypes.OutOfGame => "なし",
         CountTypes.Jackal => GetRoleName(CustomRoles.Jackal).Color(GetRoleColor(CustomRoles.Jackal)),
         CountTypes.Pirate => GetRoleName(CustomRoles.Pirate).Color(GetRoleColor(CustomRoles.Pirate)),
+        CountTypes.NineTailedFox => GetRoleName(CustomRoles.NineTailedFox).Color(GetRoleColor(CustomRoles.NineTailedFox)),
         _ => type.ToString(),
     };
     private static string BaseRoleText(RoleTypes type) => type switch
@@ -1778,6 +1779,8 @@ public static class Utils
         }
         foreach (var roleClass in CustomRoleManager.AllActiveRoles.Values)
             roleClass.AfterMeetingTasks();
+        // 九尾の狐の焼き跡: ターンを減らして出し直す(九尾の狐が死んでいても残りのターンは残す)
+        Roles.Neutral.BurnMarks.AfterMeeting();
 
         ChainShifterAddon.AfterMeetingTasks();
         VentEnterTask.AfterMeetingTasks();

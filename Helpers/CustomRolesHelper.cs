@@ -335,4 +335,6 @@ public enum CountTypes
     Impostor,
     Jackal,
     Pirate,
+    /// <summary>九尾の狐(自分とキルできない人の 2 人になれば勝つキル人外)</summary>
+    NineTailedFox,
 }

@@ -376,13 +376,13 @@ public static class Options
     public static bool IsLoaded = false;
     public static int GetRoleCount(CustomRoles role)
     {
-        if (Modules.JokeRoles.IsDisabled(role)) return 0;
+        if (Modules.JokeRoles.IsDisabled(role) || Modules.VanillaRoles.IsDisabled(role)) return 0;
         return GetRoleChance(role) == 0 ? 0 : CustomRoleCounts.TryGetValue(role, out var option) ? option.GetInt() : 0;
     }
 
     public static int GetRoleChance(CustomRoles role)
     {
-        if (Modules.JokeRoles.IsDisabled(role)) return 0;
+        if (Modules.JokeRoles.IsDisabled(role) || Modules.VanillaRoles.IsDisabled(role)) return 0;
         return CustomRoleSpawnChances.TryGetValue(role, out var option) ? option.GetInt() : 0;
     }
     public static void Load()
@@ -853,6 +853,7 @@ public static class Options
         Modules.DesignatedMix.SetupCustomOption((int)Options.offsetId.FeatOther + 620);
         // ネタ役の表示/非表示(プリセット画面のボタンで切り替える)
         Modules.JokeRoles.SetupCustomOption((int)Options.offsetId.FeatOther + 630);
+        Modules.VanillaRoles.SetupCustomOption((int)Options.offsetId.FeatOther + 631);
 
         TextOptionItem.Create((int)offsetId.GModeAdd, "Head.GameMode", TabGroup.ModMainSettings).SetColor(Color.yellow).SetGameMode(CustomGameMode.Standard);
         // シンクロカラーモード
@@ -968,6 +969,7 @@ public static class Options
             .SetGameMode(customGameMode);
 
         spawnOption.IsJoke = Modules.JokeRoles.IsJoke(role);
+        spawnOption.IsVanillaRole = Modules.VanillaRoles.IsVanilla(role);
         CustomRoleSpawnChances.Add(role, spawnOption);
         CustomRoleCounts.Add(role, countOption);
     }

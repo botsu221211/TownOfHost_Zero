@@ -41,8 +41,8 @@ public sealed class FriedPotato : RoleBase
         FriedPotatoNotifyEaten,
     }
 
-    /// <summary>次の会議で知らせる「捕食された」の件数</summary>
-    private static int pendingEatenNotices;
+    /// <summary>次の会議で知らせる「捕食された」(通常のフライドポテト / マッドフライドポテト)</summary>
+    private static readonly List<string> pendingNotices = new();
 
     private static void SetupOptionItem()
     {
@@ -51,11 +51,16 @@ public sealed class FriedPotato : RoleBase
     }
 
     [GameModuleInitializer]
-    public static void Initialize() => pendingEatenNotices = 0;
+    public static void Initialize() => pendingNotices.Clear();
 
-    /// <summary>個人秘匿で、この人の名前を「フライドポテト」にするか</summary>
+    /// <summary>
+    /// 個人秘匿で、この人の名前を「フライドポテト」にするか。
+    /// マッドフライドポテトも同じ名前・同じ色で届く(見分けがつかない。設定は無く、いつもフライドポテトになる)
+    /// </summary>
     public static bool HidesNameInWhisper(PlayerControl player)
-        => player != null && player.Is(CustomRoles.FriedPotato) && OptionHideNameInWhisper.GetBool();
+        => player != null
+        && ((player.Is(CustomRoles.FriedPotato) && OptionHideNameInWhisper.GetBool())
+            || player.Is(CustomRoles.MadFriedPotato));
 
     /// <summary>個人秘匿の送り主として表示する名前(役職の色)</summary>
     public static string WhisperName => Utils.ColorString(RoleInfo.RoleColor, GetString("FriedPotato"));
@@ -65,17 +70,56 @@ public sealed class FriedPotato : RoleBase
         if (!AmongUsClient.Instance.AmHost || !OptionNotifyEaten.GetBool()) return;
         // 自殺など、誰かにキルされたのでなければ知らせない
         if (info.AttemptKiller == null || info.AttemptKiller.PlayerId == Player.PlayerId) return;
-        pendingEatenNotices++;
+        pendingNotices.Add(string.Format(GetString("FriedPotatoEatenNotice"), WhisperName));
         Logger.Info($"{Player.GetNameWithRole()} が捕食された(次の会議で通知)", nameof(FriedPotato));
     }
+
+    /// <summary>マッドフライドポテトが捕食された時(通常のフライドポテトとは違うお知らせ)</summary>
+    public static void AddMadEatenNotice()
+        => pendingNotices.Add(string.Format(GetString("MadFriedPotatoEatenNotice"), WhisperName));
 
     /// <summary>会議の始めに出すお知らせを渡して、控えを空にする</summary>
     public static IEnumerable<string> TakeMeetingNotices()
     {
-        var list = new List<string>();
-        for (int i = 0; i < pendingEatenNotices; i++)
-            list.Add(string.Format(GetString("FriedPotatoEatenNotice"), WhisperName));
-        pendingEatenNotices = 0;
+        var list = new List<string>(pendingNotices);
+        pendingNotices.Clear();
         return list;
+    }
+}
+
+/// <summary>
+/// マッドフライドポテト (TOH_Zero)
+/// ・インポスター陣営(マッドメイト)。判定・カウントはクルー
+/// ・フライドポテトと同じく、個人秘匿(/c)で送ると名前が「フライドポテト」で届く(見分ける方法は無い)
+/// ・キルされると、次の会議で通常のフライドポテトとは違うお知らせが出る
+/// </summary>
+public sealed class MadFriedPotato : RoleBase
+{
+    public static readonly SimpleRoleInfo RoleInfo =
+        SimpleRoleInfo.Create(
+            typeof(MadFriedPotato),
+            player => new MadFriedPotato(player),
+            CustomRoles.MadFriedPotato,
+            () => RoleTypes.Crewmate,
+            CustomRoleTypes.Madmate,
+            (int)Options.offsetId.MadY + 1100,
+            null,
+            "マッドフライドポテト"
+        );
+    public MadFriedPotato(PlayerControl player)
+    : base(
+        RoleInfo,
+        player,
+        () => HasTask.False
+    )
+    { }
+
+    public override void OnMurderPlayerAsTarget(MurderInfo info)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        // 自殺など、誰かにキルされたのでなければ知らせない
+        if (info.AttemptKiller == null || info.AttemptKiller.PlayerId == Player.PlayerId) return;
+        FriedPotato.AddMadEatenNotice();
+        Logger.Info($"{Player.GetNameWithRole()} が捕食された(次の会議で通知)", nameof(MadFriedPotato));
     }
 }
