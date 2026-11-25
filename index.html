@@ -7,17 +7,15 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: "Hiragino Sans", "Yu Gothic", sans-serif; line-height: 1.7; color: #1f2430; background: #f5f6fa; }
-    .wrap { display: flex; min-height: calc(100vh - 146px); position: relative; }
-    aside { width: 232px; background: #fff; border-right: 1px solid #e8ebf2; padding: 18px 14px 20px; flex-shrink: 0; }
+    .wrap { display: flex; height: calc(100vh - 64px); margin-top: 64px; position: relative; }
+    aside { width: 232px; background: #fff; border-right: 1px solid #e8ebf2; padding: 18px 14px 20px; flex-shrink: 0; height: 100%; overflow-y: auto; }
     .listtitle { text-align: center; font-size: 22px; font-weight: 700; margin: 4px 0 16px; color: #1f2430; }
     .search { position: relative; margin-bottom: 16px; }
     .search::before { content: "🔍"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: 0.5; pointer-events: none; }
     aside input { width: 100%; padding: 9px 12px 9px 32px; border: 1px solid #e3e7f0; border-radius: 10px; background: #f7f8fb; font-size: 14px; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
     aside input::placeholder { color: #a3aabb; }
     aside input:focus { border-color: #8db8ea; box-shadow: 0 0 0 3px rgba(74,144,217,.14); background: #fff; }
-    .tagfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 6px; }
     body.typing aside a { pointer-events: none; }
-    .tagbtn { font-size: 12px; padding: 4px 11px; border-radius: 999px; border: 1px solid #e3e7f0; background: #fff; color: #5a6276; cursor: pointer; transition: all .15s; }
     .tagbtn:hover { border-color: #c5ccdb; color: #1f2430; }
     .tagbtn.on { background: #1f2430; border-color: #1f2430; color: #fff; }
     aside h3 { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: #8a92a6; margin: 0; padding: 14px 8px 6px; border-top: 1px solid #eef0f5; }
@@ -28,7 +26,7 @@
     aside a + a { margin-top: 1px; }
     aside a.active { background: #f0f4fb; font-weight: 600; }
     aside a.active::before { opacity: 1; }
-    .panel { flex: 1; min-width: 0; background: #fff; }
+    .panel { flex: 1; min-width: 0; background: #fff; height: 100%; overflow-y: auto; }
     .close { display: none; }
     main { padding: 28px 32px; max-width: 760px; }
     .hero { border-radius: 16px; padding: 22px 24px; margin-bottom: 20px; background: #fff; border: 1px solid #e3e6ee; border-left-width: 6px; box-shadow: 0 2px 10px rgba(20,30,60,.05); }
@@ -42,7 +40,7 @@
     .tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: #f0f3f9; color: #3a4256; }
     .block { background: #fafbfd; border: 1px solid #eef1f6; border-radius: 12px; padding: 14px 16px; }
     .tagfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
-    .tagbtn { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #d7dce6; background: #f9fafc; color: #3a4256; cursor: pointer; }
+    .tagbtn { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid #d7dce6; background: #f9fafc; color: #3a4256; cursor: pointer; transition: all .15s; }
     .tagbtn.on { background: #4a90d9; border-color: #4a90d9; color: #fff; }
     .en { color: #8a92a6; font-size: 14px; margin: 2px 0 0; }
     .catch { font-style: italic; color: #5a6276; margin: 4px 0 0; }
@@ -55,16 +53,15 @@
     .theme { display: flex; flex-shrink: 0; margin-left: auto; border: 1px solid #e3e7f0; border-radius: 999px; padding: 3px; gap: 2px; }
     .themebtn { border: none; background: transparent; color: #5a6276; font-size: 13px; padding: 5px 12px; border-radius: 999px; cursor: pointer; }
     .themebtn.on { background: #1f2430; color: #fff; }
-    .wrap { margin-top: 64px; }
     .foot { display: flex; justify-content: center; padding: 28px 16px; border-top: 1px solid #e8ebf2; background: #fff; }
     .ghbtn { padding: 9px 20px; border-radius: 999px; background: #1f2430; color: #fff; text-decoration: none; font-size: 14px; transition: opacity .15s; }
     .ghbtn:hover { opacity: .85; }
     .empty { color: #7a8294; padding: 24px 8px; text-align: left; font-size: 15px; word-break: keep-all; line-height: 1.8; margin: 0; }
     @media (max-width: 900px) {
-      .wrap { display: block; min-height: 0; }
-      aside { width: auto; border-right: none; }
+      .wrap { display: block; height: auto; min-height: 0; }
+      aside { width: auto; border-right: none; height: auto; overflow: visible; }
       .panel {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; height: auto;
         overflow-y: auto; z-index: 2;
         transform: translateX(100%);
         transition: transform 0.35s ease;
@@ -117,7 +114,7 @@
       <div id="list"></div>
     </aside>
     <section class="panel">
-      <button id="close" class="close" type="button">← キャンセル</button>
+      <button id="close" class="close" type="button">← 戻る</button>
       <main id="content"></main>
     </section>
   </div>
@@ -175,8 +172,8 @@
       color: "#699465"
       tags: ["ニュートラル","通常役職"]
       intro: "感染はもう始まっている。"
-      desc: "設定回数まで自信が会議で投票した相手を感染させる。\nまた、感染している人が投票した相手にも感染する。\n感染状況の可視化がオンのとき、感染者はインフェクショナーからしか見えないマークがつく。\n生存しているプレイヤーが全員感染状態になった時点で単独勝利。"
-      options: ["自身から感染させれる回数", "勝利優先度", "感染状況の可視化", "追加勝利にする"]
+      desc: "設定回数まで自身が会議で投票した相手を感染させる。\nまた、感染している人が投票した相手にも感染する。\n感染状況の可視化がオンのとき、感染者はインフェクショナーからしか見えないマークがつく。\n生存しているプレイヤーが全員感染状態になった時点で単独勝利。"
+      options: ["自身から感染させられる回数", "勝利優先度", "感染状況の可視化", "追加勝利にする"]
     },
     {
       name: "白狐"
@@ -185,7 +182,7 @@
       color: "#e6e0c8"
       tags: ["ニュートラル","通常役職"]
       intro: "具現する怨嗟"
-      desc: "『白狐はお揚げを食べながら身を潜める第三陣営です。\n満腹ゲージが底を尽きてしまうと餓死してしまいます。餓死を免れるため、また勝利のため、他プレイヤーにバレないようにお揚げを食べ続けなければなりません。』\n(Nosのwikiから一部引用)\nお揚げのお皿は白いダミーで表示。\nお揚げが乗っている場合は茶色いダミーで表示。\nお皿は白狐がいる時のみマップの決められた場所に出現します。\n全お皿の中からランダムな3つなお皿にお揚げが出現します。\nお揚げを食べるとまた別なランダムなお皿に移動します。\nお揚げの上でシェイプで適当な人を選択するとそのお揚げを食べることができます。\n満腹ゲージはキルクールで表示。"
+      desc: "『白狐はお揚げを食べながら身を潜める第三陣営です。\n満腹ゲージが底を尽きてしまうと餓死してしまいます。餓死を免れるため、また勝利のため、他プレイヤーにバレないようにお揚げを食べ続けなければなりません。』\n(Nosのwikiから一部引用)\nお揚げのお皿は白いダミーで表示。\nお揚げが乗っている場合は茶色いダミーで表示。\nお皿は白狐がいる時のみマップの決められた場所に出現します。\n全お皿の中からランダムな3つのお皿にお揚げが出現します。\nお揚げを食べるとまた別なランダムなお皿に移動します。\nお揚げの上でシェイプで適当な人を選択するとそのお揚げを食べることができます。\n満腹ゲージはキルクールで表示。"
       win: "『生存し、かつ「勝利に必要な満腹度」で設定したお揚げゲージの量を保ちながらゲームが終了する』\n(Nosのwikiから引用)"
       options: ["キラーの位置を矢印で可視化", "お揚げの最大出現数", "お揚げ1個の腹持ち", "最大満腹度", "初期満腹度", "勝利に必要な満腹度"]
     },
@@ -225,7 +222,7 @@
       en: "Mad Fried Poteto"
       team: "マッドメイト"
       color: "#ff1919"
-      tags: ["マッドメイト"]
+      tags: ["マッドメイト","通常役職"]
       intro: "悪い悪いフライドポテト"
       desc: "通常のフライドポテト同様、個人チャットを送るとフライドポテトとして表示される。\nクルーメイト役職のフライドポテトと全く同じなので見分ける方法は無い"
       win: "インポスター陣営の勝利"
@@ -391,7 +388,6 @@
     search.addEventListener('focus', () => {
       document.body.classList.add('typing');
 
-      // 検索欄を操作したときに、スマホ用の詳細パネルが残っていたら閉じる
       currentId = -1;
       renderDetail();
     });
