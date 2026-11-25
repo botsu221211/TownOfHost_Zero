@@ -406,7 +406,8 @@ public static class MeetingHudPatch
             MeetingStates.MeetingCalled = false;
             Logger.Info("------------会議終了------------", "Phase");
             ChatUpdatePatch.DoBlockChat = false;
-            if (AmongUsClient.Instance.AmHost)
+            // 会議中に試合が終わった時は、会議の後の処理(お皿や焼き跡の出し直し・役職の送り直し)をしない
+            if (AmongUsClient.Instance.AmHost && !IsGameOver())
             {
                 if (!AntiBlackout.IsCached) AntiBlackout.SetIsDead();
                 Utils.AfterMeetingTasks();
@@ -415,7 +416,7 @@ public static class MeetingHudPatch
 
                 _ = new LateTask(() =>
                 {
-                    if (!GameStates.IsInGame) return;
+                    if (!GameStates.IsInGame || IsGameOver()) return;
 
 
                     foreach (var pc in Main.AllPlayerControls)
@@ -438,23 +439,15 @@ public static class MeetingHudPatch
                         var baseRole = roleInfo?.BaseRoleType?.Invoke() ?? RoleTypes.Crewmate;
                         if (roleInfo?.IsDesyncImpostor == true)
                         {
-                            // Desync role: send Impostor to self, Crewmate to all other clients
+                            // 本人にだけ元の役職を送る。ほかの人の画面でクルーに戻すのは追放画面の後
+                            // (ここで戻すと、暗転対策で身代わりのインポスターに見せている分が消えて、追放の後に暗転する)
                             pc.RpcSetRoleDesync(baseRole, pc.GetClientId());
-                            foreach (var viewer in Main.AllPlayerControls)
-                            {
-                                if (viewer.PlayerId == pc.PlayerId) continue;
-                                int viewerClientId = viewer.GetClientId();
-                                if (viewerClientId == -1) continue;
-                                if (viewer.PlayerId == PlayerControl.LocalPlayer.PlayerId) continue;
-                                pc.RpcSetRoleDesync(RoleTypes.Crewmate, viewerClientId);
-                            }
                             continue;
                         }
 
                         pc.RpcSetRoleDesync(baseRole, pc.GetClientId());
                         Logger.Info($"AfterMeeting baseRole: {pc.GetNameWithRole()} -> {baseRole}", "AfterMeeting_RoleSync");
                     }
-                    StandardIntroHelper.HideImpostorsFromDesyncPlayers();
 
                     Utils.NotifyRoles();
                 }, 0.5f, "AfterMeeting_RoleSync");
@@ -462,6 +455,10 @@ public static class MeetingHudPatch
             MeetingVoteManager.Instance?.Destroy();
         }
     }
+
+    private static bool IsGameOver()
+        => CustomWinnerHolder.WinnerTeam != CustomWinner.Default
+            || AmongUsClient.Instance == null || AmongUsClient.Instance.IsGameOver;
 
     public static void TryAddAfterMeetingDeathPlayers(CustomDeathReason deathReason, params byte[] playerIds)
     {

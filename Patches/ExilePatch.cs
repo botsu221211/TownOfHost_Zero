@@ -90,6 +90,8 @@ namespace TownOfHostY
             if (AmongUsClient.Instance.AmHost)
             {
                 if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Default) return;
+                // 自分の画面でだけインポスターの人を、ほかの人の画面でクルーに戻す(暗転対策の身代わりを解く)
+                StandardIntroHelper.SyncDesyncViewers();
                 // ランダムスポーン
                 switch ((MapNames)Main.NormalOptions.MapId)
                 {

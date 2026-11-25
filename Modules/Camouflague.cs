@@ -103,7 +103,14 @@ public static class Camouflage
         // 戻す色。マッドアンノウンに姿を変えられている人は、変えた後の色に戻す
         int colorId = newOutfit.ColorId;
         if ((!isCamouflage || ForceRevert) && Roles.Madmate.MadUnknown.TryGetDisguiseColor(target.PlayerId, out var disguiseColor))
-            colorId = disguiseColor;
+        {
+            // 姿を変えられている人の色は、本人以外の画面にだけ送る
+            if (target.Data.DefaultOutfit.ColorId == disguiseColor) return;
+            Logger.Info($"マッドアンノウンの色に戻す color={disguiseColor}", "RpcSetSkin");
+            // コミュサボの間は本人の画面も灰色になっているので、本人には元の色を送る
+            Roles.Madmate.MadUnknown.SendDisguiseColor(target, disguiseColor, newOutfit.ColorId);
+            return;
+        }
         //if (newOutfit == null) return;
         if (target.Data.DefaultOutfit.ColorId == colorId && newOutfit.Compare(target.Data.DefaultOutfit)) return;
         Logger.Info($"newOutfit={newOutfit.GetString()} color={colorId}", "RpcSetSkin");

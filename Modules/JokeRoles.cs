@@ -16,6 +16,7 @@ public static class JokeRoles
     public static readonly HashSet<CustomRoles> Roles = new()
     {
         CustomRoles.NoLimiter,
+        CustomRoles.FirstVictim,
     };
 
     /// <summary>表示/非表示の保存先(画面には出さない)</summary>

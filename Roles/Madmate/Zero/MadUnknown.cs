@@ -155,13 +155,51 @@ public sealed class MadUnknown : RoleBase, IKiller
     {
         if (Disguised.ContainsKey(target.PlayerId)) return;
         Disguised[target.PlayerId] = Player.PlayerId;
+        // バニラでは同じ色の人は 2 人いないので、ほかの人が使っていない色から選ぶ
         int count = Palette.PlayerColors.Length;
         byte current = (byte)target.Data.DefaultOutfit.ColorId;
-        byte color = (byte)IRandom.Instance.Next(count);
-        if (color == current) color = (byte)((color + 1) % count);
+        var used = Main.AllPlayerControls
+            .Where(pc => pc != null && pc.Data != null)
+            .Select(pc => pc.Data.DefaultOutfit.ColorId)
+            .ToHashSet();
+        var free = Enumerable.Range(0, count).Where(c => c != current && !used.Contains(c)).ToList();
+        byte color = free.Count > 0
+            ? (byte)free[IRandom.Instance.Next(free.Count)]
+            : (byte)((current + 1 + IRandom.Instance.Next(count - 1)) % count);
         DisguisedColor[target.PlayerId] = color;
-        SetColor(target, color);
+        SendDisguiseColor(target, color);
     }
+
+    /// <summary>
+    /// 変えた色を、本人以外の画面にだけ送る(ホストの画面は手元で変える)。
+    /// 客の本人の画面で自分の色を変えると、その人が会議の画面に移れなくなるので、本人の画面では元の色のままにする
+    /// (名前は「？？？」になるので、姿を変えられたことは本人にも分かる)
+    /// </summary>
+    /// <param name="selfColor">本人の画面に送る色(コミュサボの解除で本人の画面も灰色から戻す時)。null なら本人には送らない</param>
+    public static void SendDisguiseColor(PlayerControl target, int color, int? selfColor = null)
+    {
+        if (target == null || target.Data == null) return;
+        target.SetColor((byte)color);
+        foreach (var pc in Main.AllPlayerControls)
+        {
+            if (pc == null || pc.AmOwner) continue;
+            if (pc.Data == null || pc.Data.Disconnected) continue;
+            int sendColor;
+            if (pc.PlayerId == target.PlayerId)
+            {
+                if (selfColor is not { } own) continue;
+                sendColor = own;
+            }
+            else sendColor = color;
+            var clientId = pc.GetClientId();
+            if (clientId == -1) continue;
+            var writer = AmongUsClient.Instance.StartRpcImmediately(target.NetId, (byte)RpcCalls.SetColor, SendOption.Reliable, clientId);
+            writer.Write(target.Data.NetId);
+            writer.Write((byte)sendColor);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+        }
+    }
+    /// <summary>元の色に戻す(全員に送る。本人の画面はもともと元の色なので変わらない)</summary>
     private static void SetColor(PlayerControl target, byte color)
     {
         target.SetColor(color);

@@ -200,6 +200,7 @@ Infectioner	インフェクショナー
 KitsuneSpirit	白狐
 NineTailedFox	九尾の狐
 NoLimiter	ノーリミッター
+FirstVictim	ファーストビィクティム
 Chairman	チェアマン
 TaskManager	タスクマネージャー
 RainbowResize	<size=8><color=#ffff00>★</color></size><color=#ff0000>に</color><color=#ffa500>じ</color><color=#ffff00>い</color><color=#00ff00>ろ</color><color=#00ffff>ス</color><color=#0000ff>タ</color><color=#800080>ー</color><size=8><color=#ffff00>★</color></size>
@@ -241,6 +242,7 @@ InfectionerInfo	感染はもう始まっている。
 KitsuneSpiritInfo	具現する怨嗟
 NineTailedFoxInfo	私の計算からは誰も逃れられない
 NoLimiterInfo	私に制御という文字はない
+FirstVictimInfo	何がなんでも初手死してやる
 ChairmanInfo	会議開閉を操ろう
 SillySheriffInfo	ごめん、ちょっと調子悪いみたい
 SympathizerInfo	ふたりで白をとり合おう
@@ -282,6 +284,7 @@ InfectionerInfoLong	[ニュートラル]\n会議で自分が投票した相手�
 KitsuneSpiritInfoLong	[ニュートラル]\nお揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する。\nマップにお皿が7枚ある(場所は試合ごとにランダムで、その試合中は同じ)。最初は全部のお皿にお揚げ(茶色いダミー)が乗っている。お揚げの上でシェイプ(誰を選んでもよい)すると食べられ、そのお皿は空(白いダミー)になる。空のお皿には、設定した秒数がたつとまたお揚げが乗る(会議の間は止まり、会議の後に続きから数える)。\n満腹度はキルボタンのクールダウンで表示される(キルはできない)。設定でキル役の方向が役職の色の矢印で分かる。\n生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利。\n(Nebula on the Ship の妖狐を参考にしています)
 NineTailedFoxInfoLong	[ニュートラル]\nキルボタンで相手に妖術をかけ、ファントムボタンで妖術をかけた相手を遠くから焼き殺せる。妖術を同時にかけられるのは1人だけ(かけ直すと前の相手の妖術は消える)。\n妖術で焼き殺した場所には、設定したターンの間「焼け跡」が残る。\n盤面が自分とキルできない人の2人になると単独勝利。生きている間は、インポスターが全滅しても試合は終わらない。
 NoLimiterInfoLong	[インポスター陣営]\nキルクールが短い代わりに、キルクールが明けた瞬間にキル範囲内に人がいると自動でキルする(一番近い人)。\nキルクールが明けた時にキルできる相手がいなければ、自分が死亡する。【死因：自殺】\n(ネタ役)
+FirstVictimInfoLong	[ニュートラル]\n一番最初のキルで死亡すると単独勝利。\n最初のキルで自身が死亡しなかった場合、死亡する。【死因：絶望死】\nほかの勝利と同時になったときは勝利優先度の高い方が勝つ。\n(ネタ役)
 ChairmanInfoLong	[クルー陣営]\n・ペットを撫でると会議が開ける。サボタージュ中は会議を開けない。\n通常ボタン回数と同時に消費する。(通常ボタン回数1回の時、先にペットで使うと、通常ボタンは使えなくなる。)\n・誰かに投票することでその会議を即中断できる(追放は起こらずスキップ扱い)。\nスキップ・自投票以外の普通の投票は出来ず、能力を発動してしまう。
 SillySheriffInfoLong	[クルー陣営]\n普通のシェリフとはちょっと違うバカなシェリフ。正しく陣営を認識できない時、人外に向かって自爆したりクルーをキルする時がある
 SympathizerInfoLong	[クルー陣営]\n共鳴者は必ず2人でしか設定できない。\n設定タスク数まで完了させると自身にしか見えない◎がつく。2人ともタスクが互いに設定数を超えた時、相手にも◎が付きもう1人の共鳴者が誰か分かる。
@@ -1159,6 +1162,7 @@ DeathReason.Telekinesis	念殺
 DeathReason.IgnitionBombed	爆死
 DeathReason.Eaten	捕食
 DeathReason.Starved	餓死
+DeathReason.Despair	絶望死
 Alive	生存
 Win	勝利
 	
@@ -1688,13 +1692,13 @@ InfectionerInfectCount	自身から感染させられる回数
 InfectionerWinPriority	勝利優先度
 InfectionerVisualize	感染状況の可視化
 InfectionerAdditionalWin	追加勝利にする
+FirstVictimWinPriority	勝利優先度
 KitsuneArrowToKiller	キル役の方向を矢印で表示(矢印は役職の色)
 KitsuneOageRespawn	お揚げが復活するまでの秒数
-KitsuneOageSatiety	お揚げ1個の腹持ち
-KitsuneMaxSatiety	最大満腹度
+KitsuneOageSatiety	お揚げ1個で回復する満腹度
 KitsuneInitialSatiety	初期満腹度
 KitsuneWinSatiety	勝利に必要な満腹度
-KitsuneSatietyDrainRate	満腹度が減る速さ
+KitsuneSatietyDrainRate	1秒に減る満腹度
 NineTailedFoxAbilityCooldown	焼き殺す能力のクールダウン
 NineTailedFoxCanVent	ベントを使える
 NineTailedFoxBurnTurns	焼け跡を残すターン数

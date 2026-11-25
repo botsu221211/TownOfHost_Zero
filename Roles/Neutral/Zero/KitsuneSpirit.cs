@@ -40,14 +40,13 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         () => HasTask.False
     )
     {
-        satiety = Mathf.Min(OptionInitialSatiety.GetFloat(), OptionMaxSatiety.GetFloat());
+        satiety = Mathf.Min(OptionInitialSatiety.GetFloat(), MaxSatiety);
         displaySynced = false;
     }
 
     private static OptionItem OptionArrowToKiller;
     private static OptionItem OptionOageRespawn;
     private static OptionItem OptionOageSatiety;
-    private static OptionItem OptionMaxSatiety;
     private static OptionItem OptionInitialSatiety;
     private static OptionItem OptionWinSatiety;
     private static OptionItem OptionDrainRate;
@@ -56,13 +55,12 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         KitsuneArrowToKiller,
         KitsuneOageRespawn,
         KitsuneOageSatiety,
-        KitsuneMaxSatiety,
         KitsuneInitialSatiety,
         KitsuneWinSatiety,
         KitsuneSatietyDrainRate,
     }
 
-    /// <summary>満腹度。タスクターンの間 1 秒に「減る速さ」ずつ減る</summary>
+    /// <summary>満腹度(%)。タスクターンの間 1 秒に「1秒に減る満腹度」ずつ減る</summary>
     private float satiety;
     /// <summary>キルボタンの表示を今の満腹度に合わせたか(タスクターンの始まりに合わせ直す)</summary>
     private bool displaySynced;
@@ -76,20 +74,20 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         // 11 は前の「お揚げの最大出現数」で使っていた番号なので空けておく(保存された値と混ざらないように)
         OptionOageRespawn = FloatOptionItem.Create(RoleInfo, 16, OptionName.KitsuneOageRespawn, new(2.5f, 180f, 2.5f), 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(0.5f, 180f, 0.5f), 20f, false)
-            .SetValueFormat(OptionFormat.Seconds);
-        OptionMaxSatiety = FloatOptionItem.Create(RoleInfo, 13, OptionName.KitsuneMaxSatiety, new(0.5f, 180f, 0.5f), 100f, false)
-            .SetValueFormat(OptionFormat.Seconds);
-        OptionInitialSatiety = FloatOptionItem.Create(RoleInfo, 14, OptionName.KitsuneInitialSatiety, new(0.5f, 180f, 0.5f), 80f, false)
-            .SetValueFormat(OptionFormat.Seconds);
-        OptionWinSatiety = FloatOptionItem.Create(RoleInfo, 15, OptionName.KitsuneWinSatiety, new(0.5f, 180f, 0.5f), 30f, false)
-            .SetValueFormat(OptionFormat.Seconds);
-        // 満腹度が減る速さ(1 秒にいくつ減るか)。1 で 1 秒に 1、0.5 なら半分の速さ
-        OptionDrainRate = FloatOptionItem.Create(RoleInfo, 17, OptionName.KitsuneSatietyDrainRate, new(0.1f, 2f, 0.1f), 0.7f, false)
-            .SetValueFormat(OptionFormat.Multiplier);
+        // 満腹度は % で数える(満腹が 100%)
+        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(5f, 100f, 5f), 20f, false)
+            .SetValueFormat(OptionFormat.Percent);
+        OptionInitialSatiety = FloatOptionItem.Create(RoleInfo, 14, OptionName.KitsuneInitialSatiety, new(5f, 100f, 5f), 80f, false)
+            .SetValueFormat(OptionFormat.Percent);
+        OptionWinSatiety = FloatOptionItem.Create(RoleInfo, 15, OptionName.KitsuneWinSatiety, new(0f, 100f, 5f), 30f, false)
+            .SetValueFormat(OptionFormat.Percent);
+        // 1 秒に減る満腹度(%)
+        OptionDrainRate = FloatOptionItem.Create(RoleInfo, 17, OptionName.KitsuneSatietyDrainRate, new(0.1f, 5f, 0.1f), 0.7f, false)
+            .SetValueFormat(OptionFormat.Percent);
     }
 
-    private static float MaxSatiety => OptionMaxSatiety.GetFloat();
+    /// <summary>満腹(100%)</summary>
+    private const float MaxSatiety = 100f;
 
     public override void Add()
     {
@@ -143,7 +141,12 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     public void RespondShapeshift()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (!Player.IsAlive())
+        // 会議の終わり(追放画面に移る時)にも白狐の画面から「変身解除」の合図が来る。
+        // その時にモーション付きで返すと、切り替わりでモーションが途中で止まって次のターンに動けなくなるので、
+        // モーションはタスクターン中だけにする
+        var inTask = GameStates.IsInTask && Main.introDestroyed
+            && MeetingHud.Instance == null && ExileController.Instance == null;
+        if (!Player.IsAlive() || !inTask)
         {
             Player.RpcRejectShapeshift();
             return;
@@ -220,7 +223,7 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
     public override string GetProgressText(bool comms = false)
     {
         var enough = satiety >= OptionWinSatiety.GetFloat();
-        return Utils.ColorString(enough ? RoleInfo.RoleColor : Color.gray, $"(満腹 {Mathf.CeilToInt(satiety)}/{Mathf.CeilToInt(MaxSatiety)})");
+        return Utils.ColorString(enough ? RoleInfo.RoleColor : Color.gray, $"(満腹 {Mathf.CeilToInt(satiety)}%)");
     }
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)

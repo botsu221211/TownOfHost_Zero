@@ -306,6 +306,7 @@ public enum CustomDeathReason
     IgnitionBombed,
     Eaten,
     Starved,
+    Despair,
 
     Win,
     etc = -1
@@ -330,6 +331,7 @@ public enum CustomWinner
     NBakery = CustomRoles.Bakery,
     Workaholic = CustomRoles.Workaholic,
     Infectioner = CustomRoles.Infectioner,
+    FirstVictim = CustomRoles.FirstVictim,
     LoveCutter = CustomRoles.LoveCutter,
     God = CustomRoles.God,
     FoxSpirit = CustomRoles.FoxSpirit,

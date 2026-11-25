@@ -169,6 +169,7 @@ public static class ZeroSettingUI
         CustomRoles.KitsuneSpirit,
         CustomRoles.NineTailedFox,
         CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
+        CustomRoles.FirstVictim, // ネタ役
     };
     private static int pendingAction = -1;
     private static float pendingTime;

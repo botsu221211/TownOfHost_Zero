@@ -207,11 +207,14 @@ public static class BurnMarks
     }
 
     private static readonly List<Mark> marks = new();
+    /// <summary>会議の後の処理は 1 回の会議で 2 回呼ばれるので、ターンを減らすのは会議ごとに 1 回だけにする</summary>
+    private static bool turnPending;
 
     [Attributes.GameModuleInitializer]
     public static void Init()
     {
         marks.Clear();
+        turnPending = false;
         CustomNetObject.HiddenForMeeting -= OnHiddenForMeeting;
         CustomNetObject.HiddenForMeeting += OnHiddenForMeeting;
     }
@@ -219,6 +222,7 @@ public static class BurnMarks
     private static void OnHiddenForMeeting()
     {
         foreach (var mark in marks) mark.Object = null;
+        turnPending = true;
     }
 
     public static void Add(Vector2 position, int turns)
@@ -233,9 +237,11 @@ public static class BurnMarks
     public static void AfterMeeting()
     {
         if (!AmongUsClient.Instance.AmHost || marks.Count == 0) return;
+        var countDown = turnPending;
+        turnPending = false;
         foreach (var mark in marks.ToArray())
         {
-            mark.TurnsLeft--;
+            if (countDown) mark.TurnsLeft--;
             if (mark.TurnsLeft <= 0)
             {
                 mark.Object?.Despawn();

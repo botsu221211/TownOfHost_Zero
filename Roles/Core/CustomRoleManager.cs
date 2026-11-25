@@ -589,6 +589,7 @@ public enum CustomRoles
     Infectioner,
     KitsuneSpirit,
     NineTailedFox,
+    FirstVictim,
     DarkHide,
     LoveCutter,
     PlatonicLover,

@@ -1185,6 +1185,30 @@ public static class StandardIntroHelper
     /// 本物のインポスター側の人をクルーに見せる。インポスターのままだと、その人の画面では「インポスター仲間」になり、
     /// 会議で名前が赤く見えてインポスターが分かってしまう(キルもできない)
     /// </summary>
+    /// <summary>
+    /// 追放画面の後に呼ぶ。自分の画面でだけインポスターの人を、ほかの人の画面でクルーに戻し、
+    /// その人たちの画面では本物のインポスターをクルーに見せる
+    /// </summary>
+    public static void SyncDesyncViewers()
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        foreach (var pc in Main.AllPlayerControls)
+        {
+            if (pc.Data == null || pc.Data.Disconnected || !pc.IsAlive()) continue;
+            if (pc.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor != true) continue;
+            foreach (var viewer in Main.AllPlayerControls)
+            {
+                if (viewer.PlayerId == pc.PlayerId) continue;
+                if (viewer.PlayerId == PlayerControl.LocalPlayer.PlayerId) continue;
+                if (viewer.Data == null || viewer.Data.Disconnected) continue;
+                var viewerClientId = viewer.GetClientId();
+                if (viewerClientId == -1) continue;
+                pc.RpcSetRoleDesync(RoleTypes.Crewmate, viewerClientId);
+            }
+        }
+        HideImpostorsFromDesyncPlayers();
+    }
+
     public static void HideImpostorsFromDesyncPlayers()
     {
         if (!AmongUsClient.Instance.AmHost) return;

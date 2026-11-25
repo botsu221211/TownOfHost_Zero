@@ -771,6 +771,61 @@ class SetColorPatch
         return true;
     }
 }
+/// <summary>
+/// ベントを使えない人をベントから出す。
+/// 自分の画面でだけインポスターの役職は本人の画面ではベントに入れてしまうので、ホストが追い出す。
+/// 追い出すまでの間にほかのベントへ移られると、入ったベントの番号で追い出しても空振りして、
+/// ほかの人の画面ではベントに入ったまま(透明)になる。今いるベントを調べて、出るまで追い出し直す
+/// </summary>
+static class VentBooter
+{
+    private static readonly HashSet<byte> booting = new();
+
+    public static void Boot(PlayerPhysics physics, int enteredId)
+    {
+        var pc = physics?.myPlayer;
+        if (pc == null || !booting.Add(pc.PlayerId)) return;
+        BootLoop(physics, pc.PlayerId, enteredId, 0);
+    }
+
+    private static void BootLoop(PlayerPhysics physics, byte playerId, int lastId, int count)
+    {
+        _ = new LateTask(() =>
+        {
+            if (physics == null || physics.myPlayer == null || !GameStates.IsInTask || count >= 10)
+            {
+                booting.Remove(playerId);
+                return;
+            }
+            var ventId = CurrentVentId(playerId) ?? lastId;
+            physics.RpcBootFromVent(ventId);
+            // 少し待って、まだベントの中なら今いるベントでもう一度
+            _ = new LateTask(() =>
+            {
+                if (physics != null && physics.myPlayer != null && GameStates.IsInTask
+                    && (CurrentVentId(playerId) != null || physics.myPlayer.inVent))
+                    BootLoop(physics, playerId, CurrentVentId(playerId) ?? ventId, count + 1);
+                else
+                    booting.Remove(playerId);
+            }, 0.6f, "Cancel Vent Check");
+        }, count == 0 ? 0.3f : 0f, "Cancel Vent");
+    }
+
+    /// <summary>ホストが知っている、その人が今入っているベントの番号(入っていなければ null)</summary>
+    private static int? CurrentVentId(byte playerId)
+    {
+        try
+        {
+            if (ShipStatus.Instance == null) return null;
+            if (!ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Ventilation, out var systemType)) return null;
+            var vent = systemType.TryCast<VentilationSystem>();
+            if (vent != null && vent.PlayersInsideVents.TryGetValue(playerId, out var id)) return id;
+        }
+        catch { }
+        return null;
+    }
+}
+
 [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.CoEnterVent))]
 class CoEnterVentPatch
 {
@@ -792,11 +847,11 @@ class CoEnterVentPatch
 
             if (!roleAllowsVent || !canVent)
             {
-                _ = new LateTask(() => { __instance.RpcBootFromVent(id); }, 0.5f, "Cancel Vent");
+                VentBooter.Boot(__instance, id);
             }
             else if (user.GetCustomRole().IsCCCatRoles() && !CatchCat.CatPlayer.CanUseVent(user))
             {
-                _ = new LateTask(() => { __instance.RpcBootFromVent(id); }, 0.5f, "Cancel Vent");
+                VentBooter.Boot(__instance, id);
             }
         }
         return true;
@@ -821,11 +876,11 @@ class RpcEnterVentPatch
 
         if (!roleAllowsVent || !canVent)
         {
-            _ = new LateTask(() => { __instance.RpcBootFromVent(id); }, 0.5f, "Cancel Vent");
+            VentBooter.Boot(__instance, id);
         }
         else if (user.GetCustomRole().IsCCCatRoles() && !CatchCat.CatPlayer.CanUseVent(user))
         {
-            _ = new LateTask(() => { __instance.RpcBootFromVent(id); }, 0.5f, "Cancel Vent");
+            VentBooter.Boot(__instance, id);
         }
     }
 }
