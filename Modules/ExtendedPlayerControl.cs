@@ -666,7 +666,8 @@ static class ExtendedPlayerControl
     public static string GetRoleInfo(this PlayerControl player, bool InfoLong = false)
     {
         var roleClass = player.GetRoleClass();
-        var role = player.GetCustomRole();
+        // 覚醒前の覚醒役職は、自分の画面ではクルーメイトとして説明する
+        var role = Roles.Core.Interfaces.AwakeningRole.ShownRole(player);
 
         role = role.VanillaRoleConversion();//変換
 

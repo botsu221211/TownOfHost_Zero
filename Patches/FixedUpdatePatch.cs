@@ -236,6 +236,9 @@ namespace TownOfHostY
                         (Color c, string t) = (Color.clear, "");
                         var targetRoleClass = target.GetRoleClass();
                         targetRoleClass?.OverrideShowMainRoleText(ref c, ref t);
+                        // 覚醒前の覚醒役職の色の上書き(クルーメイト(?)の色)は本人の名前だけ。
+                        // ほかの人の名前に付けると、ホストの画面でだけ誰が覚醒役職か分かってしまう
+                        if (target != seer && TownOfHostY.Roles.Core.Interfaces.AwakeningRole.IsUnaware(target)) c = Color.clear;
                         if (c != Color.clear)
                         {
                             RealName = RealName.Color(c); // 既存の Color 拡張を利用

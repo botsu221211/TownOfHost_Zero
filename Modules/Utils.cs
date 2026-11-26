@@ -505,13 +505,16 @@ public static class Utils
         string formatTag = "<size=70%><line-height=1.6pic>";
 
         var sb = new StringBuilder();
-        var myRole = player.GetCustomRole();
+        // 覚醒前の覚醒役職は、自分ではクルーメイト(?)だと思っている
+        var unaware = Roles.Core.Interfaces.AwakeningRole.IsUnaware(player);
+        var myRole = Roles.Core.Interfaces.AwakeningRole.ShownRole(player);
         var roleInfoLong = player.GetRoleInfo(true);
         var roleName = myRole.ToString();
         if (myRole == CustomRoles.Bakery && Bakery.IsNeutral(player))
         {
             roleName = "NBakery";
         }
+        if (unaware) roleName = Roles.Core.Interfaces.AwakeningRole.UnawareNameKey;
 
         string RoleInfoTitleString = $"{GetString("RoleInfoTitle")}";
         string RoleInfoTitle = $"{ColorString(GetRoleColor(myRole), RoleInfoTitleString)}";
@@ -521,7 +524,7 @@ public static class Utils
 
         SendMessageAutoSplitAndClearSB(PlayerId, sb, RoleInfoTitle, formatTag);
 
-        if (!myRole.IsDontShowOptionRole() && myRole != CustomRoles.GM)
+        if (!unaware && !myRole.IsDontShowOptionRole() && myRole != CustomRoles.GM)
         {
             formatTag = "<size=65%><line-height=1.5pic>";
             ShowChildrenSettings(Options.CustomRoleSpawnChances[myRole], ref sb);
@@ -691,7 +694,7 @@ public static class Utils
 
     // Help Now
     /// <summary>
-    /// コマンドの陣営指定(I/M/C/N/U/A)。/n i ・ /n r c ・ /h n m のように使う。指定がなければ null
+    /// コマンドの陣営指定(I/M/C/N/U/A)。/n i ・ /n r c ・ /a r i ・ /h n m のように使う。指定がなければ null
     /// </summary>
     public static TabGroup? ParseTeamFilter(string arg) => arg?.Trim().ToLower() switch
     {
@@ -1088,6 +1091,49 @@ public static class Utils
         }
     }
 
+    /// <summary>
+    /// /a r [陣営]: 今の設定に入っているかに関係なく、その陣営の役職を全部表示する。
+    /// 設定画面に出ない役職(非表示のネタ役・非表示のバニラ役・隠している役職)は出さない。入っている役職には人数を付ける
+    /// </summary>
+    public static void ShowAllRoles(byte PlayerId = byte.MaxValue, TabGroup? filter = null)
+    {
+        string formatTag = "<size=80%><line-height=1.8pic>";
+        var sb = new StringBuilder();
+        sb.Append(formatTag);
+        var count = 0;
+        IEnumerable<CustomRoles> roles = filter == TabGroup.Addons
+            ? CustomRolesHelper.AllAddOnRoles
+            : CustomRolesHelper.AllStandardRoles.Concat(filter == null ? CustomRolesHelper.AllAddOnRoles : Array.Empty<CustomRoles>());
+        foreach (var role in roles)
+        {
+            if (role.IsVanilla() || !MatchesTeam(role, filter)) continue;
+            if (!Options.CustomRoleSpawnChances.TryGetValue(role, out var spawn)) continue;
+            if (spawn.IsHiddenOn(Options.CurrentGameMode)) continue;
+            if (Modules.JokeRoles.IsDisabled(role) || Modules.VanillaRoles.IsDisabled(role)) continue;
+
+            if (role.IsAddOn()) sb.Append("<color=#ee82ee>○</color>");
+            else if (role.GetCustomRoleTypes() == CustomRoleTypes.Unit) sb.Append("<color=#7fff00>Ⓤ</color>");
+            else sb.Append(GetTeamMark(role, 80, false));
+            sb.Append($" {GetRoleName(role)}".Color(GetRoleColor(role)));
+            if (role.IsEnable()) sb.Append($"<size=70%> (x{role.GetCount()})</size>");
+            sb.Append('\n');
+            count++;
+        }
+        if (count == 0) sb.Append("役職がありません\n");
+        var title = filter == null ? "【全ての役職】" : $"【全ての役職: {TeamFilterName(filter.Value)}】";
+        SendMessageAutoSplitAndClearSB(PlayerId, sb, title.Color(Color.yellow), formatTag);
+    }
+    private static string TeamFilterName(TabGroup tab) => tab switch
+    {
+        TabGroup.ImpostorRoles => "インポスター",
+        TabGroup.MadmateRoles => "マッドメイト",
+        TabGroup.CrewmateRoles => "クルー",
+        TabGroup.NeutralRoles => "ニュートラル",
+        TabGroup.UnitRoles => "コンビ",
+        TabGroup.Addons => "属性",
+        _ => tab.ToString(),
+    };
+
     public static void ShowChildrenSettings(OptionItem option, ref StringBuilder sb, int deep = 0)
     {
         foreach (var opt in option.Children.Select((v, i) => new { Value = v, Index = i + 1 }))
@@ -1194,6 +1240,7 @@ public static class Utils
         sb.Append($"\n/rename - {GetString("Command.rename")}");
         sb.Append($"\n/now - {GetString("Command.now")}");
         sb.Append($"\n/h now - {GetString("Command.h_now")}");
+        sb.Append("\n/a r <陣営> - その陣営の全ての役職を表示(設定に入っていない役職も)");
         sb.Append($"\n/h roles {GetString("Command.h_roles")}");
         sb.Append($"\n/h addons {GetString("Command.h_addons")}");
         sb.Append($"\n/h modes {GetString("Command.h_modes")}");
@@ -1206,7 +1253,7 @@ public static class Utils
         sb.Append("\n/mod <ID・色・名前> - モデレーターに追加・解除(/mod だけで一覧)");
         sb.Append("\n/kick ・ /ban <ID・色・名前> - キック・BAN");
         sb.Append("\n/fm - 強制会議 ・ /start <秒> - 開始 ・ /cs - 開始を止める");
-        sb.Append($"\n\n陣営で絞り込み: /n ・ /n r ・ /h n の後ろに I M C N U A (例: /n r i)");
+        sb.Append($"\n\n陣営で絞り込み: /n ・ /n r ・ /a r ・ /h n の後ろに I M C N U A (例: /n r i)");
         sb.Append($"\n\n視界が暗転した参加者が発生した場合は、\nチャットコマンド[/brackout・/bo]か、左Control,K,Lを同時に押下してください");
 
         SendMessageAutoSplit(sb.ToString(), true);
@@ -1225,6 +1272,7 @@ public static class Utils
         sb.Append($"\n/n - {GetString("Command.now")}");
         sb.Append($"\n/n r - {GetString("Command.n_roles")}");
         sb.Append($"\n/n v - {GetString("Command.n_vanilla")}");
+        sb.Append("\n/a r - 全ての役職を表示(設定に入っていない役職も)");
         sb.Append($"\n/h n - {GetString("Command.h_now")}");
         sb.Append($"\n/h r {GetString("Command.h_roles")}");
         sb.Append($"\n/m - {GetString("Command.myrole")}");
@@ -1233,9 +1281,9 @@ public static class Utils
         sb.Append($"\n/kf - {GetString("Command.killflash")}");
         sb.Append($"\n/c <色> <内容> - {GetString("Command.privatemessage")}");
         sb.Append("\n/add <役職名> - 指定闇鍋で好きな役職を入れる(ロビーのみ)");
-        sb.Append("\n\n<color=#ffd84d>陣営で絞り込み</color>: /n ・ /n r ・ /h n の後ろに");
+        sb.Append("\n\n<color=#ffd84d>陣営で絞り込み</color>: /n ・ /n r ・ /a r ・ /h n の後ろに");
         sb.Append("\n I(インポスター) M(マッド) C(クルー) N(ニュートラル) U(コンビ) A(属性)");
-        sb.Append("\n(例) /n r i ・ /h n c");
+        sb.Append("\n(例) /n r i ・ /a r c ・ /h n c");
         sb.Append("\n\n先頭に /cmd を付けると、打った文が他の人に見えません");
         if (Modules.Moderator.IsModerator(GetPlayerById(playerId))) sb.Append(Modules.Moderator.HelpText());
 
@@ -1693,6 +1741,10 @@ public static class Utils
                 || seer.Is(CustomRoles.GrudgeSheriff)
                 || seer.Is(CustomRoles.Totocalcio)
                 || seer.Is(CustomRoles.Immoralist)
+                // ほかの人の名前に印を付ける Zero の役職(マッドアンノウンの ?・インフェクショナーの ◆・九尾の狐の ◎)
+                || seer.Is(CustomRoles.MadUnknown)
+                || seer.Is(CustomRoles.Infectioner)
+                || seer.Is(CustomRoles.NineTailedFox)
                 || VentEnterTask.HaveTask(seer)
 
                 || Duelist.CheckNotify(seer)
@@ -1735,6 +1787,8 @@ public static class Utils
 
                     //RealNameを取得 なければ現在の名前をRealNamesに書き込む
                     string TargetPlayerName = isForMeeting ? target.GetRealName(true) : Main.AllPlayerNames[target.PlayerId];
+                    // マッドアンノウンに姿を変えられた人は、タスク中もほかの人から「？？？」に見せる
+                    if (!isForMeeting && Roles.Madmate.MadUnknown.IsDisguised(target.PlayerId)) TargetPlayerName = "？？？";
 
                     //ターゲットのプレイヤー名の色を書き換えます。
                     TargetPlayerName = TargetPlayerName.ApplyNameColorData(seer, target, isForMeeting);

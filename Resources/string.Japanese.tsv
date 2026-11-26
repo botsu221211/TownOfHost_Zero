@@ -196,6 +196,7 @@ Nekomata	猫又
 Express	エクスプレス
 FriedPotato	フライドポテト
 SpeedStar	シフトスター
+MindReader	マインドリーダー
 Infectioner	インフェクショナー
 KitsuneSpirit	白狐
 NineTailedFox	九尾の狐
@@ -238,6 +239,7 @@ NekomataInfo	人外まで道連れしたい
 ExpressInfo	気持ちよく駆け回ろう
 FriedPotatoInfo	僕はフライドポテト!
 SpeedStarInfo	見ろ私のこの速さを
+MindReaderInfo	私に隠し事は無駄よ
 InfectionerInfo	感染はもう始まっている。
 KitsuneSpiritInfo	具現する怨嗟
 NineTailedFoxInfo	私の計算からは誰も逃れられない
@@ -280,6 +282,7 @@ NekomataInfoLong	[クルー陣営]\n自身が吊られた際、ランダムな1�
 ExpressInfoLong	[クルー陣営]\nただ足が速い。
 FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の名前が「フライドポテト」として届く。\nキルされると、次の会議で「フライドポテトが捕食された」と全員に通知される。
 SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
+MindReaderInfoLong	[クルー陣営]\nタスクを設定数終わらせるまで自覚ができない(自分ではただのクルーメイトだと思っている)。\n覚醒すると、次の会議の始めに「マインドリーダーが覚醒した」と全員に通知が行き(設定でオフにできる)、ほかの人の秘匿メッセージ(/c)の内容が自分にだけ見えるようになる。
 InfectionerInfoLong	[ニュートラル]\n会議で自分が投票した相手を感染させる(設定回数まで)。\nまた、感染している人が投票した相手にも感染が広がる。\n感染状況の可視化がオンのとき、感染者には自分にしか見えないマーク(◆)がつく。\n自分が生存していて、自分以外の生存者が全員感染状態になった時点で単独勝利。\nほかの勝利と同時になったときは勝利優先度の高い方が勝つ。
 KitsuneSpiritInfoLong	[ニュートラル]\nお揚げを食べながら身を潜める第三陣営。満腹度が 0 になると餓死する。\nマップにお皿が7枚ある(場所は試合ごとにランダムで、その試合中は同じ)。最初は全部のお皿にお揚げ(茶色いダミー)が乗っている。お揚げの上でシェイプ(誰を選んでもよい)すると食べられ、そのお皿は空(白いダミー)になる。空のお皿には、設定した秒数がたつとまたお揚げが乗る(会議の間は止まり、会議の後に続きから数える)。\n満腹度はキルボタンのクールダウンで表示される(キルはできない)。設定でキル役の方向が役職の色の矢印で分かる。\n生存し、満腹度が「勝利に必要な満腹度」以上でゲームが終われば追加勝利。\n(Nebula on the Ship の妖狐を参考にしています)
 NineTailedFoxInfoLong	[ニュートラル]\nキルボタンで相手に妖術をかけ、ファントムボタンで妖術をかけた相手を遠くから焼き殺せる。妖術を同時にかけられるのは1人だけ(かけ直すと前の相手の妖術は消える)。\n妖術で焼き殺した場所には、設定したターンの間「焼け跡」が残る。\n盤面が自分とキルできない人の2人になると単独勝利。生きている間は、インポスターが全滅しても試合は終わらない。
@@ -1083,6 +1086,7 @@ TieMode.All	全員追放
 TieMode.Random	ランダムに追放
 EnableDebugMode	デバッグモードを有効化する
 ChangeNameToRoleInfo	役職説明を非ホストにも表示する
+AwakeningRoleMark	覚醒役職の覚醒前に「クルーメイト(?)」と表示する
 ChangeNameToRoleInfoInfoLong	最初のスポーン時、非ホストの名前部分に簡易役職紹介文を表示させる機能。
 RoleAssigningAlgorithm	ランダム抽選アルゴリズム
 RoleAssigningAlgorithmInfoLong	役職割り当てやランダムで決定する抽選アルゴリズムを変更する。
@@ -1688,6 +1692,11 @@ FrenzyVision	視界倍率
 SpeedStarInterval	速度変化秒数
 SpeedStarMinRate	速度変化最小倍率
 SpeedStarMaxRate	速度変化最大倍率
+MindReaderAwakenTasks	覚醒までのタスク数
+MindReaderNotify	通知
+MindReaderAwakened	マインドリーダーが覚醒した
+MindReaderPeekTitle	{0}から{1}への秘匿メッセージ
+UnawareCrewmate	クルーメイト(?)
 InfectionerInfectCount	自身から感染させられる回数
 InfectionerWinPriority	勝利優先度
 InfectionerVisualize	感染状況の可視化

@@ -293,6 +293,8 @@ public static class Options
     public static OptionItem HideGameSettings;
     public static OptionItem NameChangeMode;
     public static OptionItem ChangeNameToRoleInfo;
+    /// <summary>覚醒役職の覚醒前に「クルーメイト(?)」と ? を付けるか(オフなら「クルーメイト」)</summary>
+    public static OptionItem AwakeningRoleMark;
     public static OptionItem RoleAssigningAlgorithm;
 
     public static OptionItem ApplyDenyNameList;
@@ -889,6 +891,8 @@ public static class Options
             .SetGameMode(CustomGameMode.All);
         AddonShow = StringOptionItem.Create((int)offsetId.System + 700, "AddonShowMode", addonShowModes, 0, TabGroup.ModMainSettings, true);
         ChangeIntro = StringOptionItem.Create((int)offsetId.System + 800, "ChangeIntro", new string[] { "ColoredOff", "ColoredOn" }, 0, TabGroup.ModMainSettings, true);
+        AwakeningRoleMark = StringOptionItem.Create((int)offsetId.System + 850, "AwakeningRoleMark", new string[] { "ColoredOff", "ColoredOn" }, 1, TabGroup.ModMainSettings, true)
+            .SetGameMode(CustomGameMode.Standard);
 
         // 自動機能(自動スタート・自動で部屋に戻る)
         Modules.AutoLobby.SetupCustomOption((int)offsetId.System + 900);

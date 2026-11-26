@@ -22,7 +22,8 @@ class GameDataSerializePatch
             return true;
         }
         // ダミー(CustomNetObject)の見た目を送る間は、ホストの名前を絵に書き換えたまま送る必要があるので触らない
-        if (CustomNetObject.SerializingSprite)
+        // マッドアンノウンが1人あてに送るデータも、書き換えたまま送る
+        if (CustomNetObject.SerializingSprite || Roles.Madmate.MadUnknown.SerializingDisguise)
         {
             __result = true;
             return true;
@@ -37,6 +38,7 @@ class GameDataSerializePatch
         {
             __result = true;
             MaskName(__instance, out __state);
+            restoreColor = Roles.Madmate.MadUnknown.SwapToOriginalColor(__instance);
             return true;
         }
 
@@ -46,6 +48,7 @@ class GameDataSerializePatch
             || AntiBlackout.IsCached)
         {
             MaskName(__instance, out __state);
+            restoreColor = Roles.Madmate.MadUnknown.SwapToOriginalColor(__instance);
             return true;
         }
         __instance.ClearDirtyBits();
@@ -53,9 +56,20 @@ class GameDataSerializePatch
         return false;
     }
 
-    public static void Postfix(NetworkedPlayerInfo __instance, string __state)
+    /// <summary>マッドアンノウンで変えた色を、送った後にホストのデータへ戻すための値</summary>
+    private static int? restoreColor;
+
+    public static void Postfix(NetworkedPlayerInfo __instance, string __state, bool __result)
     {
         if (__state != null) __instance.DefaultOutfit.PlayerName = __state;
+        if (restoreColor is { } color && __instance?.DefaultOutfit != null) __instance.DefaultOutfit.ColorId = color;
+        restoreColor = null;
+        if (!__result || __instance == null || CustomNetObject.SerializingSprite || Roles.Madmate.MadUnknown.SerializingDisguise) return;
+        if (!AmongUsClient.Instance || !AmongUsClient.Instance.AmHost || !GameStates.IsInGame) return;
+        // マッドアンノウンに姿を変えられた人のデータが送られたら、ほかの人の画面の色・名前をかけ直す
+        Roles.Madmate.MadUnknown.OnDataSerialized(__instance.PlayerId);
+        // データが届くと、その人の名前が全員の画面でマーク(印)の無い名前に戻るので、名前を送り直す
+        NameResync.Request(__instance.PlayerId);
     }
 
     private static void MaskName(NetworkedPlayerInfo info, out string original)
@@ -67,6 +81,8 @@ class GameDataSerializePatch
         if (PlayerControl.LocalPlayer == null) return;
         if (Camouflage.IsCamouflage || MushroomMixupUpdateSystemPatch.InSabotage) return;
         if (Main.AllPlayerNames == null || !Main.AllPlayerNames.TryGetValue(info.PlayerId, out var realName)) return;
+        // マッドアンノウンに姿を変えられた人は、本当の名前ではなく「？？？」で送る(送り直しで名前が戻らないように)
+        if (Roles.Madmate.MadUnknown.IsDisguised(info.PlayerId)) realName = "？？？";
         var outfit = info.DefaultOutfit;
         if (outfit == null || outfit.PlayerName == realName) return;
         original = outfit.PlayerName;
@@ -78,4 +94,37 @@ class GameDataSerializePatch
 class NetworkedPlayerInfoMarkDirtyPatch
 {
     public static bool Prefix() => GameDataSerializePatch.DontTouch is false;
+}
+/// <summary>
+/// ある人のデータが送られると、全員の画面でその人の名前がデータの名前(マークなどの無い名前)に戻る。
+/// ホストは「前と同じ名前なら送らない」ので、その人の名前を送り直す(マークが消えたままにならないように)
+/// </summary>
+public static class NameResync
+{
+    private static readonly System.Collections.Generic.HashSet<byte> pending = new();
+    private static bool scheduled;
+
+    public static void Request(byte playerId)
+    {
+        if (!AmongUsClient.Instance || !AmongUsClient.Instance.AmHost || !GameStates.IsInGame) return;
+        pending.Add(playerId);
+        if (scheduled) return;
+        scheduled = true;
+        _ = new LateTask(() =>
+        {
+            scheduled = false;
+            if (!GameStates.IsInGame || Main.LastNotifyNames == null) { pending.Clear(); return; }
+            foreach (var id in pending)
+            {
+                foreach (var seer in Main.AllPlayerControls)
+                {
+                    // ホスト自身の画面は送り直さない(ホストの名前を変えるとデータがまた送られて繰り返すため)
+                    if (seer == null || seer.AmOwner || seer.PlayerId == id) continue;
+                    Main.LastNotifyNames[(id, seer.PlayerId)] = null;
+                }
+            }
+            pending.Clear();
+            Utils.NotifyRoles(isForMeeting: GameStates.IsMeeting);
+        }, 0.3f, "NameResync");
+    }
 }

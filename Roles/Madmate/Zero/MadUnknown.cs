@@ -54,6 +54,7 @@ public sealed class MadUnknown : RoleBase, IKiller
         Instances.Remove(this);
         if (Instances.Count == 0)
         {
+            RestoreHostDataColors();
             Disguised.Clear();
             DisguisedColor.Clear();
             CustomRoleManager.MarkOthers.Remove(GetMarkOthers);
@@ -76,7 +77,7 @@ public sealed class MadUnknown : RoleBase, IKiller
     private static readonly List<MadUnknown> Instances = new();
     /// <summary>姿を変えた人 → 変えたマッドアンノウンの PlayerId</summary>
     private static readonly Dictionary<byte, byte> Disguised = new();
-    /// <summary>姿を変えた人 → 変えた後の色(コミュサボの解除で元に戻った時にかけ直す)</summary>
+    /// <summary>姿を変えた人 → 変えた後の色(ホストのデータの色は変えない。ほかの人の画面にだけ見せる)</summary>
     private static readonly Dictionary<byte, byte> DisguisedColor = new();
     public static bool TryGetDisguiseColor(byte playerId, out byte color) => DisguisedColor.TryGetValue(playerId, out color);
 
@@ -147,7 +148,7 @@ public sealed class MadUnknown : RoleBase, IKiller
         pending.Clear();
         usesLeft--;
         Logger.Info($"{Player.GetNameWithRole()}: 姿を変えた (残り {usesLeft} 回)", nameof(MadUnknown));
-        Utils.NotifyRoles();
+        RefreshNames();
         return false;
     }
 
@@ -161,6 +162,7 @@ public sealed class MadUnknown : RoleBase, IKiller
         var used = Main.AllPlayerControls
             .Where(pc => pc != null && pc.Data != null)
             .Select(pc => pc.Data.DefaultOutfit.ColorId)
+            .Concat(DisguisedColor.Values.Select(c => (int)c))
             .ToHashSet();
         var free = Enumerable.Range(0, count).Where(c => c != current && !used.Contains(c)).ToList();
         byte color = free.Count > 0
@@ -171,44 +173,114 @@ public sealed class MadUnknown : RoleBase, IKiller
     }
 
     /// <summary>
-    /// 変えた色を、本人以外の画面にだけ送る(ホストの画面は手元で変える)。
-    /// 客の本人の画面で自分の色を変えると、その人が会議の画面に移れなくなるので、本人の画面では元の色のままにする
-    /// (名前は「？？？」になるので、姿を変えられたことは本人にも分かる)
+    /// 色(と名前)を、本人以外の画面にだけ変える。
+    /// 客の本人の画面で自分の色が変わると、その人が会議の画面に移れなくなる(色を変えなければ起きないことを確認済み)。
+    /// ・ホストの画面: ホストが持つデータの色を直接変える(チャットや会議もこの色になる)。
+    ///   ただし全員に送る時は元の色に戻して送る(GameDataSerializePatch → SwapToOriginalColor)ので、本人には届かない
+    /// ・ほかの人の画面: その人あてにだけ、変えた色と「？？？」の名前を入れたデータを送る(チャットの色と名前も変わる)。
+    ///   見た目もすぐ変わるよう、色を変える知らせも送る
+    /// データが全員に送り直されるとほかの人の画面が元に戻るので、その後に送り直す(OnDataSerialized)
     /// </summary>
-    /// <param name="selfColor">本人の画面に送る色(コミュサボの解除で本人の画面も灰色から戻す時)。null なら本人には送らない</param>
-    public static void SendDisguiseColor(PlayerControl target, int color, int? selfColor = null)
+    public static void SendDisguiseColor(PlayerControl target, int color)
     {
         if (target == null || target.Data == null) return;
-        target.SetColor((byte)color);
+        var data = target.Data;
+        var outfit = data.DefaultOutfit;
+        // ホストの画面: データの色(送る時は元に戻す)と見た目
+        outfit.ColorId = color;
+        try { target.RawSetColor(color); } catch (Exception ex) { Logger.Warn($"手元の色: {ex.Message}", nameof(MadUnknown)); }
+
+        var client = AmongUsClient.Instance;
+        var name = IsDisguised(target.PlayerId) ? "？？？"
+            : (Main.AllPlayerNames != null && Main.AllPlayerNames.TryGetValue(target.PlayerId, out var real) ? real : outfit.PlayerName);
         foreach (var pc in Main.AllPlayerControls)
         {
-            if (pc == null || pc.AmOwner) continue;
+            if (pc == null || pc.AmOwner || pc.PlayerId == target.PlayerId) continue;
             if (pc.Data == null || pc.Data.Disconnected) continue;
-            int sendColor;
-            if (pc.PlayerId == target.PlayerId)
-            {
-                if (selfColor is not { } own) continue;
-                sendColor = own;
-            }
-            else sendColor = color;
             var clientId = pc.GetClientId();
             if (clientId == -1) continue;
-            var writer = AmongUsClient.Instance.StartRpcImmediately(target.NetId, (byte)RpcCalls.SetColor, SendOption.Reliable, clientId);
-            writer.Write(target.Data.NetId);
-            writer.Write((byte)sendColor);
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
+
+            // その人あてにだけデータを送る(GameDataTo)
+            var originalName = outfit.PlayerName;
+            var w = MessageWriter.Get(SendOption.Reliable);
+            try
+            {
+                w.StartMessage(6);
+                w.Write(client.GameId);
+                w.WritePacked(clientId);
+                w.StartMessage(1);
+                w.WritePacked(data.NetId);
+                outfit.PlayerName = name;
+                SerializingDisguise = true;
+                try { data.Serialize(w, false); }
+                finally { SerializingDisguise = false; outfit.PlayerName = originalName; }
+                w.EndMessage();
+                w.EndMessage();
+                client.SendOrDisconnect(w);
+            }
+            catch (Exception ex) { Logger.Warn($"データ送信: {ex.Message}", nameof(MadUnknown)); }
+            finally { w.Recycle(); }
+
+            // 見た目もすぐ変える
+            var writer = client.StartRpcImmediately(target.NetId, (byte)RpcCalls.SetColor, SendOption.Reliable, clientId);
+            writer.Write(data.NetId);
+            writer.Write((byte)color);
+            client.FinishRpcImmediately(writer);
         }
+        // データを送ると名前が送り直した名前に戻る(マークが消える)ので、名前を送り直す
+        NameResync.Request(target.PlayerId);
     }
-    /// <summary>元の色に戻す(全員に送る。本人の画面はもともと元の色なので変わらない)</summary>
-    private static void SetColor(PlayerControl target, byte color)
+
+    /// <summary>マッドアンノウン自身がデータを書き出している間だけ true(全員に送る時の差し替えをしない)</summary>
+    public static bool SerializingDisguise { get; private set; }
+
+    /// <summary>
+    /// 全員に送るデータを書き出す直前に呼ぶ。姿を変えた人の色を元の色に戻し、戻す前の色を返す(変えなければ null)。
+    /// 本人を含む全員に届くデータなので、本人の画面の色が変わらないようにする
+    /// </summary>
+    public static int? SwapToOriginalColor(NetworkedPlayerInfo info)
     {
-        target.SetColor(color);
-        var sender = CustomRpcSender.Create(name: $"MadUnknown.SetColor({target.Data.PlayerName})");
-        sender.AutoStartRpc(target.NetId, (byte)RpcCalls.SetColor)
-            .Write(target.Data.NetId)
-            .Write(color)
-            .EndRpc();
-        sender.SendMessage();
+        if (SerializingDisguise || info == null || Camouflage.IsCamouflage) return null;
+        if (!DisguisedColor.ContainsKey(info.PlayerId)) return null;
+        if (!Camouflage.PlayerSkins.TryGetValue(info.PlayerId, out var skin)) return null;
+        var outfit = info.DefaultOutfit;
+        if (outfit == null || outfit.ColorId == skin.ColorId) return null;
+        var current = outfit.ColorId;
+        outfit.ColorId = skin.ColorId;
+        return current;
+    }
+
+    private static bool resendPending;
+    /// <summary>
+    /// 姿を変えた人のデータが全員に送り直された時に呼ぶ(GameDataSerializePatch)。
+    /// ほかの人の画面が元の色・名前に戻っているので、少し後に送り直す
+    /// </summary>
+    public static void OnDataSerialized(byte playerId)
+    {
+        if (!AmongUsClient.Instance.AmHost || resendPending || !DisguisedColor.ContainsKey(playerId)) return;
+        resendPending = true;
+        _ = new LateTask(() =>
+        {
+            resendPending = false;
+            if (!GameStates.IsInGame || Camouflage.IsCamouflage) return;
+            foreach (var (id, color) in DisguisedColor.ToArray())
+            {
+                var target = Utils.GetPlayerById(id);
+                if (target == null || target.Data == null || target.Data.Disconnected) continue;
+                SendDisguiseColor(target, color);
+            }
+        }, 0.2f, "MadUnknown.ResendColors");
+    }
+
+    /// <summary>試合の終わりなどに、ホストのデータの色を元に戻す(次のロビーに持ち越さない)</summary>
+    private static void RestoreHostDataColors()
+    {
+        foreach (var id in DisguisedColor.Keys.ToArray())
+        {
+            var pc = Utils.GetPlayerById(id);
+            if (pc == null || pc.Data == null || !Camouflage.PlayerSkins.TryGetValue(id, out var skin)) continue;
+            pc.Data.DefaultOutfit.ColorId = skin.ColorId;
+        }
     }
 
     /// <summary>自分が死んだら、自分が姿を変えた人を元に戻す</summary>
@@ -219,10 +291,26 @@ public sealed class MadUnknown : RoleBase, IKiller
             Disguised.Remove(id);
             DisguisedColor.Remove(id);
             var target = Utils.GetPlayerById(id);
-            if (target == null || !Camouflage.PlayerSkins.TryGetValue(id, out var outfit)) continue;
-            SetColor(target, (byte)outfit.ColorId);
+            if (target == null || target.Data == null || !Camouflage.PlayerSkins.TryGetValue(id, out var skin)) continue;
+            // 本人の画面はもともと元の色なので、ホストとほかの人の画面だけ元の色・本当の名前に戻す
+            SendDisguiseColor(target, skin.ColorId);
         }
-        Utils.NotifyRoles();
+        RefreshNames();
+    }
+
+    /// <summary>
+    /// 全員の名前を、前と同じでも送り直す。
+    /// 色を変えるとその人のデータが全員に送り直され、名前がマーク(ハーフキラーの◆など)の無い元の名前に戻るため。
+    /// データが届いた後にもう一度送る
+    /// </summary>
+    private static void RefreshNames()
+    {
+        // 名前を個別に送らない人(普通のクルーなど)にも「？？？」を送るため、全員分を送り直す
+        Utils.NotifyRoles(NoCache: true, ForceLoop: true);
+        _ = new LateTask(() =>
+        {
+            if (GameStates.IsInGame) Utils.NotifyRoles(NoCache: true, ForceLoop: true);
+        }, 0.5f, "MadUnknown.RefreshNames");
     }
     public override void OnFixedUpdate(PlayerControl player)
     {

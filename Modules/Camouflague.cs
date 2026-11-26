@@ -102,13 +102,15 @@ public static class Camouflage
         }
         // 戻す色。マッドアンノウンに姿を変えられている人は、変えた後の色に戻す
         int colorId = newOutfit.ColorId;
-        if ((!isCamouflage || ForceRevert) && Roles.Madmate.MadUnknown.TryGetDisguiseColor(target.PlayerId, out var disguiseColor))
+        // (試合が終わった時は、姿を変えたままにせず元に戻す)
+        if ((!isCamouflage || ForceRevert) && CustomWinnerHolder.WinnerTeam == CustomWinner.Default
+            && Roles.Madmate.MadUnknown.TryGetDisguiseColor(target.PlayerId, out var disguiseColor))
         {
-            // 姿を変えられている人の色は、本人以外の画面にだけ送る
-            if (target.Data.DefaultOutfit.ColorId == disguiseColor) return;
+            // 姿を変えられている人: ホストのデータは元の色に戻し(データは本人を含む全員に届く)、
+            // ほかの人の画面にだけ変えた色を送る
             Logger.Info($"マッドアンノウンの色に戻す color={disguiseColor}", "RpcSetSkin");
-            // コミュサボの間は本人の画面も灰色になっているので、本人には元の色を送る
-            Roles.Madmate.MadUnknown.SendDisguiseColor(target, disguiseColor, newOutfit.ColorId);
+            if (target.Data.DefaultOutfit.ColorId != newOutfit.ColorId) target.SetColor((byte)newOutfit.ColorId);
+            Roles.Madmate.MadUnknown.SendDisguiseColor(target, disguiseColor);
             return;
         }
         //if (newOutfit == null) return;

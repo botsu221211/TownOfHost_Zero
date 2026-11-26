@@ -28,7 +28,8 @@ class SetUpRoleTextPatch
         if (!GameStates.IsModHost) return;
         _ = new LateTask(() =>
         {
-            CustomRoles role = PlayerControl.LocalPlayer.GetCustomRole();
+            // 覚醒前の覚醒役職は、イントロもクルーメイト(?)
+            CustomRoles role = Roles.Core.Interfaces.AwakeningRole.ShownRole(PlayerControl.LocalPlayer);
 
             if (!role.IsVanilla() && true)
             {

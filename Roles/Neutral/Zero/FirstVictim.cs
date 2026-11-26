@@ -86,6 +86,12 @@ public sealed class FirstVictim : RoleBase
             var pc = role.Player;
             if (pc == null || !pc.IsAlive() || (victim != null && pc.PlayerId == victim.PlayerId)) continue;
             Logger.Info($"{pc.GetNameWithRole()} : 最初のキルで死ねなかったので絶望死", nameof(FirstVictim));
+            // 会議中のキル(ゲッサーなど)の時は、会議の後に死亡させる
+            if (GameStates.IsMeeting)
+            {
+                MeetingHudPatch.TryAddAfterMeetingDeathPlayers(CustomDeathReason.Despair, pc.PlayerId);
+                continue;
+            }
             // キルの処理の途中なので、少し後に死亡させる
             _ = new LateTask(() =>
             {

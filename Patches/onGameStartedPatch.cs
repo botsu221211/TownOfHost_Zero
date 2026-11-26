@@ -1181,11 +1181,6 @@ public static class StandardIntroHelper
 
 
     /// <summary>
-    /// 自分の画面でだけインポスターになっている役職(ジャッカル・白狐・九尾の狐など)の人には、
-    /// 本物のインポスター側の人をクルーに見せる。インポスターのままだと、その人の画面では「インポスター仲間」になり、
-    /// 会議で名前が赤く見えてインポスターが分かってしまう(キルもできない)
-    /// </summary>
-    /// <summary>
     /// 追放画面の後に呼ぶ。自分の画面でだけインポスターの人を、ほかの人の画面でクルーに戻し、
     /// その人たちの画面では本物のインポスターをクルーに見せる
     /// </summary>
@@ -1209,6 +1204,11 @@ public static class StandardIntroHelper
         HideImpostorsFromDesyncPlayers();
     }
 
+    /// <summary>
+    /// 自分の画面でだけインポスターになっている役職(ジャッカル・白狐・九尾の狐など)の人には、
+    /// 本物のインポスター側の人をクルーに見せる。インポスターのままだと、その人の画面では「インポスター仲間」になり、
+    /// 会議で名前が赤く見えてインポスターが分かってしまう(キルもできない)
+    /// </summary>
     public static void HideImpostorsFromDesyncPlayers()
     {
         if (!AmongUsClient.Instance.AmHost) return;

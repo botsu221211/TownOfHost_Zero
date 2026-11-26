@@ -303,6 +303,11 @@ public static class MeetingHudPatch
 
 
                 pva.NameText.text = target.GetRealName(isMeeting: true);
+                // マッドアンノウンに姿を変えられた人は、ホストの会議画面でも変えた色にする(データの色は変えていないため)
+                if (Roles.Madmate.MadUnknown.TryGetDisguiseColor(target.PlayerId, out var disguiseColor))
+                {
+                    try { pva.PlayerIcon.SetBodyColor(disguiseColor); } catch { }
+                }
 
                 // 役職説明表示
                 if (Main.ShowRoleInfoAtMeeting.Contains(target.PlayerId))

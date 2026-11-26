@@ -781,6 +781,9 @@ static class VentBooter
 {
     private static readonly HashSet<byte> booting = new();
 
+    [Attributes.GameModuleInitializer]
+    public static void Init() => booting.Clear();
+
     public static void Boot(PlayerPhysics physics, int enteredId)
     {
         var pc = physics?.myPlayer;

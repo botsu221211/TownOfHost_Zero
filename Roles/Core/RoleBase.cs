@@ -328,7 +328,14 @@ public abstract class RoleBase : IDisposable
     /// <param name="roleColor">RoleNameの色</param>
     /// <param name="roleText">RoleNameのテキスト</param>
     public virtual void OverrideShowMainRoleText(ref Color roleColor, ref string roleText)
-    { }
+    {
+        // 覚醒役職は、覚醒前は「クルーメイト(?)」に見せる(上書きする役職は base を呼ぶこと)
+        if (this is Interfaces.IAwakeningRole && Interfaces.AwakeningRole.IsUnaware(Player))
+        {
+            roleColor = Utils.GetRoleColor(CustomRoles.Crewmate);
+            if (roleText != null) roleText = Interfaces.AwakeningRole.UnawareName;
+        }
+    }
     /// <summary>
     /// seerによるProgressTextの書き換え
     /// </summary>

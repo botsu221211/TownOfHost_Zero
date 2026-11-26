@@ -74,12 +74,13 @@ public sealed class KitsuneSpirit : RoleBase, IKiller, IAdditionalWinner
         // 11 は前の「お揚げの最大出現数」で使っていた番号なので空けておく(保存された値と混ざらないように)
         OptionOageRespawn = FloatOptionItem.Create(RoleInfo, 16, OptionName.KitsuneOageRespawn, new(2.5f, 180f, 2.5f), 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        // 満腹度は % で数える(満腹が 100%)
-        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 12, OptionName.KitsuneOageSatiety, new(5f, 100f, 5f), 20f, false)
+        // 満腹度は % で数える(満腹が 100%)。
+        // 値は「何番目か」で保存されるので、秒の時(v1.0.0)と範囲が違う設定は番号を変えて、前の保存値を読まないようにする
+        OptionOageSatiety = FloatOptionItem.Create(RoleInfo, 18, OptionName.KitsuneOageSatiety, new(5f, 100f, 5f), 20f, false)
             .SetValueFormat(OptionFormat.Percent);
-        OptionInitialSatiety = FloatOptionItem.Create(RoleInfo, 14, OptionName.KitsuneInitialSatiety, new(5f, 100f, 5f), 80f, false)
+        OptionInitialSatiety = FloatOptionItem.Create(RoleInfo, 19, OptionName.KitsuneInitialSatiety, new(5f, 100f, 5f), 80f, false)
             .SetValueFormat(OptionFormat.Percent);
-        OptionWinSatiety = FloatOptionItem.Create(RoleInfo, 15, OptionName.KitsuneWinSatiety, new(0f, 100f, 5f), 30f, false)
+        OptionWinSatiety = FloatOptionItem.Create(RoleInfo, 20, OptionName.KitsuneWinSatiety, new(0f, 100f, 5f), 30f, false)
             .SetValueFormat(OptionFormat.Percent);
         // 1 秒に減る満腹度(%)
         OptionDrainRate = FloatOptionItem.Create(RoleInfo, 17, OptionName.KitsuneSatietyDrainRate, new(0.1f, 5f, 0.1f), 0.7f, false)

@@ -562,6 +562,7 @@ public enum CustomRoles
     Express,
     FriedPotato,
     SpeedStar,
+    MindReader,
     Sympathizer,
     Medic,
     CandleLighter,

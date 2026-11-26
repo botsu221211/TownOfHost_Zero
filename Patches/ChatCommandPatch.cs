@@ -128,6 +128,13 @@ namespace TownOfHostY
                         GameStartManagerPatch.HideName.text = Main.HideName.Value;
                         break;
 
+                    case "/a":
+                    case "/all":
+                        canceled = true;
+                        if (args.Length >= 2 && args[1] is "r" or "roles")
+                            Utils.ShowAllRoles(byte.MaxValue, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
+                        break;
+
                     case "/n":
                     case "/now":
                         canceled = true;
@@ -770,6 +777,8 @@ namespace TownOfHostY
             var title = $"<color=#ff9ad5>{string.Format(GetString("PrivateMessage.Title"), senderName)}</color>";
             SendPrivateSystemMessage(target, body, title);
             SendPrivateSystemMessage(sender, string.Format(GetString("PrivateMessage.Sent"), ColoredPlayerName(target)) + "\n" + body);
+            // 覚醒したマインドリーダーには中身が見える
+            Roles.Crewmate.MindReader.OnPrivateMessage(sender, target, senderName, ColoredPlayerName(target), body);
         }
         /// <summary>指定したプレイヤーだけに届くシステムメッセージ(ホスト本人宛ての場合は自分のチャット欄に表示)</summary>
         private static void SendPrivateSystemMessage(PlayerControl to, string text, string title = "")
@@ -831,7 +840,7 @@ namespace TownOfHostY
         }
         /// <summary>
         /// 空白なしで打たれたコマンドを、空白ありの形に直す
-        /// /hr → /h r ・ /hrジャッカル → /h r ジャッカル ・ /nr → /n r ・ /nri → /n r i ・ /hn → /h n ・ /nv → /n v ・ /ni → /n i
+        /// /hr → /h r ・ /hrジャッカル → /h r ジャッカル ・ /nr → /n r ・ /nri → /n r i ・ /hn → /h n ・ /nv → /n v ・ /ni → /n i ・ /ar → /a r ・ /ari → /a r i
         /// </summary>
         public static string[] NormalizeArgs(string[] args)
         {
@@ -839,7 +848,7 @@ namespace TownOfHostY
             var head = args[0];
             var lower = head.ToLower();
             string[] split = null;
-            foreach (var (prefix, cmd, sub) in new[] { ("/hr", "/h", "r"), ("/hn", "/h", "n"), ("/nr", "/n", "r"), ("/nv", "/n", "v") })
+            foreach (var (prefix, cmd, sub) in new[] { ("/hr", "/h", "r"), ("/hn", "/h", "n"), ("/nr", "/n", "r"), ("/nv", "/n", "v"), ("/ar", "/a", "r") })
             {
                 if (!lower.StartsWith(prefix)) continue;
                 var rest = head.Substring(prefix.Length);
@@ -918,6 +927,12 @@ namespace TownOfHostY
                 case "/kl":
                 case "/killlog":
                     Utils.ShowKillLog(player.PlayerId);
+                    break;
+
+                case "/a":
+                case "/all":
+                    if (args.Length >= 2 && args[1] is "r" or "roles")
+                        Utils.ShowAllRoles(player.PlayerId, Utils.ParseTeamFilter(args.Length < 3 ? "" : args[2]));
                     break;
 
                 case "/n":

@@ -165,6 +165,7 @@ public static class ZeroSettingUI
         CustomRoles.FriedPotato,
         CustomRoles.MadFriedPotato,
         CustomRoles.SpeedStar,
+        CustomRoles.MindReader,
         CustomRoles.Infectioner,
         CustomRoles.KitsuneSpirit,
         CustomRoles.NineTailedFox,
