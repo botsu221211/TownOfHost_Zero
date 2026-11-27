@@ -16,6 +16,23 @@ namespace TownOfHostY
         private static StringBuilder Mark = new(20);
         private static StringBuilder Suffix = new(120);       
         private static float OptionsSendTimer = 1f;
+        private static float SuffixTimer = 0f;
+        /// <summary>名前の上の役職表示(RoleText)。毎回名前で探すと重いので、プレイヤーごとに覚えておく</summary>
+        private static readonly System.Collections.Generic.Dictionary<IntPtr, TMPro.TextMeshPro> roleTextCache = new();
+        /// <summary>名前の表示を作り直す間隔(FixedUpdate の回数)。毎回だと全員分の文字列を 1 秒に 50 回作ることになる</summary>
+        private const int NameUpdateInterval = 3;
+        private static TMPro.TextMeshPro GetRoleText(TMPro.TextMeshPro nameText)
+        {
+            if (roleTextCache.TryGetValue(nameText.Pointer, out var cached) && cached != null) return cached;
+            var t = nameText.transform.Find("RoleText");
+            var roleText = t != null ? t.GetComponent<TMPro.TextMeshPro>() : null;
+            if (roleText != null)
+            {
+                if (roleTextCache.Count > 64) roleTextCache.Clear(); // 消えたプレイヤーの分がたまらないように
+                roleTextCache[nameText.Pointer] = roleText;
+            }
+            return roleText;
+        }
         private static void PeriodicSendDirtyGameOptions()
         {
             OptionsSendTimer -= Time.fixedDeltaTime;
@@ -74,7 +91,13 @@ namespace TownOfHostY
 
                     if (__instance.AmOwner)
                     {
-                        Utils.ApplySuffix();
+                        // 自分の名前の接尾辞は毎回作らなくてよい
+                        SuffixTimer -= Time.fixedDeltaTime;
+                        if (SuffixTimer <= 0f)
+                        {
+                            SuffixTimer = 0.5f;
+                            Utils.ApplySuffix();
+                        }
                         PeriodicSendDirtyGameOptions();
                     }
                 }
@@ -96,24 +119,23 @@ namespace TownOfHostY
                 }
 
                 // 役職テキストの表示
+                // 名前の表示は数回に 1 回だけ作り直す(プレイヤーごとにずらして、同じ回に全員分を作らない)
+                var tick = Mathf.RoundToInt(Time.fixedTime / Mathf.Max(Time.fixedDeltaTime, 0.001f));
+                if ((tick + __instance.PlayerId) % NameUpdateInterval != 0) return;
+
                 // safety: cosmetics/nameText may be null in some states; check before use
                 var nameTextObj = __instance?.cosmetics?.nameText;
                 if (nameTextObj == null) return;
 
-                var RoleTextTransform = nameTextObj.transform.Find("RoleText");
                 TMPro.TextMeshPro RoleText = null;
-                if (RoleTextTransform != null)
+                try
                 {
-                    // GetComponent が null 参照を投げないようチェック
-                    try
-                    {
-                        RoleText = RoleTextTransform.GetComponent<TMPro.TextMeshPro>();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Warn($"RoleText GetComponent で例外: {ex.Message}", "FixedUpdatePatch");
-                        RoleText = null;
-                    }
+                    RoleText = GetRoleText(nameTextObj);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warn($"RoleText GetComponent で例外: {ex.Message}", "FixedUpdatePatch");
+                    RoleText = null;
                 }
 
                 if (RoleText == null)

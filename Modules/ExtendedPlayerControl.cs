@@ -159,7 +159,11 @@ static class ExtendedPlayerControl
         var clientId = seer.GetClientId();
         if (AmongUsClient.Instance.ClientId == clientId)
         {
-            player.SetName(name);
+            // ホストの画面: 表示の文字だけ変える。SetName はプレイヤーのデータの名前まで書き換えるので、
+            // データが「変わった」扱いになって全員に送り直され(タイマーなどでほぼ毎秒)、通信が増えるうえ、
+            // データに入っている役職でジャッカルなどの画面にインポスターが見えてしまう
+            try { if (player.cosmetics != null && player.cosmetics.nameText != null) player.cosmetics.nameText.text = name; }
+            catch { }
             return;
         }
         MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.SetName, Hazel.SendOption.Reliable, clientId);

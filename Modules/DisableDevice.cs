@@ -118,7 +118,8 @@ namespace TownOfHostY
 
         public static void FixedUpdate()
         {
-            frame = frame == 3 ? 0 : ++frame;
+            // 2 回に 1 回(端末を開いてから使えなくなるまでの一瞬を短くする)
+            frame = frame == 1 ? 0 : ++frame;
             if (frame != 0) return;
 
             if (!DoDisable) return;

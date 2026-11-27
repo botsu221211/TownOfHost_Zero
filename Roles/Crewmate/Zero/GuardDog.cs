@@ -338,16 +338,19 @@ public sealed class GuardDog : RoleBase, IKiller
         _ = new LateTask(() =>
         {
             rehidePending = false;
-            // 会議・追放画面の間は、暗転対策で見せている分を崩さないように触らない
-            if (!GameStates.IsInTask || MeetingHud.Instance != null || ExileController.Instance != null) return;
+            if (!GameStates.IsInGame || CustomWinnerHolder.WinnerTeam != CustomWinner.Default) return;
+            // 会議・追放画面の間は、暗転対策で身代わりを見せている番犬(本人の画面ではクルー)には触らない。
+            // 自分の画面でだけインポスターの人(ジャッカルなど)には暗転対策を送っていないので、会議中も見せ直す
+            var inMeeting = MeetingHud.Instance != null || ExileController.Instance != null || !GameStates.IsInTask;
             foreach (var seer in Main.AllAlivePlayerControls.Where(SeesImpostorsAsCrew).ToArray())
             {
+                if (inMeeting && seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor != true) continue;
                 var clientId = seer.GetClientId();
                 if (clientId == -1) continue;
                 foreach (var imp in Main.AllAlivePlayerControls.Where(IsRealImpostorSide).ToArray())
                     if (imp.PlayerId != seer.PlayerId) imp.RpcSetRoleDesync(RoleTypes.Crewmate, clientId);
             }
-        }, 0.2f, "GuardDog.Rehide");
+        }, 0.05f, "GuardDog.Rehide");
     }
 
     /// <summary>占い師・霊媒師の結果で「インポスター」と出すか</summary>
