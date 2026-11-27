@@ -597,6 +597,7 @@ public enum CustomRoles
     FirstVictim,
     Neet,
     Stefinder,
+    Scarlet,
     DarkHide,
     LoveCutter,
     PlatonicLover,

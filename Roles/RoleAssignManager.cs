@@ -121,9 +121,30 @@ namespace TownOfHostY.Roles
                     break;
             }
 
+            RemoveRolesWithoutPartner();
             AssignRoleList.Sort();
             Logger.Info($"{string.Join(", ", AssignCount)}", "AssignCount");
             Logger.Info($"{string.Join(", ", AssignRoleList)}", "AssignRoleList");
+        }
+        /// <summary>
+        /// 相方の役職がいないと意味がない役職(相方が出る時だけ出す)。キー: 役職、値: いないといけない相方
+        /// 例: 背徳者は妖狐がいないと後追い自殺してしまう
+        /// </summary>
+        private static readonly Dictionary<CustomRoles, CustomRoles[]> RequiredPartners = new()
+        {
+            [CustomRoles.Immoralist] = new[] { CustomRoles.FoxSpirit },
+            [CustomRoles.JClient] = new[] { CustomRoles.Jackal },
+        };
+        /// <summary>相方が抽選に入っていない役職を外す(外した枠は普通のクルー・インポスターになる)</summary>
+        private static void RemoveRolesWithoutPartner()
+        {
+            foreach (var (role, partners) in RequiredPartners)
+            {
+                if (!AssignRoleList.Contains(role)) continue;
+                if (partners.Any(p => AssignRoleList.Contains(p))) continue;
+                var removed = AssignRoleList.RemoveAll(r => r == role);
+                Logger.Info($"{role} は相方({string.Join(",", partners)})がいないので外しました ({removed}人)", "AssignRoleList");
+            }
         }
         ///<summary>
         ///役職の固定アサイン抽選

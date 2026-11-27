@@ -72,7 +72,21 @@ namespace TownOfHostY
                 Logger.Info($"切断(理由:{reason}:{stringReason}, ping:{__instance?.Ping})", "Session");
 
                 if (AmongUsClient.Instance.AmHost && GameStates.InGame)
+                {
+                    // 試合中はホスト自身の設定が「ホスト用に書き換えた設定」(会議の前の視界 0 など)になっている。
+                    // そのまま切断されると部屋の設定として残るので、試合前の設定に戻す
+                    try
+                    {
+                        if (Main.RealOptionsData != null)
+                        {
+                            Main.RealOptionsData.Restore(GameOptionsManager.Instance.CurrentGameOptions);
+                            if (GameOptionsManager.Instance.GameHostOptions != null)
+                                Main.RealOptionsData.Restore(GameOptionsManager.Instance.GameHostOptions);
+                        }
+                    }
+                    catch (Exception ex) { Logger.Warn($"設定を戻せませんでした: {ex.Message}", "Session"); }
                     GameManager.Instance.RpcEndGame(GameOverReason.ImpostorDisconnect, false);
+                }
 
                 CustomRoleManager.Dispose();
             }

@@ -334,6 +334,7 @@ public enum CustomWinner
     FirstVictim = CustomRoles.FirstVictim,
     Neet = CustomRoles.Neet,
     Stefinder = CustomRoles.Stefinder,
+    Scarlet = CustomRoles.Scarlet,
     LoveCutter = CustomRoles.LoveCutter,
     God = CustomRoles.God,
     FoxSpirit = CustomRoles.FoxSpirit,

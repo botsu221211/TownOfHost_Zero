@@ -173,6 +173,7 @@ public static class ZeroSettingUI
         CustomRoles.NineTailedFox,
         CustomRoles.Neet, // ExtremeRoles から移植
         CustomRoles.Stefinder, // SuperNewRoles から移植
+        CustomRoles.Scarlet, // Nebula on the Ship から移植
         CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
         CustomRoles.FirstVictim, // ネタ役
     };

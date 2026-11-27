@@ -1749,6 +1749,7 @@ public static class Utils
                 || seer.Is(CustomRoles.Infectioner)
                 || seer.Is(CustomRoles.NineTailedFox)
                 || Roles.Crewmate.GuardDog.NeedsOthersNames(seer)
+                || Roles.Neutral.Scarlet.NeedsOthersNames(seer)
                 || VentEnterTask.HaveTask(seer)
 
                 || Duelist.CheckNotify(seer)

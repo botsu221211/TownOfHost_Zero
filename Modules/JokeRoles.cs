@@ -17,6 +17,8 @@ public static class JokeRoles
     {
         CustomRoles.NoLimiter,
         CustomRoles.FirstVictim,
+        CustomRoles.ChainShifter,
+        CustomRoles.Vampire,
     };
 
     /// <summary>表示/非表示の保存先(画面には出さない)</summary>

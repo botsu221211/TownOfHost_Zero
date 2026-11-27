@@ -83,7 +83,7 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 - [TownOfHost_L](https://github.com/haru03741-glitch/TownOfHost_L)
   - ダミー(CustomNetObject)の仕組み(白狐のお皿)
 - [Nebula on the Ship](https://github.com/Dolly1016/Nebula-Public)
-  - 白狐(妖狐を参考)
+  - 白狐(妖狐を参考)・スカーレット
 - [ExtremeRoles](https://github.com/yukieiji/ExtremeRoles)
   - ニート
 - [SuperNewRoles](https://github.com/ykundesu/SuperNewRoles)

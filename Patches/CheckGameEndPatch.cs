@@ -76,6 +76,8 @@ namespace TownOfHostY
                     if (Neet.CheckWinOnGameEnd(CustomWinnerHolder.WinnerTeam)) baseWinnerOverridden = true;
                     // ステファインダー: キル前はクルー、キル後はインポスターの勝利を乗っ取る
                     if (Stefinder.CheckWinOnGameEnd(originalWinnerTeam)) baseWinnerOverridden = true;
+                    // スカーレット: 本命が勝っていて、2人とも生きていれば上書き
+                    if (Scarlet.CheckWinOnGameEnd()) baseWinnerOverridden = true;
                     if (FoxSpirit.CheckWin() && !reason.Equals(GameOverReason.ImpostorsBySabotage))
                     {
                         CustomWinnerHolder.ResetAndSetWinner(CustomWinner.FoxSpirit);

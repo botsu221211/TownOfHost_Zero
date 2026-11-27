@@ -1050,6 +1050,8 @@ namespace TownOfHostY
         public static void Postfix(ChatController __instance)
         {
             if (!AmongUsClient.Instance.AmHost || Main.MessagesToSend.Count < 1 || (Main.MessagesToSend[0].Item2 == byte.MaxValue && Main.MessageWait.Value > __instance.timeSinceLastMessage)) return;
+            // 個人あてのメッセージも間を空けて送る(会議の始めの役職説明などを一度に何十通も送ると、公式サーバーの不正対策でホストが切断される)
+            if (Main.MessagesToSend[0].Item2 != byte.MaxValue && __instance.timeSinceLastMessage < TargetedMessageInterval) return;
             if (DoBlockChat) return;
             var player = PlayerControl.LocalPlayer;
             if (player == null) return;
@@ -1059,6 +1061,7 @@ namespace TownOfHostY
             if (custom)
             {
                 SendCustomChat(msg, sendTo: sendTo);
+                __instance.timeSinceLastMessage = 0f; // 間隔を空けるため、送った時刻を記録する
                 return;
             }
 
@@ -1138,6 +1141,9 @@ namespace TownOfHostY
         /// システムメッセージの後にホストの名前を戻す時、全員に送る名前。
         /// マッドアンノウンに姿を変えられていれば「？？？」(本当の名前に戻すと、チャットや会議の画面で正体が分かってしまう)
         /// </summary>
+        /// <summary>個人あてのメッセージを送る間隔(秒)</summary>
+        private const float TargetedMessageInterval = 0.5f;
+
         public static string PublicName(PlayerControl pc, string fallback)
             => pc != null && GameStates.IsInGame && Roles.Madmate.MadUnknown.IsDisguised(pc.PlayerId) ? "？？？" : fallback;
 

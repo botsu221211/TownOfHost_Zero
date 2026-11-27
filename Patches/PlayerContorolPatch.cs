@@ -710,7 +710,8 @@ class ReportDeadBodyPatch
 
         MeetingTimeManager.OnReportDeadBody();
 
-        Utils.NotifyRoles(isForMeeting: true, NoCache: true);
+        // 全員分を作り直すが、前に送った名前と同じものは送らない(大人数の部屋で一度に送りすぎると、公式サーバーの不正対策でホストが切断される)
+        Utils.NotifyRoles(isForMeeting: true, ForceLoop: true);
 
         Utils.SyncAllSettings();
 
