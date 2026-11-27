@@ -157,6 +157,13 @@ public sealed class Psychic : RoleBase
     public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen, bool isMeeting, ref bool enabled, ref string roleText)
     {
         if (!VentSelect.IsShowTargetRole(Player, seen)) return;
+        // 番犬は「インポスター」と出る
+        if (GuardDog.ShowsAsImpostor(seen))
+        {
+            enabled = true;
+            roleText = GuardDog.FortuneText(ConfirmCamp.GetBool());
+            return;
+        }
         if (KillerOnly.GetBool() &&
             !(seen.GetCustomRole().IsImpostor() || seen.IsNeutralKiller() || seen.IsCrewKiller()
             || seen.Is(CustomRoles.GrudgeSheriff))) return;
@@ -182,6 +189,7 @@ public sealed class Psychic : RoleBase
     public bool KnowTargetRoleColor(PlayerControl target)
     {
         if (!VentSelect.IsShowTargetRole(Player, target)) return false;
+        if (GuardDog.ShowsAsImpostor(target)) return false; // 名前の色で番犬だと分からないように
         if (!ConfirmCamp.GetBool()) return false;   //役職表示
         if (KillerOnly.GetBool() &&
         !(target.GetCustomRole().IsImpostor() || target.IsNeutralKiller() || target.IsCrewKiller()

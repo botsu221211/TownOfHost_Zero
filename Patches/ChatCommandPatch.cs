@@ -20,6 +20,24 @@ namespace TownOfHostY
         public static List<string> ChatHistory = new();
         private static Dictionary<CustomRoles, string> roleCommands;
 
+        /// <summary>
+        /// コマンドを空白で分ける。全角で打たれたコマンド(／ｋｉｌｌ　１ など)も読めるよう、
+        /// コマンド名や色・番号などは半角にする(/c と /say の本文は打ったまま)
+        /// </summary>
+        public static string[] SplitCommand(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return new[] { text ?? "" };
+            var head = text.TrimStart();
+            if (!(head.StartsWith("/") || head.StartsWith("／"))) return text.Split(' ');
+            var parts = text.Replace('\u3000', ' ').Split(' ');
+            int offset = Modules.ChatInput.ToHalfWidth(parts[0]).ToLower() == "/cmd" ? 1 : 0;
+            var cmd = offset < parts.Length ? Modules.ChatInput.ToHalfWidth(parts[offset]).ToLower().TrimStart('/') : "";
+            int bodyStart = cmd == "c" ? offset + 2 : cmd == "say" ? offset + 1 : int.MaxValue;
+            for (int i = 0; i < parts.Length && i < bodyStart; i++)
+                parts[i] = Modules.ChatInput.ToHalfWidth(parts[i]);
+            return parts;
+        }
+
         public static bool Prefix(ChatController __instance)
         {
             if (__instance.freeChatField.textArea.text == "") return __instance.quickChatField.Visible;
@@ -27,7 +45,7 @@ namespace TownOfHostY
             var text = __instance.freeChatField.textArea.text;
             if (ChatHistory.Count == 0 || ChatHistory[^1] != text) ChatHistory.Add(text);
             ChatControllerUpdatePatch.CurrentHistorySelection = ChatHistory.Count;
-            string[] args = text.Split(' ');
+            string[] args = SplitCommand(text);
             string subArgs = "";
             var canceled = false;
             var cancelVal = "";
@@ -289,12 +307,6 @@ namespace TownOfHostY
                         Utils.GetPlayerById(id)?.RpcExileV3();
                         break;
 
-                    case "/kill":
-                        canceled = true;
-                        if (args.Length < 2 || !int.TryParse(args[1], out int id2)) break;
-                        Utils.GetPlayerById(id2)?.RpcMurderPlayer(Utils.GetPlayerById(id2));
-                        break;
-
                     case "/vo":
                     case "/voice":
                         canceled = true;
@@ -348,6 +360,7 @@ namespace TownOfHostY
                     case "/fm":
                     case "/start":
                     case "/cs":
+                    case "/kill":
                         canceled = true;
                         Modules.Moderator.TryHandleCommand(PlayerControl.LocalPlayer, args);
                         break;
@@ -536,9 +549,10 @@ namespace TownOfHostY
                 .EndRpc()
                 .AutoStartRpc(sender.NetId, (byte)RpcCalls.SetName)
                 .Write(sender.Data.NetId)
-                .Write(name)
+                .Write(ChatUpdatePatch.PublicName(sender, name))
                 .EndRpc()
                 .SendMessage();
+            NameResync.Request(sender.PlayerId);
 
             sender.SetName(SendName);
             DestroyableSingleton<HudManager>.Instance.Chat.AddChat(sender, text);
@@ -736,7 +750,7 @@ namespace TownOfHostY
             }
             // 霊界の人は送れない・霊界の人には送れない(ロビーでは全員生存扱い)
             // ただしホストとモデレーターは霊界からでも送れる(霊界の人にも送れる)
-            var privileged = Modules.Moderator.IsHostOrModerator(sender);
+            var privileged = Modules.Moderator.CanGhostWhisper(sender);
             if (!sender.IsAlive() && !privileged)
             {
                 SendPrivateSystemMessage(sender, GetString("PrivateMessage.DeadCannotSend"));
@@ -897,7 +911,7 @@ namespace TownOfHostY
                 }
             }
 
-            string[] args = text.Trim().Split(' ');
+            string[] args = SplitCommand(text.Trim());
             string subArgs = "";
 
             // /cmd は有っても無くてもよい(付けると本編のサーバーがホストにしか届けないので他の人に見えない)
@@ -1074,10 +1088,11 @@ namespace TownOfHostY
                     .EndRpc();
                 writer.StartRpc(player.NetId, (byte)RpcCalls.SetName)
                     .Write(player.Data.NetId)
-                    .Write(player.Data.PlayerName)
+                    .Write(PublicName(player, player.Data.PlayerName))
                     .EndRpc();
                 writer.EndMessage();
                 writer.SendMessage();
+                NameResync.Request(player.PlayerId);
             }
             __instance.timeSinceLastMessage = 0f;
         }
@@ -1112,12 +1127,20 @@ namespace TownOfHostY
                     .EndRpc()
                     .StartRpc(sender.NetId, (byte)RpcCalls.SetName)
                     .Write(sender.Data.NetId)
-                    .Write(name)
+                    .Write(PublicName(sender, name))
                     .EndRpc()
                     .EndMessage()
                     .SendMessage();
+                NameResync.Request(sender.PlayerId);
             }
         }
+        /// <summary>
+        /// システムメッセージの後にホストの名前を戻す時、全員に送る名前。
+        /// マッドアンノウンに姿を変えられていれば「？？？」(本当の名前に戻すと、チャットや会議の画面で正体が分かってしまう)
+        /// </summary>
+        public static string PublicName(PlayerControl pc, string fallback)
+            => pc != null && GameStates.IsInGame && Roles.Madmate.MadUnknown.IsDisguised(pc.PlayerId) ? "？？？" : fallback;
+
         private static void AddChatAsAlive(PlayerControl player, string msg)
         {
             var wasDead = player.Data.IsDead;
@@ -1161,7 +1184,7 @@ namespace TownOfHostY
                         .EndRpc();
                     writer.StartRpc(host.NetId, (byte)RpcCalls.SetName)
                         .Write(host.Data.NetId)
-                        .Write(host.Data.PlayerName)
+                        .Write(PublicName(host, host.Data.PlayerName))
                         .EndRpc();
 
                     if (target.IsAlive())

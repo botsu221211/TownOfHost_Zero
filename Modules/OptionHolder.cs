@@ -856,6 +856,8 @@ public static class Options
         // ネタ役の表示/非表示(プリセット画面のボタンで切り替える)
         Modules.JokeRoles.SetupCustomOption((int)Options.offsetId.FeatOther + 630);
         Modules.VanillaRoles.SetupCustomOption((int)Options.offsetId.FeatOther + 631);
+        // モデレーターが使えるコマンドのオン/オフ
+        Modules.Moderator.SetupCustomOption((int)Options.offsetId.FeatOther + 3000);
 
         TextOptionItem.Create((int)offsetId.GModeAdd, "Head.GameMode", TabGroup.ModMainSettings).SetColor(Color.yellow).SetGameMode(CustomGameMode.Standard);
         // シンクロカラーモード

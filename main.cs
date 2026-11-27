@@ -332,6 +332,8 @@ public enum CustomWinner
     Workaholic = CustomRoles.Workaholic,
     Infectioner = CustomRoles.Infectioner,
     FirstVictim = CustomRoles.FirstVictim,
+    Neet = CustomRoles.Neet,
+    Stefinder = CustomRoles.Stefinder,
     LoveCutter = CustomRoles.LoveCutter,
     God = CustomRoles.God,
     FoxSpirit = CustomRoles.FoxSpirit,

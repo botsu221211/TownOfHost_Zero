@@ -86,7 +86,9 @@ namespace TownOfHostY
                 if (pc == null) return false;
                 return ((pc.Is(CustomRoles.Sheriff) && (Sheriff.IsInfoPoor?.GetBool() ?? false))
                         || (pc.Is(CustomRoles.SillySheriff) && (SillySheriff.IsInfoPoor?.GetBool() ?? false))
-                        || pc.Is(CustomRoles.InfoPoor));
+                        || pc.Is(CustomRoles.InfoPoor)
+                        // ニートはカメラ・アドミン・バイタルなどを使えない
+                        || pc.Is(CustomRoles.Neet));
             }
             catch
             {

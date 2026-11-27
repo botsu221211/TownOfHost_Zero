@@ -124,7 +124,7 @@ class CheckMurderPatch
             // PlayerDataがnullじゃないか確認
             target.Data == null ||
             // targetの状態をチェック
-            target.inVent ||
+            VentBooter.IsInVent(target) ||
             target.MyPhysics.Animations.IsPlayingEnterVentAnimation() ||
             target.MyPhysics.Animations.IsPlayingAnyLadderAnimation() ||
             target.inMovingPlat)
@@ -601,6 +601,12 @@ class ReportDeadBodyPatch
         if (Options.IsStandardHAS && target != null && __instance == target.Object) return true; //[StandardHAS] ボタンでなく、通報者と死体が同じなら許可
         if (Options.CurrentGameMode == CustomGameMode.HideAndSeek || Options.IsStandardHAS) return false;
         if (Options.IsCCMode && CatchCat.Option.IgnoreReport.GetBool() && target != null) return false;
+        // ニートは緊急会議を開けない(設定)
+        if (target == null && Roles.Neutral.Neet.CannotCallEmergency(__instance))
+        {
+            Logger.Info("ニートは緊急会議を開けない", "ReportDeadBody");
+            return false;
+        }
         if (target == null && Options.DisableButtonInMushroomMixup.GetBool() && MushroomMixupUpdateSystemPatch.InSabotage)
         {
             Logger.Info("DisableButton InMushroomMixup", "ReportDeadBody");
@@ -782,13 +788,45 @@ static class VentBooter
     private static readonly HashSet<byte> booting = new();
 
     [Attributes.GameModuleInitializer]
-    public static void Init() => booting.Clear();
+    public static void Init()
+    {
+        booting.Clear();
+        enteredPos.Clear();
+    }
+
+    /// <summary>入ったベントの位置(ほかのベントへ移って出ても、ここへ戻す)</summary>
+    private static readonly Dictionary<byte, Vector2> enteredPos = new();
 
     public static void Boot(PlayerPhysics physics, int enteredId)
     {
         var pc = physics?.myPlayer;
         if (pc == null || !booting.Add(pc.PlayerId)) return;
+        try
+        {
+            var vent = ShipStatus.Instance?.AllVents?.FirstOrDefault(v => v != null && v.Id == enteredId);
+            if (vent != null) enteredPos[pc.PlayerId] = (Vector2)vent.transform.position + new Vector2(0f, 0.3636f);
+        }
+        catch { }
         BootLoop(physics, pc.PlayerId, enteredId, 0);
+    }
+
+    /// <summary>追い出し終わり: 残った inVent を消し、ほかのベントへ移って出ていたら入ったベントへ戻す</summary>
+    private static void Finish(PlayerPhysics physics, byte playerId)
+    {
+        booting.Remove(playerId);
+        var pc = physics?.myPlayer;
+        if (pc == null) { enteredPos.Remove(playerId); return; }
+        if (CurrentVentId(playerId) == null)
+        {
+            pc.inVent = false;
+            pc.walkingToVent = false;
+        }
+        if (enteredPos.Remove(playerId, out var pos) && GameStates.IsInTask && pc.IsAlive()
+            && Vector2.Distance(pc.GetTruePosition(), pos) > 1.5f)
+        {
+            Logger.Info($"{pc.GetNameWithRole()} : ベントで移動したので、入ったベントへ戻す", "VentBooter");
+            pc.RpcSnapTo(pos);
+        }
     }
 
     private static void BootLoop(PlayerPhysics physics, byte playerId, int lastId, int count)
@@ -797,7 +835,7 @@ static class VentBooter
         {
             if (physics == null || physics.myPlayer == null || !GameStates.IsInTask || count >= 10)
             {
-                booting.Remove(playerId);
+                Finish(physics, playerId);
                 return;
             }
             var ventId = CurrentVentId(playerId) ?? lastId;
@@ -809,7 +847,7 @@ static class VentBooter
                     && (CurrentVentId(playerId) != null || physics.myPlayer.inVent))
                     BootLoop(physics, playerId, CurrentVentId(playerId) ?? ventId, count + 1);
                 else
-                    booting.Remove(playerId);
+                    Finish(physics, playerId);
             }, 0.6f, "Cancel Vent Check");
         }, count == 0 ? 0.3f : 0f, "Cancel Vent");
     }
@@ -826,6 +864,24 @@ static class VentBooter
         }
         catch { }
         return null;
+    }
+
+    /// <summary>
+    /// 本当にベントの中にいるか。ホストの画面の inVent は、追い出した後も true のまま残ることがある
+    /// (残ると、その人をキルや九尾の狐の妖術で倒せなくなる)ので、ベントの管理(VentilationSystem)を見る
+    /// </summary>
+    public static bool IsInVent(PlayerControl pc)
+    {
+        if (pc == null) return false;
+        try
+        {
+            if (pc.MyPhysics != null && pc.MyPhysics.Animations.IsPlayingEnterVentAnimation()) return true;
+            if (ShipStatus.Instance != null && ShipStatus.Instance.Systems.TryGetValue(SystemTypes.Ventilation, out var systemType)
+                && systemType.TryCast<VentilationSystem>() is { } vent)
+                return vent.PlayersInsideVents.ContainsKey(pc.PlayerId);
+        }
+        catch { }
+        return pc.inVent;
     }
 }
 

@@ -7,7 +7,7 @@ using TownOfHostY.Roles.Core;
 namespace TownOfHostY.Modules;
 
 /// <summary>
-/// 自動スタート・試合後に自動で部屋に戻る (TOH_Zero・TownOfHost-hamo / Shell を参考)
+/// 自動スタート・試合後に自動で部屋に戻る (TOH_Zero・TownOfHost-hamo を参考)
 /// どちらもホストだけの機能。設定は MOD の設定の「自動機能」にある(全プリセット共通)
 /// </summary>
 public static class AutoLobby

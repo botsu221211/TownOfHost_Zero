@@ -5,7 +5,7 @@ using TownOfHostY.Roles.Core;
 namespace TownOfHostY.Modules;
 
 /// <summary>
-/// ゲームマスター(GM)の詳細設定 (TOH_Zero・TownOfHost-hamo / Shell を参考)
+/// ゲームマスター(GM)の詳細設定 (TOH_Zero・TownOfHost-hamo を参考)
 /// 「ゲームマスター」がオンの時だけ、その下に表示される。
 /// GM は霊界にいる扱いだが、見えるものは霊界の設定ではなくここの設定で決める。
 /// </summary>

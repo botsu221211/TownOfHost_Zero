@@ -368,6 +368,27 @@ public static class MeetingHudPatch
             RevengeTargetPlayer.Clear();
         }
     }
+    /// <summary>会議中にその人を死亡させる(ホストの処刑・/kill)。ゲッサーと同じ方式</summary>
+    public static void ExecutePlayer(PlayerControl player)
+    {
+        var meeting = MeetingHud.Instance;
+        if (player == null || meeting == null) return;
+        player.Data.IsDead = true;
+        player.RpcExileV3();
+        var state = PlayerState.GetByPlayerId(player.PlayerId);
+        state.DeathReason = CustomDeathReason.Execution;
+        CustomRoleManager.CheckMurderInfos[player.PlayerId] = new MurderInfo(PlayerControl.LocalPlayer, player, player, player);
+        CustomRoleManager.OnMurderPlayer(player, player);
+        Main.AllPlayerControls.Do(pc => pc.KillFlash());
+        foreach (var va in meeting.playerStates)
+        {
+            if (va.VotedForId != player.PlayerId) continue;
+            var voter = Utils.GetPlayerById(va.PlayerId);
+            if (voter == null) continue;
+            meeting.RpcClearVote(voter.PlayerId);
+        }
+    }
+
     [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
     class UpdatePatch
     {
@@ -379,21 +400,7 @@ public static class MeetingHudPatch
                 __instance.playerStates.DoIf(x => x.HighlightedFX.enabled, x =>
                 {
                     var player = Utils.GetPlayerById(x.PlayerId);
-                    // ゲッサーと完全同等の方式でキル（バン・hacking判定回避）
-                    player.Data.IsDead = true;
-                    player.RpcExileV3();
-                    var state = PlayerState.GetByPlayerId(player.PlayerId);
-                    state.DeathReason = CustomDeathReason.Execution;
-                    CustomRoleManager.CheckMurderInfos[player.PlayerId] = new MurderInfo(PlayerControl.LocalPlayer, player, player, player);
-                    CustomRoleManager.OnMurderPlayer(player, player);
-                    Main.AllPlayerControls.Do(pc => pc.KillFlash());
-                    foreach (var va in __instance.playerStates)
-                    {
-                        if (va.VotedForId != player.PlayerId) continue;
-                        var voter = Utils.GetPlayerById(va.PlayerId);
-                        if (voter == null) continue;
-                        __instance.RpcClearVote(voter.PlayerId);
-                    }
+                    ExecutePlayer(player);
 
                     string formatTag = "<size=70%><line-height=1.6pic>";
                     Utils.SendMessageAutoSplit($"{formatTag}{string.Format(GetString("Message.Executed"), player.Data.PlayerName)}", true);

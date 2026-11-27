@@ -215,7 +215,7 @@ public abstract class RoleBase : IDisposable
     public virtual bool OnEnterVent(PlayerPhysics physics, int ventId) => true;
 
     /// <summary>
-    /// ペットを撫でて能力を使う役職か(TownOfHost-Shell / hamo / Pko を参考)。
+    /// ペットを撫でて能力を使う役職か(TownOfHost-Pko を参考)。
     /// true にすると、撫でた時に <see cref="OnPet"/> が呼ばれ、クールダウンは <see cref="PetCooldown"/> で数える
     /// </summary>
     public virtual bool UsePetAbility => false;

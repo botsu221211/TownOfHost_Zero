@@ -131,8 +131,9 @@ public sealed class NineTailedFox : RoleBase, IKiller
         }
 
         // ベントの中・昇降機・はしごの途中の相手は今は焼けない(妖術もクールダウンもそのまま)
-        if (target.inVent || target.inMovingPlat || target.onLadder || target.walkingToVent
-            || target.MyPhysics.Animations.IsPlayingEnterVentAnimation() || target.MyPhysics.Animations.IsPlayingAnyLadderAnimation())
+        // (ホストの画面の inVent は追い出した後も残ることがあるので、ベントの管理を見る)
+        if (VentBooter.IsInVent(target) || target.inMovingPlat || target.onLadder
+            || target.MyPhysics.Animations.IsPlayingAnyLadderAnimation())
         {
             Logger.Info($"{Player.GetNameWithRole()} : {target.GetNameWithRole()} は今は焼けない状態", nameof(NineTailedFox));
             return false;

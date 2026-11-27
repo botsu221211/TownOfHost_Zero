@@ -146,6 +146,13 @@ public sealed class FortuneTeller : RoleBase
     {
         if (!isMeeting) return;
         if (!ForecastResult.ContainsKey(seen.PlayerId)) return;
+        // 番犬は「インポスター」と出る
+        if (GuardDog.ShowsAsImpostor(seen))
+        {
+            enabled = true;
+            roleText = GuardDog.FortuneText(ConfirmCamp);
+            return;
+        }
         if (KillerOnly &&
             !(seen.GetCustomRole().IsImpostor() || seen.IsNeutralKiller() || seen.IsCrewKiller()
             || seen.Is(CustomRoles.GrudgeSheriff))) return;
@@ -179,6 +186,7 @@ public sealed class FortuneTeller : RoleBase
         if (!isMeeting) return false;
         if (!ForecastResult.ContainsKey(target.PlayerId)) return false;
         if (ConfirmCamp) return false;
+        if (GuardDog.ShowsAsImpostor(target)) return false; // 名前の色で番犬だと分からないように
         if (KillerOnly &&
             !(target.GetCustomRole().IsImpostor() || target.IsNeutralKiller() || target.IsCrewKiller())) return false;
         return true;

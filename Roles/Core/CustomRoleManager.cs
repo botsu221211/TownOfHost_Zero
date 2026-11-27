@@ -80,6 +80,8 @@ public static class CustomRoleManager
                 else if (Medic.GuardPlayerCheckMurder(info)) { }
                 // 背徳者の対象プレイヤー
                 else if (Immoralist.GuardPlayerCheckMurder(info)) { }
+                // 番犬の飼い主
+                else if (Roles.Crewmate.GuardDog.GuardPlayerCheckMurder(info)) { }
                 // ターゲットのキルチェック処理実行
                 else if (targetRole != null)
                 {
@@ -505,6 +507,7 @@ public enum CustomRoles
     Administer,
     Mimic,
     HalfKiller,
+    EvilAnt,
     Frenzy,
     NoLimiter,
 
@@ -563,6 +566,7 @@ public enum CustomRoles
     FriedPotato,
     SpeedStar,
     MindReader,
+    GuardDog,
     Sympathizer,
     Medic,
     CandleLighter,
@@ -591,6 +595,8 @@ public enum CustomRoles
     KitsuneSpirit,
     NineTailedFox,
     FirstVictim,
+    Neet,
+    Stefinder,
     DarkHide,
     LoveCutter,
     PlatonicLover,

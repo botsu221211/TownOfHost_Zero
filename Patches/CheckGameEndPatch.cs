@@ -72,6 +72,10 @@ namespace TownOfHostY
                 {
                     // インフェクショナー: ほかの勝利と同時に感染が完了していれば、勝利優先度で置き換える
                     if (Infectioner.CheckWinOnGameEnd(originalWinnerTeam)) baseWinnerOverridden = true;
+                    // ニート: 単独勝利の設定がオンで生きていれば、勝利優先度で置き換える
+                    if (Neet.CheckWinOnGameEnd(CustomWinnerHolder.WinnerTeam)) baseWinnerOverridden = true;
+                    // ステファインダー: キル前はクルー、キル後はインポスターの勝利を乗っ取る
+                    if (Stefinder.CheckWinOnGameEnd(originalWinnerTeam)) baseWinnerOverridden = true;
                     if (FoxSpirit.CheckWin() && !reason.Equals(GameOverReason.ImpostorsBySabotage))
                     {
                         CustomWinnerHolder.ResetAndSetWinner(CustomWinner.FoxSpirit);

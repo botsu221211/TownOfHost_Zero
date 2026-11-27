@@ -202,6 +202,9 @@ public sealed class MadUnknown : RoleBase, IKiller
 
             // その人あてにだけデータを送る(GameDataTo)
             var originalName = outfit.PlayerName;
+            // データには役職も入っている。番犬(噛み殺しモード)やジャッカルなどあてには、インポスター側の役職をクルーとして送る
+            var maskRole = Roles.Crewmate.GuardDog.SeesImpostorsAsCrew(pc) && Roles.Crewmate.GuardDog.IsRealImpostorSide(target) && data.Role != null;
+            var originalRole = data.Role != null ? data.Role.Role : RoleTypes.Crewmate;
             var w = MessageWriter.Get(SendOption.Reliable);
             try
             {
@@ -211,9 +214,15 @@ public sealed class MadUnknown : RoleBase, IKiller
                 w.StartMessage(1);
                 w.WritePacked(data.NetId);
                 outfit.PlayerName = name;
+                if (maskRole) data.Role.Role = RoleTypes.Crewmate;
                 SerializingDisguise = true;
                 try { data.Serialize(w, false); }
-                finally { SerializingDisguise = false; outfit.PlayerName = originalName; }
+                finally
+                {
+                    SerializingDisguise = false;
+                    outfit.PlayerName = originalName;
+                    if (maskRole) data.Role.Role = originalRole;
+                }
                 w.EndMessage();
                 w.EndMessage();
                 client.SendOrDisconnect(w);

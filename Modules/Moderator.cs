@@ -95,10 +95,49 @@ public static class Moderator
     private static bool IsHost(PlayerControl pc)
         => pc != null && (pc.PlayerId == PlayerControl.LocalPlayer?.PlayerId || pc.GetClientId() == AmongUsClient.Instance.HostId);
 
+    // ───────────────────────── 設定(モデレーターが使えるコマンドのオン/オフ) ─────────────────────────
+    private static readonly (string key, string[] cmds)[] CommandOptionDefs =
+    {
+        ("ModCmdKick", new[] { "/kick" }),
+        ("ModCmdBan", new[] { "/ban" }),
+        ("ModCmdSay", new[] { "/say" }),
+        ("ModCmdEnd", new[] { "/end", "/廃村" }),
+        ("ModCmdMf", new[] { "/mf" }),
+        ("ModCmdFm", new[] { "/fm" }),
+        ("ModCmdStart", new[] { "/start" }),
+        ("ModCmdCs", new[] { "/cs" }),
+        ("ModCmdBo", new[] { "/bo" }),
+        ("ModCmdKill", new[] { "/kill" }),
+        ("ModCmdGhostWhisper", new[] { "/c" }),
+    };
+    private static readonly Dictionary<string, OptionItem> CommandOptions = new();
+
+    public static void SetupCustomOption(int id)
+    {
+        TextOptionItem.Create(id, "Head.ModeratorCommands", TabGroup.ModMainSettings)
+            .SetColor(new Color32(173, 224, 238, 255))
+            .SetGameMode(CustomGameMode.All);
+        for (int i = 0; i < CommandOptionDefs.Length; i++)
+        {
+            var (key, cmds) = CommandOptionDefs[i];
+            var opt = BooleanOptionItem.Create(id + 1 + i, key, true, TabGroup.ModMainSettings, false)
+                .SetGameMode(CustomGameMode.All);
+            foreach (var c in cmds) CommandOptions[c] = opt;
+        }
+    }
+
+    /// <summary>モデレーターがそのコマンドを使えるか(設定でオフにしたものは使えない)。/c は霊界からの個人秘匿</summary>
+    public static bool IsAllowedForModerator(string cmd)
+        => !CommandOptions.TryGetValue(cmd, out var opt) || opt.GetBool();
+
+    /// <summary>霊界からでも個人秘匿を送れる・霊界の人に送れるか(ホストは常に。モデレーターは設定がオンの時)</summary>
+    public static bool CanGhostWhisper(PlayerControl pc)
+        => IsHost(pc) || (IsModerator(pc) && IsAllowedForModerator("/c"));
+
     // ───────────────────────── コマンド ─────────────────────────
     /// <summary>モデレーター用のコマンド(これ以外は今まで通り)</summary>
     private static bool IsModeratorCommand(string cmd)
-        => cmd is "/kick" or "/ban" or "/say" or "/end" or "/廃村" or "/mf" or "/fm" or "/start" or "/cs" or "/bo";
+        => cmd is "/kick" or "/ban" or "/say" or "/end" or "/廃村" or "/mf" or "/fm" or "/start" or "/cs" or "/bo" or "/kill";
 
     /// <summary>
     /// ホストのチャット・ゲストのチャットの両方から呼ぶ。モデレーター関係のコマンドなら処理して true を返す。
@@ -127,6 +166,11 @@ public static class Moderator
             Reply(sender, "このコマンドはモデレーターだけが使えます。");
             return true;
         }
+        if (!fromHost && !IsAllowedForModerator(cmd))
+        {
+            Reply(sender, "このコマンドは、今の設定ではモデレーターは使えません。");
+            return true;
+        }
 
         Logger.Info($"{sender.GetNameWithRole()} がモデレーターコマンド: {string.Join(" ", args)}", nameof(Moderator));
         switch (cmd)
@@ -152,6 +196,7 @@ public static class Moderator
             case "/bo":
                 if (GameStates.InGame) Main.AllPlayerControls.Do(pc => pc.KillFlash());
                 break;
+            case "/kill": HandleKill(sender, args); break;
         }
         return true;
     }
@@ -277,6 +322,47 @@ public static class Moderator
         Utils.SendMessageAutoSplit($"{name} が{(ban ? "BAN" : "キック")}されました。", true, Title);
     }
 
+    /// <summary>/kill: 指定した人を強制的に死亡させる(ホストとモデレーター。試合中のみ)</summary>
+    private static void HandleKill(PlayerControl sender, string[] args)
+    {
+        if (args.Length < 2)
+        {
+            Reply(sender, "使い方: /kill <色・ID・名前>");
+            return;
+        }
+        if (!GameStates.IsInGame || !Main.IsSetRoleFinished || CustomWinnerHolder.WinnerTeam != CustomWinner.Default)
+        {
+            Reply(sender, "/kill は試合中だけ使えます。");
+            return;
+        }
+        if (ExileController.Instance != null || AntiBlackout.IsCached && !GameStates.IsMeeting)
+        {
+            Reply(sender, "追放画面の間は使えません。少し待ってから使ってください。");
+            return;
+        }
+        var target = FindTarget(string.Join(" ", args.Skip(1)));
+        if (target == null)
+        {
+            Reply(sender, "その人が見つかりません。");
+            return;
+        }
+        if (!target.IsAlive())
+        {
+            Reply(sender, $"{PlainName(target)} はもう死んでいます。");
+            return;
+        }
+        var name = PlainName(target);
+        Logger.Info($"{sender.GetNameWithRole()} が /kill で {target.GetNameWithRole()} を死亡させた", nameof(Moderator));
+        if (GameStates.IsMeeting && MeetingHud.Instance != null)
+            MeetingHudPatch.ExecutePlayer(target);
+        else
+        {
+            PlayerState.GetByPlayerId(target.PlayerId).DeathReason = CustomDeathReason.Execution;
+            target.RpcMurderPlayer(target);
+        }
+        Utils.SendMessageAutoSplit($"{name} が強制的に死亡させられました。", true, Title);
+    }
+
     private static void HandleSay(PlayerControl sender, string[] args)
     {
         if (args.Length < 2)
@@ -350,17 +436,25 @@ public static class Moderator
 
     /// <summary>/h に足すモデレーター用コマンドの説明</summary>
     public static string HelpText()
-        => "\n\n<color=#ADE0EE>【モデレーター用】</color>"
-         + "\n/kick <ID・色・名前> - キックする"
-         + "\n/ban <ID・色・名前> - BANする"
-         + "\n/say <内容> - 全員に伝言を出す"
-         + "\n/end - 廃村にする(試合中)"
-         + "\n/mf - 会議を終わらせる(会議中)"
-         + "\n/fm - 強制的に会議を開く(タスク中)"
-         + "\n/start <秒> - 開始のカウントダウンを始める(ロビー)"
-         + "\n/cs - 開始のカウントダウンを止める"
-         + "\n/bo - 全員の画面を光らせる(試合中)"
-         + "\n/c <色> <内容> - 霊界からでも個人秘匿を送れる";
+    {
+        var lines = new (string cmd, string text)[]
+        {
+            ("/kick", "/kick <ID・色・名前> - キックする"),
+            ("/ban", "/ban <ID・色・名前> - BANする"),
+            ("/say", "/say <内容> - 全員に伝言を出す"),
+            ("/end", "/end - 廃村にする(試合中)"),
+            ("/mf", "/mf - 会議を終わらせる(会議中)"),
+            ("/fm", "/fm - 強制的に会議を開く(タスク中)"),
+            ("/start", "/start <秒> - 開始のカウントダウンを始める(ロビー)"),
+            ("/cs", "/cs - 開始のカウントダウンを止める"),
+            ("/bo", "/bo - 全員の画面を光らせる(試合中)"),
+            ("/kill", "/kill <色・ID・名前> - その人を強制的に死亡させる(試合中)"),
+            ("/c", "/c <色> <内容> - 霊界からでも個人秘匿を送れる"),
+        };
+        var allowed = lines.Where(l => IsAllowedForModerator(l.cmd)).Select(l => "\n" + l.text).ToList();
+        if (allowed.Count == 0) return "";
+        return "\n\n<color=#ADE0EE>【モデレーター用】</color>" + string.Concat(allowed);
+    }
 
     // ───────────────────────── ロビーの名前表示 ─────────────────────────
     private static bool HasPrefix(string name) => !string.IsNullOrEmpty(name) && name.StartsWith(NamePrefix, StringComparison.Ordinal);

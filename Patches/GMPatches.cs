@@ -9,7 +9,7 @@ using TownOfHostY.Roles.Core;
 namespace TownOfHostY.Patches;
 
 /// <summary>
-/// GM の詳細設定の動き (TOH_Zero・TownOfHost-hamo / Shell を参考)
+/// GM の詳細設定の動き (TOH_Zero・TownOfHost-hamo を参考)
 /// ・タスク一覧を隠す / 全体のタスク進捗を出す
 /// ・会議が始まったらチャットを自動で開く
 /// ・タスクターンが始まったら自動で憑依ボタンを押す

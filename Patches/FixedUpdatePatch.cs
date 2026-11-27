@@ -129,7 +129,7 @@ namespace TownOfHostY
                     {
                         try
                         {
-                            // MODを入れている人の名前は色を変える(TownOfHost-Shell と同じ見せ方)
+                            // MODを入れている人の名前は色を変える
                             // ・同じ TOH_Zero の同じバージョン: 水色
                             // ・別のMOD(フォーク): オレンジで上に MOD の名前
                             // ・バージョン違い: 赤で上にバージョン
@@ -239,6 +239,8 @@ namespace TownOfHostY
                         // 覚醒前の覚醒役職の色の上書き(クルーメイト(?)の色)は本人の名前だけ。
                         // ほかの人の名前に付けると、ホストの画面でだけ誰が覚醒役職か分かってしまう
                         if (target != seer && TownOfHostY.Roles.Core.Interfaces.AwakeningRole.IsUnaware(target)) c = Color.clear;
+                        // ステファインダーの赤(キル後)も本人の名前だけ
+                        if (target != seer && target.Is(CustomRoles.Stefinder)) c = Color.clear;
                         if (c != Color.clear)
                         {
                             RealName = RealName.Color(c); // 既存の Color 拡張を利用

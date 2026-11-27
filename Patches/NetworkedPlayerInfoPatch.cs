@@ -70,6 +70,8 @@ class GameDataSerializePatch
         Roles.Madmate.MadUnknown.OnDataSerialized(__instance.PlayerId);
         // データが届くと、その人の名前が全員の画面でマーク(印)の無い名前に戻るので、名前を送り直す
         NameResync.Request(__instance.PlayerId);
+        // データには役職も入っている。番犬(噛み殺しモード)やジャッカルなどの画面で、インポスターをクルーに見せ直す
+        Roles.Crewmate.GuardDog.OnDataSerialized(__instance.Object);
     }
 
     private static void MaskName(NetworkedPlayerInfo info, out string original)

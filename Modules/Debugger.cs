@@ -37,7 +37,7 @@ namespace TownOfHostY
             catch { }
         }
         public static bool isEnable;
-        public static List<string> disableList = new();
+        public static HashSet<string> disableList = new();
         public static List<string> sendToGameList = new();
         public static bool isDetail = false;
         public static bool isAlsoInGame = false;
@@ -49,7 +49,9 @@ namespace TownOfHostY
             if (toGame && !sendToGameList.Contains(tag)) sendToGameList.Add(tag);
             else sendToGameList.Remove(tag);
         }
-        public static void Disable(string tag) { if (!disableList.Contains(tag)) disableList.Add(tag); }
+        public static void Disable(string tag) => disableList.Add(tag);
+        /// <summary>そのタグのログを出すか。出さない時は、ログの文字列を作る前に返して無駄を省く</summary>
+        public static bool IsEnabled(string tag) => isEnable && !disableList.Contains(tag);
         public static void SendInGame(string text, bool isAlways = false)
         {
             if (!isEnable) return;
@@ -94,8 +96,12 @@ namespace TownOfHostY
                     break;
             }
         }
-        public static void Info(string text, string tag, bool escapeCRLF = true, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string fileName = "") =>
+        public static void Info(string text, string tag, bool escapeCRLF = true, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string fileName = "")
+        {
+            // 出さないログは、タグを消す処理(正規表現)をする前に返す
+            if (!IsEnabled(tag)) return;
             SendToFile(text.RemoveHtmlTags(), LogLevel.Info, tag, escapeCRLF, lineNumber, fileName);
+        }
         public static void Warn(string text, string tag, bool escapeCRLF = true, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string fileName = "") =>
             SendToFile(text, LogLevel.Warning, tag, escapeCRLF, lineNumber, fileName);
         public static void Error(string text, string tag, bool escapeCRLF = true, [CallerLineNumber] int lineNumber = 0, [CallerFilePath] string fileName = "") =>

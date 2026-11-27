@@ -60,7 +60,8 @@ namespace TownOfHostY
         public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
         {
             var rpcType = (RpcCalls)callId;
-            Logger.Info($"{__instance?.Data?.PlayerId}({__instance?.Data?.PlayerName}):{callId}({RPC.GetRpcName(callId)})", "ReceiveRPC");
+            if (Logger.IsEnabled("ReceiveRPC"))
+                Logger.Info($"{__instance?.Data?.PlayerId}({__instance?.Data?.PlayerName}):{callId}({RPC.GetRpcName(callId)})", "ReceiveRPC");
             MessageReader subReader = MessageReader.Get(reader);
             switch (rpcType)
             {
@@ -456,6 +457,8 @@ namespace TownOfHostY
                     break;
             }
 
+            // 送るたびに名前を探すのは重いので、ログを出す時だけ(普段は SendRPC のログは出さない)
+            if (!Logger.IsEnabled("SendRPC")) return;
             string rpcName = RPC.GetRpcName(callId);
             string target = targetClientId < 0 ? "All" : AmongUsClient.Instance.GetClient(targetClientId)?.PlayerName ?? targetClientId.ToString();
             string from = Main.AllPlayerControls.FirstOrDefault(c => c.NetId == targetNetId)?.Data?.PlayerName ?? targetNetId.ToString();

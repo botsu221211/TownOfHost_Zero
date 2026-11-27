@@ -155,20 +155,24 @@ public static class ZeroSettingUI
         _ => actionLabels[index],
     };
 
-    /// <summary>TOH_Zero オリジナル役職(Zero闇鍋の対象)。新しく作ったら追加する</summary>
+    /// <summary>TOH_Zero で追加した役職(オリジナル・ほかの MOD からの移植の両方。Zero闇鍋の対象)。新しく作ったら追加する</summary>
     public static readonly HashSet<CustomRoles> ZeroOriginalRoles = new()
     {
         CustomRoles.Mimic,
         CustomRoles.HalfKiller,
+        CustomRoles.EvilAnt,
         CustomRoles.Frenzy,
         CustomRoles.MadUnknown,
         CustomRoles.FriedPotato,
         CustomRoles.MadFriedPotato,
         CustomRoles.SpeedStar,
         CustomRoles.MindReader,
+        CustomRoles.GuardDog, // 人狼ジャッジメントより
         CustomRoles.Infectioner,
         CustomRoles.KitsuneSpirit,
         CustomRoles.NineTailedFox,
+        CustomRoles.Neet, // ExtremeRoles から移植
+        CustomRoles.Stefinder, // SuperNewRoles から移植
         CustomRoles.NoLimiter, // ネタ役(非表示の時は入らない)
         CustomRoles.FirstVictim, // ネタ役
     };

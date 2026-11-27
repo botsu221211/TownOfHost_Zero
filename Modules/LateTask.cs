@@ -27,9 +27,12 @@ namespace TownOfHostY
             if (name != "")
                 Logger.Info("\"" + name + "\" is created", "LateTask");
         }
+        // 毎フレーム呼ばれるので、終わった分を消すための一時リストは使い回す
+        private static readonly List<LateTask> TasksToRemove = new();
         public static void Update(float deltaTime)
         {
-            var TasksToRemove = new List<LateTask>();
+            if (Tasks.Count == 0) return;
+            TasksToRemove.Clear();
             for (int i = 0; i < Tasks.Count; i++)
             {
                 var task = Tasks[i];
@@ -48,7 +51,9 @@ namespace TownOfHostY
                     TasksToRemove.Add(task);
                 }
             }
-            TasksToRemove.ForEach(task => Tasks.Remove(task));
+            if (TasksToRemove.Count == 0) return;
+            foreach (var task in TasksToRemove) Tasks.Remove(task);
+            TasksToRemove.Clear();
         }
     }
 }

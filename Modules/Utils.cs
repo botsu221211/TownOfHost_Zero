@@ -1253,6 +1253,7 @@ public static class Utils
         sb.Append("\n/mod <ID・色・名前> - モデレーターに追加・解除(/mod だけで一覧)");
         sb.Append("\n/kick ・ /ban <ID・色・名前> - キック・BAN");
         sb.Append("\n/fm - 強制会議 ・ /start <秒> - 開始 ・ /cs - 開始を止める");
+        sb.Append("\n/kill <色・ID・名前> - その人を強制的に死亡させる(試合中)");
         sb.Append($"\n\n陣営で絞り込み: /n ・ /n r ・ /a r ・ /h n の後ろに I M C N U A (例: /n r i)");
         sb.Append($"\n\n視界が暗転した参加者が発生した場合は、\nチャットコマンド[/brackout・/bo]か、左Control,K,Lを同時に押下してください");
 
@@ -1582,12 +1583,14 @@ public static class Utils
 
         if (MushroomMixupUpdateSystemPatch.InSabotage) return; //キノコカオス中は無効
 
-        var caller = new System.Diagnostics.StackFrame(1, false);
-        var callerMethod = caller.GetMethod();
-        string callerMethodName = callerMethod?.Name;
-        string callerClassName = callerMethod?.DeclaringType?.FullName;
         var logger = Logger.Handler("NotifyRoles");
-        logger.Info("NotifyRolesが" + callerClassName + "." + callerMethodName + "から呼び出されました");
+        // 呼び出し元を調べるのは重いので、ログを出す時だけ(普段は NotifyRoles のログは出さない)
+        bool logNotify = Logger.IsEnabled("NotifyRoles");
+        if (logNotify)
+        {
+            var callerMethod = new System.Diagnostics.StackFrame(1, false).GetMethod();
+            logger.Info("NotifyRolesが" + callerMethod?.DeclaringType?.FullName + "." + callerMethod?.Name + "から呼び出されました");
+        }
         HudManagerPatch.NowCallNotifyRolesCount++;
         HudManagerPatch.LastSetNameDesyncCount = 0;
 
@@ -1607,7 +1610,7 @@ public static class Utils
             //if (seer.IsModClient()) continue;
             string fontSize = isForMeeting ? "1.5" : Main.RoleTextSize.ToString();
             if (isForMeeting && (seer.GetClient().PlatformData.Platform is Platforms.Playstation or Platforms.Switch)) fontSize = "70%";
-            logger.Info("NotifyRoles-Loop1-" + seer.GetNameWithRole() + ":START");
+            if (logNotify) logger.Info("NotifyRoles-Loop1-" + seer.GetNameWithRole() + ":START");
 
             var seerRole = seer.GetRoleClass();
 
@@ -1745,6 +1748,7 @@ public static class Utils
                 || seer.Is(CustomRoles.MadUnknown)
                 || seer.Is(CustomRoles.Infectioner)
                 || seer.Is(CustomRoles.NineTailedFox)
+                || Roles.Crewmate.GuardDog.NeedsOthersNames(seer)
                 || VentEnterTask.HaveTask(seer)
 
                 || Duelist.CheckNotify(seer)
@@ -1754,7 +1758,7 @@ public static class Utils
                 {
                     //targetがseer自身の場合は何もしない
                     if (target == seer) continue;
-                    logger.Info("NotifyRoles-Loop2-" + target.GetNameWithRole() + ":START");
+                    if (logNotify) logger.Info("NotifyRoles-Loop2-" + target.GetNameWithRole() + ":START");
 
                     //名前の後ろに付けるマーカー
                     TargetMark.Clear();
@@ -1809,10 +1813,10 @@ public static class Utils
                     //適用
                     target.RpcSetNamePrivate(TargetName, true, seer, force: NoCache);
 
-                    logger.Info("NotifyRoles-Loop2-" + target.GetNameWithRole() + ":END");
+                    if (logNotify) logger.Info("NotifyRoles-Loop2-" + target.GetNameWithRole() + ":END");
                 }
             }
-            logger.Info("NotifyRoles-Loop1-" + seer.GetNameWithRole() + ":END");
+            if (logNotify) logger.Info("NotifyRoles-Loop1-" + seer.GetNameWithRole() + ":END");
         }
     }
     public static void MarkEveryoneDirtySettings()

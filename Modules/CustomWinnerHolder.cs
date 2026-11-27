@@ -50,7 +50,7 @@ namespace TownOfHostY
         public static int WinPriority;
 
         /// <summary>
-        /// 勝利優先度を比べて勝者を決める (TownOfHost_L の ResetAndSetAndChWinner を参考)。
+        /// 勝利優先度を比べて勝者を決める (TownOfHost-K の勝利優先度の仕組みを参考)。
         /// まだ勝者がいないか、今の勝者より優先度が大きければ単独勝利。同じ優先度なら追加勝利(addWin が true の時)。
         /// </summary>
         public static bool SetPriorityWinner(CustomWinner winner, int priority, IEnumerable<byte> playerIds, bool addWin = true)

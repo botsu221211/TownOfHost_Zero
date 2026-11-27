@@ -10,7 +10,7 @@ using TownOfHostY.Roles.Core;
 namespace TownOfHostY;
 
 /// <summary>
-/// ペットを撫でて能力を使う仕組み (TownOfHost-Shell / hamo / Pko の Petactionpatch を参考)。
+/// ペットを撫でて能力を使う仕組み (TownOfHost-Pko の Petactionpatch を参考)。
 /// ・撫でた合図(RpcCalls.Pet)をホストが受け取り、役職の <see cref="RoleBase.OnPet"/> を呼ぶ
 /// ・クールダウンはホストで数え、本人の名前の下に表示する
 /// ・設定でペットを付けていない人に紫のペット(pet_test)を自動で付ける

@@ -163,6 +163,12 @@ public class MeetingVoteManager
                 });
             }
         }
+        // イビルアントの能力の票も、結果の画面に出す
+        foreach (var (voter, target, n) in Roles.Impostor.EvilAnt.BonusVotes())
+        {
+            for (var i = 0; i < n; i++)
+                states.Add(new() { VoterId = voter, VotedForId = target });
+        }
 
         // インフェクショナー: この会議の投票で感染を広げる
         Roles.Neutral.Infectioner.OnMeetingEnd(AllVotes);
@@ -259,6 +265,11 @@ public class MeetingVoteManager
             }
 
             votes[vote.VotedFor] += vote.NumVotes;
+        }
+        // イビルアントの能力の票(普通の投票とは別に足す)
+        foreach (var (_, target, n) in Roles.Impostor.EvilAnt.BonusVotes())
+        {
+            if (votes.ContainsKey(target)) votes[target] += n;
         }
 
         return new VoteResult(votes, isAntiComp, overrideExiled, overruleNonce);
