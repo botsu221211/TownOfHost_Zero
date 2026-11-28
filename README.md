@@ -27,10 +27,12 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 
 ### 導入方法
 #### はじめて導入する場合(おすすめ)
-1. リリースから、自分の Among Us に合う zip をダウンロードします。BepInEx と TOH_Zero が入っています。
-   - Steam版: `TownOfHost_Zero_steam_v(バージョン).zip`
-   - Epic版: `TownOfHost_Zero_epic_v(バージョン).zip`
-2. zip の中身を全部、Among Us のフォルダ(`Among Us.exe` があるフォルダ)にそのまま入れます。
+1. リリースから `TownOfHost_Zero_v(バージョン).zip` をダウンロードします。BepInEx と TOH_Zero が入っています(Steam版・Epic版どちらでも使えます)。
+2. Among Us のフォルダ(`Among Us.exe` があるフォルダ)を開きます。
+   - Steam版: ライブラリで Among Us を右クリック →「管理」→「ローカルファイルを閲覧」
+   - Epic版: `C:\Program Files\Epic Games\AmongUs`
+3. zip の中身を全部、そのフォルダにそのまま入れます。
+4. 起動します。初回は準備に少し時間がかかります(黒い画面が出ても閉じずに待ってください)。
 
 #### BepInEx を自分で入れている場合
 1. [BepInEx (IL2CPP版)](https://builds.bepinex.dev/projects/bepinex_be) を Among Us のフォルダに導入します。
