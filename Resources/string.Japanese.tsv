@@ -173,7 +173,7 @@ MadScientistInfoLong	[インポスター陣営]:\nクルーだがインポスタ
 MadGuesserInfoLong	(インポスター陣営):\n会議中に他のプレイヤーの役職を当てる事でそのプレイヤーを死亡(死因:射殺)させることができる。\nなお役職の推測をミスした場合、自身が死亡(死因:誤爆)する。
 MadConnecterInfoLong	[インポスター陣営]\nクルーだがインポスターの味方。\n専用タスク(表示されたベントに入る)を終えるとインポスターが分かる。その後インポスターにキルボタンを押すと、互いに認識でき、位置が矢印で表示される。\n設定で、タスク数に応じてインポスターの役職や死体への矢印が分かる。
 MadUnknownInfoLong	[インポスター陣営(マッドメイト)]\n[キルボタン]：インポスター陣営にだけ見える印(?)を付ける(キルはしない)。ベントに入ると自分にも付けられる。\n[ファントムボタン]：印の付いた人の色を変え、名前を「？？？」にする(自分が死ぬまで続く)。\n使う前に会議になると印は消える。
-MadFriedPotatoInfoLong	[インポスター陣営(マッドメイト)]\n判定はクルー。個人秘匿(/c)で送ると、名前が「フライドポテト」として届く(クルーのフライドポテトと見分けられない)。\nキルされると、次の会議で全員に通知される。
+MadFriedPotatoInfoLong	[インポスター陣営(マッドメイト)]\n判定はクルー。個人秘匿(/c)で送ると、名前が「フライドポテト」として届く(クルーのフライドポテトと見分けられない)。\nキルされると、次の会議で全員に通知される。\n設定でベントが使える。
 SKMadmateInfoLong	(インポスター陣営):\n変身した際に一番近かった人がなれる役職。タスクはない。
 	
 # クルー役職	
@@ -201,6 +201,7 @@ FriedPotato	フライドポテト
 SpeedStar	シフトスター
 MindReader	マインドリーダー
 GuardDog	番犬
+Santa	サンタ
 Infectioner	インフェクショナー
 KitsuneSpirit	白狐
 NineTailedFox	九尾の狐
@@ -248,6 +249,7 @@ FriedPotatoInfo	僕はフライドポテト!
 SpeedStarInfo	見ろ私のこの速さを
 MindReaderInfo	私に隠し事は無駄よ
 GuardDogInfo	飼い主の"本当"は...?
+SantaInfo	良い子にはプレゼントをあげよう
 InfectionerInfo	感染はもう始まっている。
 KitsuneSpiritInfo	具現する怨嗟
 NineTailedFoxInfo	私の計算からは誰も逃れられない
@@ -295,6 +297,7 @@ FriedPotatoInfoLong	[クルー陣営]\n個人秘匿(/c)で送ると、自分の�
 SpeedStarInfoLong	[クルー陣営]\n設定秒数ごとに、自分の足の速さがランダムに変わる。\n速さは設定した最小倍率〜最大倍率の間で決まる。
 MindReaderInfoLong	[クルー陣営]\nタスクを設定数終えるまで自覚がない(クルーメイトに見える)。\n覚醒すると次の会議で全員に通知され(設定でオフ可)、ほかの人の個人秘匿(/c)の中身が見えるようになる。
 GuardDogInfoLong	[クルー陣営]\n会議で自投票してから投票した人を飼い主にする(設定ターン内に決めないと死亡)。\n番犬が生きている間、飼い主はキルされない。番犬は飼い主だけを噛み殺せる。\nペットでタスクモード⇔噛み殺しモードを切り替える(噛み殺しモードの時だけキル可能)。\n飼い主は誰か分かるが役職は分からない。占い・霊媒では「インポスター」と出る。
+SantaInfoLong	[クルー陣営]\nペットでタスクモード⇔プレゼントモードを切り替える(設定のタスク数を終わらせてから)。\nプレゼントモードでキルボタンを押すと、相手の役職が設定の確率でシェリフ・ライターなどに変わる(設定回数まで)。\nただし相手がクルー陣営でなければ自殺する(ラバーズ・マッドメイトは設定で渡せる)。\nタスクを全部終わらせると、ずっとプレゼントモードになる(ペットがなくても使える)。\n(TownOfHost-Pkoから移植)
 InfectionerInfoLong	[ニュートラル]\n会議で投票した相手を感染させる(設定回数まで)。感染者が投票した相手にも感染が広がる。\n自分以外の生存者が全員感染したら単独勝利(勝利優先度が高い方が勝つ)。
 KitsuneSpiritInfoLong	[ニュートラル]\nマップに7枚のお皿があり、お揚げ(茶色)の上でシェイプすると食べて満腹度が回復する。食べたお皿(白)は設定秒数でまたお揚げが乗る。\n満腹度は時間で減り、0になると餓死する(キルボタンに餓死までの秒数が出る・キルはできない)。\n生きて満腹度が勝利に必要な値以上ならゲーム終了時に追加勝利。
 NineTailedFoxInfoLong	[ニュートラル]\n[キルボタン]：妖術をかける(1人だけ・かけ直すと前の相手は解ける)。\n[ファントムボタン]：妖術をかけた相手を遠くから焼き殺す(焼け跡が設定ターン残る)。\n自分とキルできない人の2人になると単独勝利。生きている間はインポスター全滅でも試合は終わらない。
@@ -822,6 +825,7 @@ BakeryChangeChances	ニュートラルに変化する確率
 ExpressSpeed	スピード
 FriedPotatoHideNameInWhisper	秘匿のフライドポテト
 FriedPotatoNotifyEaten	通知
+MadFriedPotatoCanVent	ベントを使える
 FriedPotatoEatenNotice	{0}が捕食された
 MadFriedPotatoEatenNotice	悪い{0}が捕食された
 TaskmanagerSeeNowtask	会議時以外でもタスク数が見える
@@ -1747,6 +1751,16 @@ GuardDogDesignateCount	指定可能回数
 GuardDogBiteCooldown	噛み殺しのクールダウン
 GuardDogOwnerKnowsDog	飼い主から番犬が分かる
 GuardDogKnowOwnerRole	飼い主の役職が分かる
+SantaKillCooldown	プレゼントクールタイム
+SantaGiftLimit	プレゼントの配布上限回数
+SantaCanTaskCount	能力を発揮するタスク数
+SantaCanGiftLovers	ラバーズにもプレゼントを配れる
+SantaCanGiftMadmate	マッドロールにもプレゼントを配れる
+SantaGiftRateSheriff	シェリフ排出率
+SantaGiftRateLighter	ライター排出率
+SantaGiftRateNiceGuesser	ナイスゲッサー排出率
+SantaGiftRateExpress	エクスプレス排出率
+SantaGiftRateSpeedBooster	スピードブースター排出率
 EvilAntAbilityCooldown	能力クール
 EvilAntStandSeconds	カウント増加に必要な立ち止まる秒数
 EvilAntMeetingUses	会議中能力の使用回数

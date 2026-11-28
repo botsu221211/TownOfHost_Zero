@@ -78,6 +78,7 @@ TOH_Zeroに関する不具合・質問を TOH_Y や本家TOH の開発者・Disc
 - TownOfHost-Pko
   - ペットを撫でて能力を使う仕組み・ペットの自動付与
   - /h r の役職説明の見せ方
+  - サンタ
 - TownOfHost-K
   - 勝利優先度の仕組み
 - [TownOfHost_L](https://github.com/haru03741-glitch/TownOfHost_L)

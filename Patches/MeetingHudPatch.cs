@@ -451,6 +451,9 @@ public static class MeetingHudPatch
                         var baseRole = roleInfo?.BaseRoleType?.Invoke() ?? RoleTypes.Crewmate;
                         if (roleInfo?.IsDesyncImpostor == true)
                         {
+                            // ホストは試合の始まりと同じくクルーのまま(キルボタンは MOD が出す)。
+                            // ホストの役職は全員に送られるので、インポスターにすると全員の画面でインポスターになってしまう
+                            if (pc.AmOwner) continue;
                             // 本人にだけ元の役職を送る。ほかの人の画面でクルーに戻すのは追放画面の後
                             // (ここで戻すと、暗転対策で身代わりのインポスターに見せている分が消えて、追放の後に暗転する)
                             pc.RpcSetRoleDesync(baseRole, pc.GetClientId());

@@ -571,6 +571,7 @@ public enum CustomRoles
     SpeedStar,
     MindReader,
     GuardDog,
+    Santa,
     Sympathizer,
     Medic,
     CandleLighter,

@@ -92,6 +92,7 @@ public sealed class FriedPotato : RoleBase
 /// ・インポスター陣営(マッドメイト)。判定・カウントはクルー
 /// ・フライドポテトと同じく、個人秘匿(/c)で送ると名前が「フライドポテト」で届く(見分ける方法は無い)
 /// ・キルされると、次の会議で通常のフライドポテトとは違うお知らせが出る
+/// ・設定でベントが使える(クールダウン・滞在時間はマッドメイト共通の設定)
 /// </summary>
 public sealed class MadFriedPotato : RoleBase
 {
@@ -100,10 +101,10 @@ public sealed class MadFriedPotato : RoleBase
             typeof(MadFriedPotato),
             player => new MadFriedPotato(player),
             CustomRoles.MadFriedPotato,
-            () => RoleTypes.Crewmate,
+            () => OptionCanVent?.GetBool() == true ? RoleTypes.Engineer : RoleTypes.Crewmate,
             CustomRoleTypes.Madmate,
             (int)Options.offsetId.MadY + 1100,
-            null,
+            SetupOptionItem,
             "マッドフライドポテト"
         );
     public MadFriedPotato(PlayerControl player)
@@ -113,6 +114,16 @@ public sealed class MadFriedPotato : RoleBase
         () => HasTask.False
     )
     { }
+
+    private static OptionItem OptionCanVent;
+    enum OptionName
+    {
+        MadFriedPotatoCanVent,
+    }
+    private static void SetupOptionItem()
+    {
+        OptionCanVent = BooleanOptionItem.Create(RoleInfo, 10, OptionName.MadFriedPotatoCanVent, false, false);
+    }
 
     public override void OnMurderPlayerAsTarget(MurderInfo info)
     {

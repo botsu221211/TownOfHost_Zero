@@ -145,8 +145,10 @@ public sealed class GuardDog : RoleBase, IKiller
     {
         if (!AmongUsClient.Instance.AmHost || biteMode == bite) return;
         biteMode = bite;
+        // ホストのキルボタンは MOD が出すので、役職は変えない
+        // (ホストの役職は全員に送られるので、変えると全員の画面でインポスターになってしまう)
         var clientId = Player.GetClientId();
-        if (clientId != -1 || Player.AmOwner)
+        if (clientId != -1 && !Player.AmOwner)
         {
             if (bite)
             {
@@ -316,7 +318,7 @@ public sealed class GuardDog : RoleBase, IKiller
     /// </summary>
     public static bool SeesImpostorsAsCrew(PlayerControl seer)
         => seer != null && seer.IsAlive() && !seer.AmOwner
-            && (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor == true || IsBiting(seer));
+            && (seer.GetCustomRole().GetRoleInfo()?.IsDesyncImpostor == true || IsBiting(seer) || Santa.IsInPresentMode(seer));
 
     /// <summary>本物のインポスター側の役職(本人以外の画面でもインポスター側に見える)か</summary>
     public static bool IsRealImpostorSide(PlayerControl pc)

@@ -168,6 +168,7 @@ public static class ZeroSettingUI
         CustomRoles.SpeedStar,
         CustomRoles.MindReader,
         CustomRoles.GuardDog, // 人狼ジャッジメントより
+        CustomRoles.Santa, // TownOfHost-Pko から移植
         CustomRoles.Infectioner,
         CustomRoles.KitsuneSpirit,
         CustomRoles.NineTailedFox,
