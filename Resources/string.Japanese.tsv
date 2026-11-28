@@ -407,6 +407,24 @@ ChainShifterInfoLong	[ニュートラル]\nチェインシフターでゲーム�
 # ユニット役職	
 	
 Telepathisters	テレパシスターズ
+SignalAndCalling	<color=#ff1919>シグナル</color>＆<color=#ff1919>コーリング</color>
+Signal	シグナル
+Calling	コーリング
+SignalAndCallingInfo	役職を交換して惑わせ
+SignalInfo	キラー通信
+CallingInfo	狂人通信
+SignalAndCallingInfoLong	[インポスター陣営]\nインポスターの「シグナル」とマッドメイトの「コーリング」の2人組(必ず一緒に出る)。\nコーリングが会議中に自投票すると交換要請になり、次のターンから2人の役職が入れ替わる。\nシグナルが死んだ時のコーリングは、設定で「後追い」「シグナルになる」「何もしない」から選べる。
+SignalInfoLong	[インポスター陣営]\n普通のインポスター。コーリングが会議中に自投票(交換要請)すると、次のターンから自分がコーリング、相手がシグナルになる。
+CallingInfoLong	[インポスター陣営]\nシグナルの相方のマッドメイト。会議中に自投票すると交換要請になり、次のターンから自分がシグナル(インポスター)、相手がコーリングになる。\nもう一度自投票すると普通の自投票。
+SignalCallingCanSeeEachOther	互いに役職が見える
+SignalCallingOnSignalDead	シグナル死亡時のコーリング
+SignalCallingDeadFollow	後追い
+SignalCallingDeadBecomeSignal	シグナルになる
+SignalCallingDeadNothing	何もしない
+SignalCallingCanVent	コーリングがベントを使える
+SignalCallingVentCooldown	クールダウン
+SignalCallingVentMaxTime	滞在可能時間(0で無制限)
+SignalCallingUseMadmateSettings	マッドメイト系役職の設定を使う
 GodfatherAndJanitor	<color=#ff1919>ゴッドファーザー</color>＆<color=#ff1919>ジャニター</color>
 Godfather	ゴッドファーザー
 Janitor	ジャニター

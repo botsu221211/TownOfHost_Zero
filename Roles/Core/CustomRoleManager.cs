@@ -175,11 +175,13 @@ public static class CustomRoleManager
         {
             Lovers.VoteSuicide(attemptTarget.PlayerId);
             Janitor.VoteSuicide(attemptTarget.PlayerId);
+            SignalAndCalling.OnPlayerDead(attemptTarget.PlayerId, true);
         }
         else
         {
             Lovers.KillSuicide(attemptTarget.PlayerId);
             Janitor.KillSuicide(attemptTarget.PlayerId);
+            SignalAndCalling.OnPlayerDead(attemptTarget.PlayerId, false);
         }
 
         //TargetDeadArrow
@@ -513,6 +515,7 @@ public enum CustomRoles
 
     Godfather,
     Janitor,
+    Signal,
     //Madmate
     Madmate,
     MadGuardian,
@@ -525,6 +528,7 @@ public enum CustomRoles
     MadConnecter,
     MadUnknown,
     MadFriedPotato,
+    Calling,
 
     SKMadmate,
     //Crewmate(Vanilla)
@@ -613,6 +617,7 @@ public enum CustomRoles
 
     GM,
     GodfatherAndJanitor,
+    SignalAndCalling,
     MaxMain,
     /************/
 

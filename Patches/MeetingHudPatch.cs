@@ -487,6 +487,7 @@ public static class MeetingHudPatch
             // 役職による道連れ
             Lovers.VoteSuicide(playerId);
             Janitor.VoteSuicide(playerId);
+            Roles.Unit.SignalAndCalling.OnPlayerDead(playerId, true);
             //道連れチェック
             RevengeOnExile(playerId, deathReason);
         }

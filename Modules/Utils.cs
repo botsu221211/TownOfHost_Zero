@@ -1842,6 +1842,7 @@ public static class Utils
         Roles.Neutral.BurnMarks.AfterMeeting();
 
         ChainShifterAddon.AfterMeetingTasks();
+        Roles.Unit.SignalAndCalling.AfterMeetingTasks();
         VentEnterTask.AfterMeetingTasks();
 
         if (Options.AirShipVariableElectrical.GetBool())

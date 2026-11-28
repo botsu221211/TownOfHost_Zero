@@ -110,7 +110,8 @@ static class CustomRolesHelper
     {
         return role is CustomRoles.Lovers
             or CustomRoles.Sympathizer
-            or CustomRoles.GodfatherAndJanitor;
+            or CustomRoles.GodfatherAndJanitor
+            or CustomRoles.SignalAndCalling;
     }
     public static bool IsFixedCountRole(this CustomRoles role)
     {
@@ -127,6 +128,7 @@ static class CustomRolesHelper
     public static bool IsDontShowOptionRole(this CustomRoles role)
     {
         return role is CustomRoles.Godfather or CustomRoles.Janitor
+            or CustomRoles.Signal or CustomRoles.Calling
             // 期間限定で
             or CustomRoles.Gang
             or CustomRoles.SKMadmate
