@@ -724,13 +724,12 @@ class ReportDeadBodyPatch
 
         return true;
     }
-    public static async void ChangeLocalNameAndRevert(string name, int time)
+    public static void ChangeLocalNameAndRevert(string name, int time)
     {
-        //async Taskじゃ警告出るから仕方ないよね。
+        // メインスレッドで戻す(Task.Delay の続きはメインスレッド以外で動くので、ゲームの物を触ると落ちることがある)
         var revertName = PlayerControl.LocalPlayer.name;
         PlayerControl.LocalPlayer.RpcSetNameEx(name);
-        await Task.Delay(time);
-        PlayerControl.LocalPlayer.RpcSetNameEx(revertName);
+        _ = new LateTask(() => PlayerControl.LocalPlayer?.RpcSetNameEx(revertName), time / 1000f, "ChangeLocalNameAndRevert");
     }
 }
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.StartMeeting))]

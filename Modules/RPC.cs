@@ -299,9 +299,20 @@ namespace TownOfHostY
             AmongUsClient.Instance.FinishRpcImmediately(writer);
             player.Exiled();
         }
-        public static async void RpcVersionCheck()
+        /// <summary>
+        /// 自分のバージョンを全員に送る。自分のキャラクターがまだいない時は 0.5 秒ごとに待つ。
+        /// (前は await Task.Delay で待っていたが、続きがメインスレッド以外で動き、ゲームの通信を触って落ちることがあった。
+        ///  LateTask はメインスレッドで動くので安全)
+        /// </summary>
+        public static void RpcVersionCheck() => RpcVersionCheck(0);
+        private static void RpcVersionCheck(int tries)
         {
-            while (PlayerControl.LocalPlayer == null) await Task.Delay(500);
+            if (AmongUsClient.Instance == null || !AmongUsClient.Instance.AmConnected) return;
+            if (PlayerControl.LocalPlayer == null)
+            {
+                if (tries < 60) _ = new LateTask(() => RpcVersionCheck(tries + 1), 0.5f, "RpcVersionCheck");
+                return;
+            }
             MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(
                 PlayerControl.LocalPlayer.NetId,
                 (byte)CustomRPC.VersionCheck,

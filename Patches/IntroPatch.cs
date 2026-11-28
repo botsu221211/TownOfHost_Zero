@@ -316,23 +316,21 @@ class BeginCrewmatePatch
         }
     }
 
-    private static async void StartFadeIntro(IntroCutscene __instance, Color start, Color end)
+    /// <summary>
+    /// イントロの帯の色を 2 秒後から 0.5 秒かけて変える。
+    /// (前は await Task.Delay で待っていたが、続きがメインスレッド以外で動き、ゲームの物を触って落ちることがあった。
+    ///  LateTask はメインスレッドで動くので安全)
+    /// </summary>
+    private static void StartFadeIntro(IntroCutscene __instance, Color start, Color end)
     {
-        await Task.Delay(2000);
-        int milliseconds = 0;
-        while (true)
-        {
-            await Task.Delay(20);
-            milliseconds += 20;
-            float time = (float)milliseconds / (float)500;
-            Color LerpingColor = Color.Lerp(start, end, time);
-            if (__instance == null || milliseconds > 500)
-            {
-                Logger.Info("ループを終了します", "StartFadeIntro");
-                break;
-            }
-            __instance.BackgroundBar.material.color = LerpingColor;
-        }
+        _ = new LateTask(() => FadeIntroStep(__instance, start, end, 0), 2f, "StartFadeIntro");
+    }
+    private static void FadeIntroStep(IntroCutscene __instance, Color start, Color end, int milliseconds)
+    {
+        milliseconds += 20;
+        if (__instance == null || __instance.BackgroundBar == null || milliseconds > 500) return;
+        __instance.BackgroundBar.material.color = Color.Lerp(start, end, milliseconds / 500f);
+        _ = new LateTask(() => FadeIntroStep(__instance, start, end, milliseconds), 0.02f, ""); // 名前なし = ログに出さない
     }
 }
 
